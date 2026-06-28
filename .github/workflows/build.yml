@@ -1,0 +1,66 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "**"
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  APP_NAME: "Aula F75 Max Driver"
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build DMG
+        run: make dmg
+
+      - name: Upload app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "Aula F75 Max Driver-app"
+          path: "build/Aula F75 Max Driver.dmg"
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download app artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: "Aula F75 Max Driver-app"
+          path: release
+
+      - name: Prepare release asset
+        run: |
+          set -euo pipefail
+          safe_tag="${GITHUB_REF_NAME//\//-}"
+          mv "release/${APP_NAME}.dmg" "release/${APP_NAME}-${safe_tag}.dmg"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          safe_tag="${GITHUB_REF_NAME//\//-}"
+          gh release create "${GITHUB_REF_NAME}" "release/${APP_NAME}-${safe_tag}.dmg" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes

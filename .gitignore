@@ -1,0 +1,14 @@
+.idea/
+.build/
+build/
+
+# Xcode and SwiftPM local state
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+.swiftpm/
+
+# macOS metadata
+.DS_Store
+

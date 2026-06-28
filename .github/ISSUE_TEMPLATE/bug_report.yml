@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a problem with the app or device interaction
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the issue and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: 1. Open the app
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Environment
+      description: Include macOS version, keyboard connection type, and any permissions granted.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste relevant output from the app log if available.
