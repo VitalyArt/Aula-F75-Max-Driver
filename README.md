@@ -8,6 +8,18 @@ Native macOS utility for configuring the Epomaker x Aula F75 Max keyboard on App
 
 The app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. It does not install kernel extensions and does not require libusb.
 
+## Website
+
+The promo and documentation site lives in `docs/` and is ready for GitHub Pages.
+
+- Local entry point: `docs/index.html`
+- Static assets: `docs/assets/` and `docs/screenshots/`
+- GitHub Pages deployment workflow: `.github/workflows/pages.yml`
+- Default site language: English
+- Site languages: English, Russian, Spanish, Uzbek, Kazakh, Portuguese, Simplified Chinese
+
+After pushing to `main` or `master`, GitHub Actions publishes the `docs/` directory through Pages. The workflow can also be started manually from the Actions tab.
+
 ## Screenshots
 
 ![Aula F75 Max Driver main window](docs/screenshots/main-window.png)
