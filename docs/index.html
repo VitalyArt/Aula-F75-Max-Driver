@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Aula F75 Max Driver is a native macOS utility for configuring the Epomaker x Aula F75 Max keyboard, display, RGB lighting, battery, and 2.4G mode.">
+  <meta name="theme-color" content="#101713">
+  <meta property="og:title" content="Aula F75 Max Driver">
+  <meta property="og:description" content="A polished native macOS driver for Aula F75 Max: display uploads, RGB, battery, Game Mode, and HID diagnostics.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/app-icon.png">
+  <title>Aula F75 Max Driver</title>
+  <link rel="icon" href="assets/app-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add("reveal-enabled");</script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-glow page-glow-one"></div>
+  <div class="page-glow page-glow-two"></div>
+
+  <header class="site-header" data-reveal>
+    <a class="brand" href="#top" aria-label="Aula F75 Max Driver">
+      <img src="assets/app-icon.png" width="44" height="44" alt="">
+      <span>Aula F75 Max Driver</span>
+    </a>
+    <div class="header-controls">
+      <nav class="site-nav" aria-label="Primary navigation" data-i18n-aria-label="navAria">
+        <a href="#features" data-i18n="navFeatures">Features</a>
+        <a href="#workflow" data-i18n="navWorkflow">Workflow</a>
+        <a href="#install" data-i18n="navInstall">Install</a>
+        <a href="https://github.com/VitalyArt/Aula-F75-Max-Driver" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+      <label class="language-switcher" for="language-select">
+        <span data-i18n="languageLabel">Language</span>
+        <select id="language-select" aria-label="Language" data-i18n-aria-label="languageLabel">
+          <option value="en">🇺🇸 English</option>
+          <option value="ru">🇷🇺 Русский</option>
+          <option value="es">🇪🇸 Español</option>
+          <option value="uz">🇺🇿 O'zbekcha</option>
+          <option value="kk">🇰🇿 Қазақша</option>
+          <option value="pt">🇵🇹 Português</option>
+          <option value="zh-Hans">🇨🇳 简体中文</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-copy" data-reveal>
+        <p class="eyebrow" data-i18n="heroEyebrow">Native macOS utility</p>
+        <h1 data-i18n="heroTitle">Control Aula F75 Max without extra drivers.</h1>
+        <p class="hero-text" data-i18n="heroText">
+          Configure the keyboard display, RGB lighting, battery status, response level, and Game Mode from one focused app for Apple Silicon Macs.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/latest" target="_blank" rel="noreferrer" data-i18n="downloadDmg">
+            Download DMG
+          </a>
+          <a class="button button-secondary" href="#install" data-i18n="howToInstall">How to install</a>
+        </div>
+        <div class="hero-facts" aria-label="Key facts" data-i18n-aria-label="heroFactsAria">
+          <span>macOS 14+</span>
+          <span>Apple Silicon</span>
+          <span>USB-C + 2.4G</span>
+        </div>
+      </div>
+
+      <div class="hero-device" data-reveal>
+        <div class="window-chrome">
+          <span></span>
+          <span></span>
+          <span></span>
+          <strong>Aula F75 Max Driver</strong>
+        </div>
+        <img src="screenshots/main-window.png" alt="Aula F75 Max Driver main window" data-i18n-alt="mainScreenshotAlt">
+        <div class="battery-badge">
+          <small data-i18n="batteryLabel">Battery</small>
+          <strong>91%</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="section intro-strip" data-reveal>
+      <article>
+        <span class="metric">128 x 128</span>
+        <p data-i18n="introDisplay">Upload images and GIFs to the keyboard display with fit, fill, and stretch modes.</p>
+      </article>
+      <article>
+        <span class="metric">2.4G</span>
+        <p data-i18n="introWireless">Control battery, RGB lighting, response, sleep, and Game Mode through the receiver.</p>
+      </article>
+      <article>
+        <span class="metric">HID</span>
+        <p data-i18n="introHid">Direct communication through macOS HID APIs without kernel extensions or libusb.</p>
+      </article>
+    </section>
+
+    <section id="features" class="section">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow" data-i18n="featuresEyebrow">What's inside</p>
+        <h2 data-i18n="featuresTitle">Tools built specifically for the F75 Max.</h2>
+        <p data-i18n="featuresText">The app separates wired operations from 2.4G settings, so it is clear which connection mode each task needs.</p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card accent-orange" data-reveal>
+          <span class="feature-icon">01</span>
+          <h3 data-i18n="featureDisplayTitle">Keyboard display</h3>
+          <p data-i18n="featureDisplayText">Upload PNG, JPEG, GIF, BMP, TIFF, and WebP files to the 128 x 128 display. Animated GIFs keep their frame delays.</p>
+        </article>
+        <article class="feature-card accent-green" data-reveal>
+          <span class="feature-icon">02</span>
+          <h3 data-i18n="featureRgbTitle">RGB and performance</h3>
+          <p data-i18n="featureRgbText">Configure lighting mode, brightness, speed, direction, fixed color, response level, and sleep timeout.</p>
+        </article>
+        <article class="feature-card accent-cyan" data-reveal>
+          <span class="feature-icon">03</span>
+          <h3 data-i18n="featureBatteryTitle">Battery and alerts</h3>
+          <p data-i18n="featureBatteryText">Read battery percentage through the 2.4G receiver and get a local notification when it drops below 20%.</p>
+        </article>
+        <article class="feature-card accent-amber" data-reveal>
+          <span class="feature-icon">04</span>
+          <h3 data-i18n="featureDiagnosticsTitle">HID diagnostics</h3>
+          <p data-i18n="featureDiagnosticsText">The endpoints panel shows transport, usage pages, and report sizes for quick connection and macOS permission checks.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="workflow" class="section split-section">
+      <div class="panel-copy" data-reveal>
+        <p class="eyebrow" data-i18n="workflowEyebrow">Workflow</p>
+        <h2 data-i18n="workflowTitle">Two connections, two areas of responsibility.</h2>
+        <p data-i18n="workflowText">
+          USB-C is used for display tasks and clock sync. The 2.4G receiver is used for battery, RGB, response, sleep, and Game Mode.
+        </p>
+        <ul class="check-list">
+          <li data-i18n="workflowItemClock">Sync the keyboard clock to local macOS time.</li>
+          <li data-i18n="workflowItemReset">Factory reset for display slots and configuration blocks used by this app.</li>
+          <li data-i18n="workflowItemLogin">Launch at Login and interface language selection.</li>
+          <li data-i18n="workflowItemLocales">Localizations: English, Russian, Spanish, Uzbek, Kazakh, Portuguese, Simplified Chinese.</li>
+        </ul>
+      </div>
+      <div class="screenshot-card" data-reveal>
+        <img src="screenshots/details-window.png" alt="HID endpoint diagnostics and app settings" data-i18n-alt="detailsScreenshotAlt">
+      </div>
+    </section>
+
+    <section id="install" class="section install-section">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow" data-i18n="installEyebrow">Install</p>
+        <h2 data-i18n="installTitle">Download the DMG or build locally.</h2>
+      </div>
+
+      <div class="install-grid">
+        <article class="install-card" data-reveal>
+          <span class="step-number">1</span>
+          <h3 data-i18n="installReadyTitle">Ready-made build</h3>
+          <p data-i18n="installReadyText">Open the latest GitHub Release, download the DMG, and move the app to Applications.</p>
+          <a class="text-link" href="https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/latest" target="_blank" rel="noreferrer" data-i18n="installReadyLink">
+            Open releases/latest
+          </a>
+        </article>
+        <article class="install-card" data-reveal>
+          <span class="step-number">2</span>
+          <h3 data-i18n="installBuildTitle">Build from source</h3>
+          <p data-i18n="installBuildText">Requires macOS 14+, an Apple Silicon Mac, and Xcode Command Line Tools.</p>
+          <pre><code>make all
+open "build/Aula F75 Max Driver.app"</code></pre>
+        </article>
+        <article class="install-card" data-reveal>
+          <span class="step-number">3</span>
+          <h3 data-i18n="installPermissionsTitle">macOS permissions</h3>
+          <p data-i18n="installPermissionsText">If HID commands do not run, grant Input Monitoring permission to the app and restart it.</p>
+          <pre><code>System Settings
+Privacy &amp; Security
+Input Monitoring</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section cta-section" data-reveal>
+      <div>
+        <p class="eyebrow" data-i18n="ctaEyebrow">Open source</p>
+        <h2 data-i18n="ctaTitle">A native driver you can inspect and build yourself.</h2>
+      </div>
+      <a class="button button-primary" href="https://github.com/VitalyArt/Aula-F75-Max-Driver" target="_blank" rel="noreferrer" data-i18n="sourceCode">Source code</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Aula F75 Max Driver</span>
+    <span data-i18n="footerText">macOS HID utility for Epomaker x Aula F75 Max</span>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>
