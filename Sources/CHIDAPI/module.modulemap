@@ -1,0 +1,5 @@
+module CHIDAPI [system] {
+    header "hidapi_shim.h"
+    link "hidapi-hidraw"
+    export *
+}
