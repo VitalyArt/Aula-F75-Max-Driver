@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Aula F75 Max Driver
+Comment=Configure the Aula F75 Max keyboard
+Exec=AulaF75MaxDriverLinux
+Icon=aula-f75-max-driver
+Terminal=false
+Categories=Utility;Settings;HardwareSettings;
+Keywords=Aula;F75;Keyboard;HID;RGB;

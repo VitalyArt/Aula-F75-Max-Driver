@@ -15,26 +15,57 @@ env:
   APP_NAME: "Aula F75 Max Driver"
 
 jobs:
-  build:
+  macos-dmg:
+    name: macOS DMG
     runs-on: macos-15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build DMG
-        run: make dmg
+      - name: Build macOS DMG
+        run: make macos-dmg
 
-      - name: Upload app artifact
+      - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
-          name: "Aula F75 Max Driver-app"
+          name: aula-f75-max-driver-macos-dmg
           path: "build/Aula F75 Max Driver.dmg"
+          if-no-files-found: error
+
+  linux-build:
+    name: Linux GTK
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.0-noble
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          apt-get update
+          apt-get install -y make libgtk-4-dev libhidapi-dev pkg-config
+
+      - name: Build Linux app
+        run: make linux-build
+
+      - name: Package Linux artifact
+        run: make linux-package LINUX_ARTIFACT="build/AulaF75MaxDriverLinux-${GITHUB_SHA}.tar.gz"
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aula-f75-max-driver-linux
+          path: "build/AulaF75MaxDriverLinux-${{ github.sha }}.tar.gz"
           if-no-files-found: error
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: build
+    needs:
+      - macos-dmg
+      - linux-build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -43,17 +74,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download app artifact
+      - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: "Aula F75 Max Driver-app"
+          name: aula-f75-max-driver-macos-dmg
           path: release
 
-      - name: Prepare release asset
-        run: |
-          set -euo pipefail
-          safe_tag="${GITHUB_REF_NAME//\//-}"
-          mv "release/${APP_NAME}.dmg" "release/${APP_NAME}-${safe_tag}.dmg"
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: aula-f75-max-driver-linux
+          path: release
+
+      - name: Prepare release assets
+        run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_LINUX_ARTIFACT="AulaF75MaxDriverLinux-${GITHUB_SHA}.tar.gz"
 
       - name: Create GitHub release
         env:
@@ -61,6 +95,8 @@ jobs:
         run: |
           set -euo pipefail
           safe_tag="${GITHUB_REF_NAME//\//-}"
-          gh release create "${GITHUB_REF_NAME}" "release/${APP_NAME}-${safe_tag}.dmg" \
+          gh release create "${GITHUB_REF_NAME}" \
+            "release/${APP_NAME}-${safe_tag}.dmg" \
+            "release/AulaF75MaxDriverLinux-${safe_tag}.tar.gz" \
             --title "${GITHUB_REF_NAME}" \
             --generate-notes

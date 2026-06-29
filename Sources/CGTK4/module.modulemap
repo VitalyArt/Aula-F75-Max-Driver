@@ -1,0 +1,5 @@
+module CGTK4 [system] {
+    header "gtk4_shim.h"
+    link "gtk-4"
+    export *
+}
