@@ -129,6 +129,18 @@ Create a DMG installer image:
 make macos-dmg
 ```
 
+For distributable builds that should open without the "Apple could not verify" warning,
+sign with a Developer ID certificate and notarize the DMG:
+
+```sh
+make macos-dmg \
+  CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
+  NOTARYTOOL_PROFILE="your-notary-profile"
+```
+
+`NOTARYTOOL_PROFILE` must be created in advance with `xcrun notarytool store-credentials`.
+After notarization, the script staples the ticket to the DMG.
+
 Compatibility aliases are kept for the original macOS workflow:
 
 ```sh
