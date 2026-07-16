@@ -1,17 +1,11 @@
-#if os(Linux)
 import AulaCore
 import AulaLinuxHID
 import CAulaLinuxGTK
 import Foundation
 import Glibc
 
-@main
-struct AulaLinuxMain {
-    static func main() {
-        let status = aula_linux_app_run(CommandLine.argc, CommandLine.unsafeArgv)
-        exit(status)
-    }
-}
+let status = aula_linux_app_run(CommandLine.argc, CommandLine.unsafeArgv)
+exit(status)
 
 @_cdecl("aula_linux_refresh")
 public func aulaLinuxRefresh(_ buffer: UnsafeMutablePointer<CChar>?, _ capacity: Int32) {
@@ -19,10 +13,10 @@ public func aulaLinuxRefresh(_ buffer: UnsafeMutablePointer<CChar>?, _ capacity:
         let backend = LinuxHIDBackend()
         let endpoints = backend.scanEndpoints()
         guard !endpoints.isEmpty else {
-            return "No Aula F75 Max HID endpoints found. Check USB connection and udev permissions."
+            return L10n.text("Aula F75 Max wired USB device was not found.")
         }
         return endpoints.map { endpoint in
-            "\(endpoint.role): \(endpoint.product) vid=0x\(String(endpoint.vendorID, radix: 16)) pid=0x\(String(endpoint.productID, radix: 16)) \(endpoint.summary)"
+            "\(L10n.text(endpoint.role)): \(endpoint.product) vid=0x\(String(endpoint.vendorID, radix: 16)) pid=0x\(String(endpoint.productID, radix: 16)) \(endpoint.summary)"
         }.joined(separator: "\n")
     }
 }
@@ -32,9 +26,9 @@ public func aulaLinuxQueryBattery(_ buffer: UnsafeMutablePointer<CChar>?, _ capa
     writeResult(buffer, capacity) {
         let backend = LinuxHIDBackend()
         if let percent = try backend.queryBattery() {
-            return "Battery: \(percent)%."
+            return L10n.format("Battery: %d%%.", percent)
         }
-        return "Battery query sent, but no percentage report was received."
+        return L10n.text("Battery query sent, but no percentage report was received.")
     }
 }
 
@@ -43,7 +37,7 @@ public func aulaLinuxSyncTime(_ buffer: UnsafeMutablePointer<CChar>?, _ capacity
     writeResult(buffer, capacity) {
         let backend = LinuxHIDBackend()
         try backend.syncTime()
-        return "Keyboard display clock synced."
+        return L10n.text("Keyboard clock synced.")
     }
 }
 
@@ -65,7 +59,7 @@ public func aulaLinuxUploadDisplay(
         try backend.uploadDisplayStream(data, slot: Int(slot)) { progress in
             lastProgress = progress
         }
-        return "Uploaded image to slot \(slot). Chunks: \(lastProgress.sentChunks)/\(lastProgress.totalChunks)."
+        return L10n.format("Uploaded %d frame(s) to slot %d.", lastProgress.sentChunks, slot)
     }
 }
 
@@ -77,7 +71,7 @@ public func aulaLinuxFactoryReset(_ buffer: UnsafeMutablePointer<CChar>?, _ capa
         try backend.factoryReset { message in
             messages.append(message)
         }
-        messages.append("Factory reset complete.")
+        messages.append(L10n.text("Factory reset complete."))
         return messages.joined(separator: "\n")
     }
 }
@@ -111,8 +105,10 @@ public func aulaLinuxApplyRGB(
             colorful: colorful != 0,
             color: Int(color)
         )
-        let colorText = colorful != 0 ? "Colorful" : String(format: "#%06X", Int(color) & 0xffffff)
-        return "RGB set: mode \(mode), brightness \(brightness), speed \(speed), direction \(direction), \(colorText)."
+        let modeText = L10n.format("Mode %d", mode)
+        let directionText = L10n.format("Direction %d", direction)
+        let colorText = colorful != 0 ? L10n.text("Colorful") : String(format: "#%06X", Int(color) & 0xffffff)
+        return L10n.format("RGB set: %@ B%d S%d %@ %@.", modeText, brightness, speed, directionText, colorText)
     }
 }
 
@@ -126,7 +122,9 @@ public func aulaLinuxApplyPerformance(
     writeResult(buffer, capacity) {
         let backend = LinuxHIDBackend()
         try backend.applyPerformance(level: Int(level), sleepTime: Int(sleepTime))
-        return "Performance set: response level \(level), sleep \(sleepTime)."
+        let levelText = L10n.format("Level %d", level)
+        let sleepText = L10n.format("Value %d", sleepTime)
+        return L10n.format("Performance set: %@, sleep %@.", levelText, sleepText)
     }
 }
 
@@ -140,7 +138,7 @@ public func aulaLinuxRestoreCommand(
     writeResult(buffer, capacity) {
         let backend = LinuxHIDBackend()
         try backend.applyPerformance(level: Int(level), sleepTime: Int(sleepTime))
-        return "Command key restore sent; Fn layer unlocked."
+        return L10n.text("Command key restore sent; Fn layer unlocked.")
     }
 }
 
@@ -155,7 +153,7 @@ public func aulaLinuxSetGameMode(
     writeResult(buffer, capacity) {
         let backend = LinuxHIDBackend()
         try backend.setGameMode(enabled: enabled != 0, level: Int(level), sleepTime: Int(sleepTime))
-        return enabled != 0 ? "Game Mode enabled." : "Game Mode disabled."
+        return enabled != 0 ? L10n.text("Game Mode enabled.") : L10n.text("Game Mode disabled.")
     }
 }
 
@@ -171,13 +169,3 @@ private func writeResult(
     }
 }
 
-private func writeCString(_ message: String, to buffer: UnsafeMutablePointer<CChar>?, capacity: Int32) {
-    guard let buffer, capacity > 0 else { return }
-    let limit = max(Int(capacity) - 1, 0)
-    let bytes = Array(message.utf8.prefix(limit))
-    for index in bytes.indices {
-        buffer[index] = CChar(bitPattern: bytes[index])
-    }
-    buffer[bytes.count] = 0
-}
-#endif

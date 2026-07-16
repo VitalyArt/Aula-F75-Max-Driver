@@ -6,6 +6,10 @@ if command -v udevadm >/dev/null 2>&1; then
     udevadm trigger || true
 fi
 
+if command -v glib-compile-schemas >/dev/null 2>&1; then
+    glib-compile-schemas /usr/share/glib-2.0/schemas || true
+fi
+
 if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database /usr/share/applications || true
 fi
