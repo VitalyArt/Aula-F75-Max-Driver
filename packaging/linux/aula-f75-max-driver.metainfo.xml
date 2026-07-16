@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>art.vitaly.aula-f75-max-driver</id>
+  <id>vitalyart.aula-f75-max-driver</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <pkgname>aula-f75-max-driver</pkgname>
@@ -14,7 +14,7 @@
   <summary xml:lang="pt">Configure o teclado Epomaker x Aula F75 Max</summary>
   <summary xml:lang="zh-Hans">配置 Epomaker x Aula F75 Max 键盘</summary>
 
-  <developer id="art.vitaly">
+  <developer id="vitalyart">
     <name>VitalyArt</name>
   </developer>
 

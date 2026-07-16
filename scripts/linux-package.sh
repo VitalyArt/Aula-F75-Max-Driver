@@ -11,12 +11,14 @@ mkdir -p "${linux_root}/share/applications"
 mkdir -p "${linux_root}/share/icons/hicolor/256x256/apps"
 mkdir -p "${linux_root}/share/pixmaps"
 mkdir -p "${linux_root}/share/metainfo"
+mkdir -p "${linux_root}/share/glib-2.0/schemas"
 mkdir -p "${linux_root}/share/udev/rules.d"
 
 cp ".build/release/${LINUX_PRODUCT}" "${linux_root}/"
 cp "packaging/linux/aula-f75-max-driver.desktop" "${linux_root}/share/applications/${LINUX_DESKTOP_ID}.desktop"
 cp "docs/assets/app-icon.png" "${linux_root}/share/icons/hicolor/256x256/apps/${LINUX_DESKTOP_ID}.png"
 cp "docs/assets/app-icon.png" "${linux_root}/share/pixmaps/${LINUX_DESKTOP_ID}.png"
+cp "packaging/linux/vitalyart.aula-f75-max-driver.gschema.xml" "${linux_root}/share/glib-2.0/schemas/"
 package_version="${RELEASE_TAG:-1.0.0}"
 python3 scripts/render-metainfo.py \
     "packaging/linux/aula-f75-max-driver.metainfo.xml" \

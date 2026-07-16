@@ -52,13 +52,13 @@ enum LaunchAtLogin {
         let library = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!
         return library
             .appendingPathComponent("LaunchAgents", isDirectory: true)
-            .appendingPathComponent("art.vitaly.aula-macos-driver.login.plist")
+            .appendingPathComponent("vitalyart.aula-macos-driver.login.plist")
     }
 
     private static func writeLegacyLaunchAgent() throws {
         let bundlePath = Bundle.main.bundleURL.path
         let plist: [String: Any] = [
-            "Label": "art.vitaly.aula-macos-driver.login",
+            "Label": "vitalyart.aula-macos-driver.login",
             "ProgramArguments": ["/usr/bin/open", "-g", bundlePath],
             "RunAtLoad": true,
             "KeepAlive": false

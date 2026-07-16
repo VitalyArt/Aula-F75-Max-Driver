@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="vitalyart.aula-f75-max-driver" path="/vitalyart/aula-f75-max-driver/">
+    <key name="language-code" type="s">
+      <default>'system'</default>
+      <summary>Selected language code</summary>
+      <description>Language override for the Linux UI. The special value system follows the desktop locale.</description>
+    </key>
+  </schema>
+</schemalist>

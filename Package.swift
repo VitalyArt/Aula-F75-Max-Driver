@@ -66,7 +66,10 @@ targets.append(contentsOf: [
     ),
     .executableTarget(
         name: "AulaLinuxApp",
-        dependencies: ["AulaCore", "AulaLinuxHID", "CAulaLinuxGTK"]
+        dependencies: ["AulaCore", "AulaLinuxHID", "CAulaLinuxGTK"],
+        resources: [
+            .process("Resources")
+        ]
     )
 ])
 #endif
