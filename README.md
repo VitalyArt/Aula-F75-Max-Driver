@@ -157,7 +157,7 @@ Build a Debian/Ubuntu installer package:
 
 ```sh
 make linux-deb
-sudo apt install ./build/aula-f75-max-driver_*.deb
+sudo apt install ./build/AulaF75MaxDriver-v*_*.deb
 ```
 
 The DEB installs the application launcher, desktop entry, icon, Swift runtime libraries needed by the release binary, and the udev rule. Replug the keyboard and receiver after installation.

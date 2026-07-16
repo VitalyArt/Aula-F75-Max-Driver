@@ -1,11 +1,31 @@
 Package: @PACKAGE_NAME@
+Name: Aula F75 Max Driver
+Title: Aula F75 Max Driver
+Summary: Configure the Epomaker x Aula F75 Max keyboard
 Version: @VERSION@
 Section: utils
 Priority: optional
 Architecture: @ARCH@
 Maintainer: VitalyArt <noreply@vitaly.art>
+Original-Maintainer: VitalyArt <noreply@vitaly.art>
+Vendor: VitalyArt
+Publisher: VitalyArt
+Origin: VitalyArt
+License: MIT
+Project-License: MIT
+ProjectLicense: MIT
+Installed-Size: @INSTALLED_SIZE@
+Date: @BUILD_DATE@
 Depends: libc6, libgtk-4-1, libhidapi-hidraw0
-Homepage: https://github.com/VitalyArt/Aula-F75-Max-Driver
+Homepage: https://vitalyart.github.io/Aula-F75-Max-Driver/
 Description: Native Linux driver for the Aula F75 Max keyboard
  Configure the Epomaker x Aula F75 Max keyboard display, RGB lighting,
  battery status, response level, sleep timeout, Game Mode, and HID diagnostics.
+ .
+ The app uses Linux hidraw and hidapi directly, installs the required udev
+ rule, and keeps wired USB-C display workflows separate from 2.4G receiver
+ settings.
+ .
+ Features include image and GIF upload to the 128 x 128 keyboard display,
+ RGB mode controls, battery reading through the 2.4G receiver, performance
+ settings, and HID endpoint diagnostics for troubleshooting.

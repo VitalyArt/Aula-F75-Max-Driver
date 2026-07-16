@@ -13,6 +13,7 @@ permissions:
 
 env:
   APP_NAME: "Aula F75 Max Driver"
+  RELEASE_BASE_NAME: "AulaF75MaxDriver"
 
 jobs:
   macos-dmg:
@@ -46,12 +47,13 @@ jobs:
       - name: Install Linux dependencies
         run: |
           apt-get update
-          apt-get install -y make libgtk-4-dev libhidapi-dev pkg-config
+          apt-get install -y make libgtk-4-dev libhidapi-dev pkg-config python3-pil
 
       - name: Build Linux app
         run: make linux-build
 
       - name: Build Linux DEB installer
+        shell: bash
         run: |
           set -euo pipefail
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
@@ -95,15 +97,23 @@ jobs:
       - name: Prepare release assets
         run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_LINUX_DEB="aula-f75-max-driver-${GITHUB_SHA}.deb"
 
-      - name: Create GitHub release
+      - name: Create or update GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
           set -euo pipefail
           safe_tag="${GITHUB_REF_NAME//\//-}"
-          deb_version="${safe_tag#v}"
-          gh release create "${GITHUB_REF_NAME}" \
-            "release/${APP_NAME}-${safe_tag}.dmg" \
-            release/aula-f75-max-driver_${deb_version}_*.deb \
-            --title "${GITHUB_REF_NAME}" \
-            --generate-notes
+          release_version="v${safe_tag#v}"
+          assets=(
+            "release/${RELEASE_BASE_NAME}-${release_version}.dmg"
+            release/${RELEASE_BASE_NAME}-${release_version}_*.deb
+          )
+
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" "${assets[@]}" \
+              --title "${GITHUB_REF_NAME}" \
+              --generate-notes
+          fi
