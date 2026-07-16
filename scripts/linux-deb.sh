@@ -18,8 +18,11 @@ if ! python3 -c 'from PIL import Image' >/dev/null 2>&1; then
 fi
 
 arch="$(dpkg --print-architecture)"
-version="${RELEASE_TAG:-}"
-if [ -z "$version" ]; then version="1.0.0"; fi
+release_tag="${RELEASE_TAG:-${GITHUB_REF_NAME:-}}"
+if [ -z "$release_tag" ] && [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+    release_tag="${GITHUB_REF_NAME:-}"
+fi
+version="${release_tag:-1.0.0}"
 version="${version#v}"
 version="$(printf '%s' "$version" | tr '/' '-')"
 
@@ -45,7 +48,11 @@ mkdir -p \
     "${root}/etc/udev/rules.d"
 
 install -m 0755 "$binary" "${install_dir}/${LINUX_PRODUCT}"
-ldd "$binary" | awk '/libswift.*=>/ { print $3 }' | while read -r lib; do
+
+# Bundle the Swift runtime that the Linux executable loads at startup.
+# The binary depends on more than libswift* (for example libBlocksRuntime
+# and libdispatch), so copy every resolved library from the Swift toolchain.
+ldd "$binary" | awk '$3 ~ /\/swift\// { print $3 }' | while read -r lib; do
     if [ -n "$lib" ] && [ -f "$lib" ]; then install -m 0644 "$lib" "${install_dir}/lib/"; fi
 done
 
@@ -59,7 +66,8 @@ chmod 0755 "${root}/usr/bin/${LINUX_PRODUCT}"
 install -m 0644 "packaging/linux/aula-f75-max-driver.desktop" "${root}/usr/share/applications/${LINUX_DESKTOP_ID}.desktop"
 install -m 0644 "docs/assets/app-icon.png" "${root}/usr/share/icons/hicolor/256x256/apps/${LINUX_DESKTOP_ID}.png"
 install -m 0644 "docs/assets/app-icon.png" "${root}/usr/share/pixmaps/${LINUX_DESKTOP_ID}.png"
-install -m 0644 "packaging/linux/aula-f75-max-driver.metainfo.xml" "${root}/usr/share/metainfo/${LINUX_APPSTREAM_ID}.metainfo.xml"
+appstream_metainfo="${root}/usr/share/metainfo/${LINUX_APPSTREAM_ID}.metainfo.xml"
+install -m 0644 "packaging/linux/aula-f75-max-driver.metainfo.xml" "$appstream_metainfo"
 install -m 0644 "packaging/linux/60-aula-f75-max.rules" "${root}/etc/udev/rules.d/"
 install -m 0644 "LICENSE" "${root}/usr/share/doc/${LINUX_PACKAGE_NAME}/copyright"
 
@@ -72,6 +80,11 @@ sed \
     -e "s/@INSTALLED_SIZE@/${installed_size}/g" \
     -e "s/@BUILD_DATE@/${build_date}/g" \
     "packaging/linux/deb-control.in" > "${root}/DEBIAN/control"
+python3 scripts/render-metainfo.py \
+    "packaging/linux/aula-f75-max-driver.metainfo.xml" \
+    "$appstream_metainfo" \
+    "$version" \
+    "$build_date"
 scripts/embed-deb-icon.py "${root}/DEBIAN/control" "docs/assets/app-icon.png"
 
 install -m 0755 "packaging/linux/deb-postinst" "${root}/DEBIAN/postinst"

@@ -17,6 +17,11 @@ cp ".build/release/${LINUX_PRODUCT}" "${linux_root}/"
 cp "packaging/linux/aula-f75-max-driver.desktop" "${linux_root}/share/applications/${LINUX_DESKTOP_ID}.desktop"
 cp "docs/assets/app-icon.png" "${linux_root}/share/icons/hicolor/256x256/apps/${LINUX_DESKTOP_ID}.png"
 cp "docs/assets/app-icon.png" "${linux_root}/share/pixmaps/${LINUX_DESKTOP_ID}.png"
-cp "packaging/linux/aula-f75-max-driver.metainfo.xml" "${linux_root}/share/metainfo/${LINUX_APPSTREAM_ID}.metainfo.xml"
+package_version="${RELEASE_TAG:-1.0.0}"
+python3 scripts/render-metainfo.py \
+    "packaging/linux/aula-f75-max-driver.metainfo.xml" \
+    "${linux_root}/share/metainfo/${LINUX_APPSTREAM_ID}.metainfo.xml" \
+    "$package_version" \
+    "$(date -u +%F)"
 cp "packaging/linux/60-aula-f75-max.rules" "${linux_root}/share/udev/rules.d/"
 tar -C "${BUILD_DIR}" -czf "${LINUX_ARTIFACT}" linux
