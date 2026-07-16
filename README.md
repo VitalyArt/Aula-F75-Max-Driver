@@ -4,9 +4,9 @@
   <img src="docs/assets/app-icon.png" width="128" alt="Aula F75 Max Driver app icon">
 </p>
 
-Native macOS utility for configuring the Epomaker x Aula F75 Max keyboard on Apple Silicon Macs.
+Native utility for configuring the Epomaker x Aula F75 Max keyboard on macOS and Linux.
 
-The app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. It does not install kernel extensions and does not require libusb.
+The macOS app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. The Linux app uses `hidapi` over `hidraw` and a native GTK4 interface. Both versions share the same portable protocol code where possible.
 
 ## Website
 
@@ -15,6 +15,7 @@ The promo and documentation site lives in `docs/` and is ready for GitHub Pages.
 - Local entry point: `docs/index.html`
 - Static assets: `docs/assets/` and `docs/screenshots/`
 - GitHub Pages deployment workflow: `.github/workflows/pages.yml`
+- Build workflow: `.github/workflows/build.yml` validates macOS DMG packaging and Linux DEB installer builds through the Makefile.
 - Default site language: English
 - Site languages: English, Russian, Spanish, Uzbek, Kazakh, Portuguese, Simplified Chinese
 
@@ -34,16 +35,19 @@ After pushing to `main` or `master`, GitHub Actions publishes the `docs/` direct
 - Sends a local notification when battery level drops below 20%.
 - Controls RGB mode, brightness, speed, direction, colorful animation, and fixed color.
 - Configures response level, sleep timeout, Game Mode, and Command key restore behavior.
-- Syncs the keyboard display clock to local macOS time.
+- Syncs the keyboard display clock to local system time.
 - Uploads PNG, JPEG, GIF, BMP, TIFF, and WebP images to the 128 x 128 keyboard display.
 - Supports animated GIF uploads with frame delays.
 - Supports display fit modes: fit, fill, and stretch.
 - Provides a factory reset flow for display slots and keyboard configuration blocks used by this implementation.
 - Provides a diagnostic endpoint view for HID transport troubleshooting.
 - Supports app language selection with bundled localizations.
-- Supports Launch at Login.
+- Ships native macOS and Linux builds with platform-specific integrations.
+- Supports Launch at Login on macOS.
 
 ## Requirements
+
+### macOS
 
 - macOS 14 or newer.
 - Apple Silicon Mac.
@@ -60,12 +64,51 @@ System Settings -> Privacy & Security -> Input Monitoring
 
 Then restart the app.
 
+### Linux
+
+- Ubuntu or Fedora on x86_64.
+- Swift 6 toolchain.
+- GTK4 development libraries.
+- hidapi development libraries.
+- Aula F75 Max keyboard and/or 2.4G receiver.
+- udev access to the supported hidraw devices.
+
+Ubuntu dependencies:
+
+```sh
+sudo apt install libgtk-4-dev libhidapi-dev pkg-config
+```
+
+Fedora dependencies:
+
+```sh
+sudo dnf install gtk4-devel hidapi-devel pkgconf-pkg-config
+```
+
+Source builds need the udev rule before running device commands:
+
+```sh
+sudo install -m 0644 packaging/linux/60-aula-f75-max.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+Then replug the keyboard and receiver.
+
 ## Build and Run
+
+Show available Make targets:
+
+```sh
+make help
+```
+
+### macOS
 
 Build and package the app:
 
 ```sh
-make all
+make macos-app
 ```
 
 Open the packaged app:
@@ -77,20 +120,64 @@ open "build/Aula F75 Max Driver.app"
 Build and open in one step:
 
 ```sh
-make run
+make macos-run
 ```
 
 Create a DMG installer image:
 
 ```sh
+make macos-dmg
+```
+
+Compatibility aliases are kept for the original macOS workflow:
+
+```sh
+make all
+make build
+make app
 make dmg
+make run
+```
+
+### Linux
+
+Build the native Linux GTK app:
+
+```sh
+make linux-build
+```
+
+Run the native Linux GTK app:
+
+```sh
+make linux-run
+```
+
+Build a Debian/Ubuntu installer package:
+
+```sh
+make linux-deb
+sudo apt install ./build/AulaF75MaxDriver-v*_*.deb
+```
+
+The DEB installs the application launcher, desktop entry, icon, Swift runtime libraries needed by the release binary, and the udev rule. Replug the keyboard and receiver after installation.
+
+Package a legacy tar.gz artifact for development workflows:
+
+```sh
+make linux-package
 ```
 
 Other commands:
 
-- `make build` builds the Swift package in release mode for `arm64`.
-- `make app` builds and packages `build/Aula F75 Max Driver.app`.
-- `make dmg` builds a styled drag-to-install `build/Aula F75 Max Driver.dmg` with the app and an Applications shortcut.
+- `make macos-build` builds the macOS SwiftUI app binary in release mode for `arm64`.
+- `make macos-app` builds and packages `build/Aula F75 Max Driver.app`.
+- `make macos-dmg` builds a styled drag-to-install `build/Aula F75 Max Driver.dmg` with the app and an Applications shortcut.
+- `make macos-run` builds and opens the macOS app bundle.
+- `make linux-build` builds the native Linux GTK app on Linux.
+- `make linux-deb` builds the Debian/Ubuntu installer in `build/`.
+- `make linux-package` packages the Linux binary and udev rule into `build/AulaF75MaxDriverLinux.tar.gz` as a legacy developer artifact.
+- `make linux-run` runs the native Linux GTK app on Linux.
 - `make clean` removes `.build/` and `build/`.
 
 The build output is local generated state and should not be committed.
@@ -175,6 +262,8 @@ Launch at Login is managed through the macOS ServiceManagement framework. It can
 `-- build/
 ```
 
+Linux-specific code is split into separate targets under `Sources/AulaCore/`, `Sources/AulaLinuxHID/`, `Sources/AulaLinuxApp/`, and `Sources/CAulaLinuxGTK/`.
+
 Important files:
 
 - `AulaF75MaxDriverApp.swift` defines the SwiftUI app, main window, and AppKit window appearance configuration.
@@ -184,12 +273,13 @@ Important files:
 - `WirelessAulaDevice.swift` handles 2.4G receiver communication.
 - `DisplayEncoder.swift` converts image files into the keyboard display payload format.
 - `HIDDeviceMonitor.swift` watches for supported HID attach and removal events.
-- `AulaTypes.swift` contains protocol constants, shared errors, endpoint metadata, and upload progress types.
+- `AulaTypes.swift` contains the current macOS app protocol constants, shared errors, endpoint metadata, and upload progress types.
+- `AulaCore` contains portable packet builders and shared types used by the Linux implementation.
 - `Localization.swift` resolves bundled localized strings and language override behavior.
 
 ## Architecture
 
-The app is a Swift Package executable target using SwiftUI for UI and AppKit/IOKit for macOS integration.
+The macOS app is a Swift Package executable target using SwiftUI for UI and AppKit/IOKit for macOS integration. The Linux app is a separate native GTK4 executable using hidapi/hidraw.
 
 High-level flow:
 
@@ -233,13 +323,20 @@ The selected language is stored in `UserDefaults` under `app.language.code`. The
 
 ## Testing
 
-There is currently no automated test target in `Package.swift`.
+There is currently no automated test target in `Package.swift`. The shared `AulaCore` target is compiled as part of the package build.
 
 Recommended validation before a release:
 
 ```sh
 make clean
-make all
+make macos-app
+```
+
+Linux validation should be run on Ubuntu or Fedora after installing the documented GTK4, hidapi, and udev dependencies:
+
+```sh
+make linux-build
+make linux-run
 ```
 
 Manual validation:
@@ -268,7 +365,7 @@ swift test
 - Try reconnecting the keyboard or receiver.
 - Try a direct USB port instead of a hub.
 - Grant Input Monitoring permission and restart the app.
-- Run `make clean && make all` if testing a fresh local build.
+- Run `make clean && make macos-app` if testing a fresh local macOS build.
 
 ### Battery is unavailable
 

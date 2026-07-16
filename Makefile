@@ -1,9 +1,25 @@
 SHELL := /bin/bash
 
 APP_NAME := Aula F75 Max Driver
+RELEASE_BASE_NAME := AulaF75MaxDriver
 EXECUTABLE_NAME := AulaF75MaxDriver
 CONFIGURATION := release
 BUILD_DIR := build
+
+LINUX_PRODUCT := AulaF75MaxDriverLinux
+LINUX_ARTIFACT := $(BUILD_DIR)/AulaF75MaxDriverLinux.tar.gz
+LINUX_DESKTOP_ID := aula-f75-max-driver
+LINUX_APPSTREAM_ID := art.vitaly.aula-f75-max-driver
+LINUX_PACKAGE_NAME := aula-f75-max-driver
+LINUX_INSTALL_PREFIX := /opt/$(LINUX_PACKAGE_NAME)
+LINUX_DEB ?=
+
+RELEASE_DIR ?= release
+RELEASE_TAG ?=
+SOURCE_MACOS_DMG ?= $(APP_NAME).dmg
+SOURCE_LINUX_ARTIFACT ?= AulaF75MaxDriverLinux.tar.gz
+SOURCE_LINUX_DEB ?=
+
 APP_DIR := $(BUILD_DIR)/$(APP_NAME).app
 DMG_DIR := $(BUILD_DIR)/dmg
 DMG_PATH := $(BUILD_DIR)/$(APP_NAME).dmg
@@ -11,54 +27,19 @@ DMG_RW_PATH := $(BUILD_DIR)/$(APP_NAME)-rw.dmg
 DMG_STYLE_SCRIPT := scripts/style-dmg.applescript
 EXECUTABLE := .build/arm64-apple-macosx/$(CONFIGURATION)/$(EXECUTABLE_NAME)
 
-.PHONY: all build app dmg run clean
+export APP_NAME RELEASE_BASE_NAME EXECUTABLE_NAME CONFIGURATION BUILD_DIR
+export LINUX_PRODUCT LINUX_ARTIFACT LINUX_DESKTOP_ID LINUX_APPSTREAM_ID
+export LINUX_PACKAGE_NAME LINUX_INSTALL_PREFIX LINUX_DEB
+export RELEASE_DIR RELEASE_TAG SOURCE_MACOS_DMG SOURCE_LINUX_ARTIFACT SOURCE_LINUX_DEB
+export APP_DIR DMG_DIR DMG_PATH DMG_RW_PATH DMG_STYLE_SCRIPT EXECUTABLE
 
-all: app
+.PHONY: help all build app dmg run
+.PHONY: macos-build macos-app macos-dmg macos-run
+.PHONY: linux-check-deps linux-install-udev linux-build linux-package linux-deb linux-run
+.PHONY: release-package clean
 
-build:
-	CLANG_MODULE_CACHE_PATH=/private/tmp/clang-cache swift build -c $(CONFIGURATION) --arch arm64
-
-app: build
-	rm -rf "$(APP_DIR)"
-	mkdir -p "$(APP_DIR)/Contents/MacOS"
-	mkdir -p "$(APP_DIR)/Contents/Resources"
-	cp "$(EXECUTABLE)" "$(APP_DIR)/Contents/MacOS/$(APP_NAME)"
-	cp Info.plist "$(APP_DIR)/Contents/Info.plist"
-	cp "Sources/AulaF75MaxDriver/Resources/AppIcon.icns" "$(APP_DIR)/Contents/Resources/AppIcon.icns"
-
-dmg: app
-	rm -rf "$(DMG_DIR)" "$(DMG_PATH)" "$(DMG_RW_PATH)"
-	mkdir -p "$(DMG_DIR)"
-	cp -R "$(APP_DIR)" "$(DMG_DIR)/"
-	ln -s /Applications "$(DMG_DIR)/Applications"
-	hdiutil create \
-		-volname "$(APP_NAME)" \
-		-srcfolder "$(DMG_DIR)" \
-		-ov \
-		-fs HFS+ \
-		-format UDRW \
-		"$(DMG_RW_PATH)"
-	@set -euo pipefail; \
-		mount_dir="$$(mktemp -d "/tmp/$(APP_NAME)-dmg.XXXXXX")"; \
-		device=""; \
-		cleanup() { \
-			if [ -n "$$device" ]; then hdiutil detach "$$device" >/dev/null 2>&1 || true; fi; \
-			rm -rf "$$mount_dir"; \
-		}; \
-		trap cleanup EXIT; \
-		device="$$(hdiutil attach "$(DMG_RW_PATH)" -readwrite -noverify -noautoopen -owners off -mountpoint "$$mount_dir" | awk '/^\/dev\// { print $$1; exit }')"; \
-		osascript "$(DMG_STYLE_SCRIPT)" "$$mount_dir" "$(APP_NAME)"; \
-		sync; \
-		hdiutil detach "$$device"; \
-		device=""
-	hdiutil convert "$(DMG_RW_PATH)" \
-		-format UDZO \
-		-imagekey zlib-level=9 \
-		-o "$(DMG_PATH)"
-	rm -f "$(DMG_RW_PATH)"
-
-run: app
-	open "$(APP_DIR)"
-
-clean:
-	rm -rf .build "$(BUILD_DIR)"
+include make/help.mk
+include make/macos.mk
+include make/linux.mk
+include make/release.mk
+include make/clean.mk

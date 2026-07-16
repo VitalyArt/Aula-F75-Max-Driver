@@ -1,0 +1,22 @@
+[Desktop Entry]
+Type=Application
+Name=Aula F75 Max Driver
+GenericName=Keyboard Configuration Utility
+GenericName[ru]=Утилита настройки клавиатуры
+GenericName[es]=Utilidad de configuración de teclado
+GenericName[uz]=Klaviatura sozlash utilitasi
+GenericName[kk]=Пернетақтаны баптау утилитасы
+GenericName[pt]=Utilitário de configuração de teclado
+GenericName[zh_CN]=键盘配置工具
+Comment=Configure the Epomaker x Aula F75 Max keyboard display, RGB lighting, battery, and 2.4G mode
+Comment[ru]=Настраивайте дисплей, RGB, батарею и режим 2.4G клавиатуры Epomaker x Aula F75 Max
+Comment[es]=Configura pantalla, RGB, batería y modo 2.4G del teclado Epomaker x Aula F75 Max
+Comment[uz]=Epomaker x Aula F75 Max klaviaturasi displeyi, RGB, batareya va 2.4G rejimini sozlang
+Comment[kk]=Epomaker x Aula F75 Max пернетақтасының дисплейін, RGB жарығын, батареясын және 2.4G режимін баптаңыз
+Comment[pt]=Configure tela, RGB, bateria e modo 2.4G do teclado Epomaker x Aula F75 Max
+Comment[zh_CN]=配置 Epomaker x Aula F75 Max 键盘屏幕、RGB 灯效、电池和 2.4G 模式
+Exec=AulaF75MaxDriverLinux
+Icon=aula-f75-max-driver
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=Aula;F75;Keyboard;HID;RGB;Epomaker;2.4G;Display;

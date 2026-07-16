@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>art.vitaly.aula-f75-max-driver</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <pkgname>aula-f75-max-driver</pkgname>
+
+  <name>Aula F75 Max Driver</name>
+  <summary>Configure the Epomaker x Aula F75 Max keyboard</summary>
+  <summary xml:lang="ru">Настраивайте клавиатуру Epomaker x Aula F75 Max</summary>
+  <summary xml:lang="es">Configura el teclado Epomaker x Aula F75 Max</summary>
+  <summary xml:lang="uz">Epomaker x Aula F75 Max klaviaturasini sozlang</summary>
+  <summary xml:lang="kk">Epomaker x Aula F75 Max пернетақтасын баптаңыз</summary>
+  <summary xml:lang="pt">Configure o teclado Epomaker x Aula F75 Max</summary>
+  <summary xml:lang="zh-Hans">配置 Epomaker x Aula F75 Max 键盘</summary>
+
+  <developer id="art.vitaly">
+    <name>VitalyArt</name>
+  </developer>
+
+  <description>
+    <p>
+      Aula F75 Max Driver is a native Linux utility for configuring the
+      Epomaker x Aula F75 Max keyboard display, RGB lighting, battery status,
+      response level, sleep timeout, Game Mode, and HID diagnostics.
+    </p>
+    <p xml:lang="ru">
+      Aula F75 Max Driver - нативная Linux-утилита для настройки клавиатуры
+      Epomaker x Aula F75 Max: дисплея, RGB-подсветки, батареи, отклика,
+      sleep timeout, Game Mode и диагностики HID.
+    </p>
+    <p xml:lang="es">
+      Aula F75 Max Driver es una utilidad nativa para Linux que configura el
+      teclado Epomaker x Aula F75 Max: pantalla, iluminación RGB, batería,
+      nivel de respuesta, suspensión, Game Mode y diagnóstico HID.
+    </p>
+    <p xml:lang="uz">
+      Aula F75 Max Driver - Epomaker x Aula F75 Max klaviaturasi displeyi, RGB
+      yoritishi, batareyasi, javob darajasi, uyqu vaqti, Game Mode va HID
+      diagnostikasini sozlash uchun native Linux utilitasi.
+    </p>
+    <p xml:lang="kk">
+      Aula F75 Max Driver - Epomaker x Aula F75 Max пернетақтасының дисплейін,
+      RGB жарығын, батареясын, жауап деңгейін, ұйқы уақытын, Game Mode режимін
+      және HID диагностикасын баптауға арналған native Linux утилитасы.
+    </p>
+    <p xml:lang="pt">
+      Aula F75 Max Driver é um utilitário nativo para Linux que configura o
+      teclado Epomaker x Aula F75 Max: tela, RGB, bateria, nível de resposta,
+      suspensão, Game Mode e diagnóstico HID.
+    </p>
+    <p xml:lang="zh-Hans">
+      Aula F75 Max Driver 是一款原生 Linux 工具，用于配置 Epomaker x Aula F75 Max
+      键盘屏幕、RGB 灯效、电池状态、响应等级、睡眠时间、Game Mode 和 HID 诊断。
+    </p>
+    <p>
+      The app communicates directly through Linux hidraw and hidapi, installs
+      the required udev rule, and separates wired USB-C display workflows from
+      2.4G receiver settings.
+    </p>
+    <ul>
+      <li>Upload PNG, JPEG, GIF, BMP, TIFF, and WebP images to the 128 x 128 keyboard display.</li>
+      <li>Control RGB lighting mode, brightness, speed, direction, fixed color, response level, and sleep timeout.</li>
+      <li>Read battery percentage through the 2.4G receiver and inspect HID endpoints for troubleshooting.</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">aula-f75-max-driver.desktop</launchable>
+  <icon type="stock">aula-f75-max-driver</icon>
+  <provides>
+    <binary>AulaF75MaxDriverLinux</binary>
+    <id>aula-f75-max-driver.desktop</id>
+  </provides>
+
+  <categories>
+    <category>Settings</category>
+    <category>HardwareSettings</category>
+  </categories>
+
+  <keywords>
+    <keyword>Aula</keyword>
+    <keyword>F75</keyword>
+    <keyword>Keyboard</keyword>
+    <keyword>HID</keyword>
+    <keyword>RGB</keyword>
+  </keywords>
+
+  <url type="homepage">https://vitalyart.github.io/Aula-F75-Max-Driver/</url>
+  <url type="bugtracker">https://github.com/VitalyArt/Aula-F75-Max-Driver/issues</url>
+  <url type="vcs-browser">https://github.com/VitalyArt/Aula-F75-Max-Driver</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main Aula F75 Max Driver window</caption>
+      <image type="source">https://vitalyart.github.io/Aula-F75-Max-Driver/screenshots/main-window.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>HID endpoint diagnostics and app settings</caption>
+      <image type="source">https://vitalyart.github.io/Aula-F75-Max-Driver/screenshots/details-window.png</image>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="1.0.0" date="2026-07-16" />
+  </releases>
+
+  <content_rating type="oars-1.1" />
+</component>

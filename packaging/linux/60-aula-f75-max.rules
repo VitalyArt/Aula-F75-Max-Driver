@@ -1,0 +1,9 @@
+# Aula F75 Max wired keyboard and 2.4G receiver.
+# Install with:
+#   sudo install -m 0644 packaging/linux/60-aula-f75-max.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+#   sudo udevadm trigger
+# Then replug the keyboard and receiver.
+
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="800a", MODE="0666", TAG+="uaccess"
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="05ac", ATTRS{idProduct}=="024f", MODE="0666", TAG+="uaccess"
