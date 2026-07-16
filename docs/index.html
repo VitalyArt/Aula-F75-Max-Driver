@@ -13,7 +13,10 @@
   <link rel="icon" href="assets/app-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"></noscript>
+  <link rel="preload" as="image" href="screenshots/main-window.webp" type="image/webp">
   <script>document.documentElement.classList.add("reveal-enabled");</script>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -76,7 +79,10 @@
           <span></span>
           <strong>Aula F75 Max Driver</strong>
         </div>
-        <img src="screenshots/main-window.png" alt="Aula F75 Max Driver main window" data-i18n-alt="mainScreenshotAlt">
+        <picture>
+          <source srcset="screenshots/main-window.webp" type="image/webp">
+          <img src="screenshots/main-window.png" width="1216" height="792" alt="Aula F75 Max Driver main window" data-i18n-alt="mainScreenshotAlt" fetchpriority="high" decoding="async">
+        </picture>
         <div class="battery-badge">
           <small data-i18n="batteryLabel">Battery</small>
           <strong>91%</strong>
@@ -145,7 +151,10 @@
         </ul>
       </div>
       <div class="screenshot-card" data-reveal>
-        <img src="screenshots/details-window.png" alt="HID endpoint diagnostics and app settings" data-i18n-alt="detailsScreenshotAlt">
+        <picture>
+          <source srcset="screenshots/details-window.webp" type="image/webp">
+          <img src="screenshots/details-window.png" width="1216" height="792" alt="HID endpoint diagnostics and app settings" data-i18n-alt="detailsScreenshotAlt" loading="lazy" decoding="async">
+        </picture>
       </div>
     </section>
 
