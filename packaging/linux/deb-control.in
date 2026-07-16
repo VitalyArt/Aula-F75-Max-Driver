@@ -1,0 +1,11 @@
+Package: @PACKAGE_NAME@
+Version: @VERSION@
+Section: utils
+Priority: optional
+Architecture: @ARCH@
+Maintainer: VitalyArt <noreply@vitaly.art>
+Depends: libc6, libgtk-4-1, libhidapi-hidraw0
+Homepage: https://github.com/VitalyArt/Aula-F75-Max-Driver
+Description: Native Linux driver for the Aula F75 Max keyboard
+ Configure the Epomaker x Aula F75 Max keyboard display, RGB lighting,
+ battery status, response level, sleep timeout, Game Mode, and HID diagnostics.

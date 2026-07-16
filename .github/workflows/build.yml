@@ -51,14 +51,20 @@ jobs:
       - name: Build Linux app
         run: make linux-build
 
-      - name: Package Linux artifact
-        run: make linux-package LINUX_ARTIFACT="build/AulaF75MaxDriverLinux-${GITHUB_SHA}.tar.gz"
+      - name: Build Linux DEB installer
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            make linux-deb RELEASE_TAG="${GITHUB_REF_NAME}" LINUX_DEB="build/aula-f75-max-driver-${GITHUB_SHA}.deb"
+          else
+            make linux-deb RELEASE_TAG="0.0.0+${GITHUB_SHA}" LINUX_DEB="build/aula-f75-max-driver-${GITHUB_SHA}.deb"
+          fi
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: aula-f75-max-driver-linux
-          path: "build/AulaF75MaxDriverLinux-${{ github.sha }}.tar.gz"
+          path: "build/aula-f75-max-driver-${{ github.sha }}.deb"
           if-no-files-found: error
 
   release:
@@ -87,7 +93,7 @@ jobs:
           path: release
 
       - name: Prepare release assets
-        run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_LINUX_ARTIFACT="AulaF75MaxDriverLinux-${GITHUB_SHA}.tar.gz"
+        run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_LINUX_DEB="aula-f75-max-driver-${GITHUB_SHA}.deb"
 
       - name: Create GitHub release
         env:
@@ -95,8 +101,9 @@ jobs:
         run: |
           set -euo pipefail
           safe_tag="${GITHUB_REF_NAME//\//-}"
+          deb_version="${safe_tag#v}"
           gh release create "${GITHUB_REF_NAME}" \
             "release/${APP_NAME}-${safe_tag}.dmg" \
-            "release/AulaF75MaxDriverLinux-${safe_tag}.tar.gz" \
+            release/aula-f75-max-driver_${deb_version}_*.deb \
             --title "${GITHUB_REF_NAME}" \
             --generate-notes

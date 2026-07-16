@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Aula F75 Max Driver is a native macOS utility for configuring the Epomaker x Aula F75 Max keyboard, display, RGB lighting, battery, and 2.4G mode.">
+  <meta name="description" content="Aula F75 Max Driver is a native macOS and Linux utility for configuring the Epomaker x Aula F75 Max keyboard, display, RGB lighting, battery, and 2.4G mode.">
   <meta name="theme-color" content="#101713">
   <meta property="og:title" content="Aula F75 Max Driver">
-  <meta property="og:description" content="A polished native macOS driver for Aula F75 Max: display uploads, RGB, battery, Game Mode, and HID diagnostics.">
+  <meta property="og:description" content="A polished native macOS and Linux driver for Aula F75 Max: display uploads, RGB, battery, Game Mode, and HID diagnostics.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/app-icon.png">
   <title>Aula F75 Max Driver</title>
@@ -51,20 +51,20 @@
   <main id="top">
     <section class="hero section">
       <div class="hero-copy" data-reveal>
-        <p class="eyebrow" data-i18n="heroEyebrow">Native macOS utility</p>
-        <h1 data-i18n="heroTitle">Control Aula F75 Max without extra drivers.</h1>
+        <p class="eyebrow" data-i18n="heroEyebrow">Native macOS and Linux utility</p>
+        <h1 data-i18n="heroTitle">Control Aula F75 Max on macOS or Linux.</h1>
         <p class="hero-text" data-i18n="heroText">
-          Configure the keyboard display, RGB lighting, battery status, response level, and Game Mode from one focused app for Apple Silicon Macs.
+          Configure the keyboard display, RGB lighting, battery status, response level, and Game Mode from one focused app on both platforms.
         </p>
         <div class="hero-actions">
           <a class="button button-primary" href="https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/latest" target="_blank" rel="noreferrer" data-i18n="downloadDmg">
-            Download DMG
+            Download release
           </a>
           <a class="button button-secondary" href="#install" data-i18n="howToInstall">How to install</a>
         </div>
         <div class="hero-facts" aria-label="Key facts" data-i18n-aria-label="heroFactsAria">
           <span>macOS 14+</span>
-          <span>Apple Silicon</span>
+          <span>Linux GTK4</span>
           <span>USB-C + 2.4G</span>
         </div>
       </div>
@@ -95,7 +95,7 @@
       </article>
       <article>
         <span class="metric">HID</span>
-        <p data-i18n="introHid">Direct communication through macOS HID APIs without kernel extensions or libusb.</p>
+        <p data-i18n="introHid">Direct communication through macOS HID APIs and Linux hidraw/hidapi, without kernel extensions or libusb.</p>
       </article>
     </section>
 
@@ -103,7 +103,7 @@
       <div class="section-heading" data-reveal>
         <p class="eyebrow" data-i18n="featuresEyebrow">What's inside</p>
         <h2 data-i18n="featuresTitle">Tools built specifically for the F75 Max.</h2>
-        <p data-i18n="featuresText">The app separates wired operations from 2.4G settings, so it is clear which connection mode each task needs.</p>
+        <p data-i18n="featuresText">The app separates wired operations from 2.4G settings, so it is clear which connection mode each task needs on macOS and Linux.</p>
       </div>
 
       <div class="feature-grid">
@@ -152,14 +152,14 @@
     <section id="install" class="section install-section">
       <div class="section-heading" data-reveal>
         <p class="eyebrow" data-i18n="installEyebrow">Install</p>
-        <h2 data-i18n="installTitle">Download the DMG or build locally.</h2>
+        <h2 data-i18n="installTitle">Download the macOS DMG or Linux DEB.</h2>
       </div>
 
       <div class="install-grid">
         <article class="install-card" data-reveal>
           <span class="step-number">1</span>
           <h3 data-i18n="installReadyTitle">Ready-made build</h3>
-          <p data-i18n="installReadyText">Open the latest GitHub Release, download the DMG, and move the app to Applications.</p>
+          <p data-i18n="installReadyText">Open the latest GitHub Release and download the macOS DMG or Debian/Ubuntu DEB installer.</p>
           <a class="text-link" href="https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/latest" target="_blank" rel="noreferrer" data-i18n="installReadyLink">
             Open releases/latest
           </a>
@@ -167,14 +167,18 @@
         <article class="install-card" data-reveal>
           <span class="step-number">2</span>
           <h3 data-i18n="installBuildTitle">Build from source</h3>
-          <p data-i18n="installBuildText">Requires macOS 14+, an Apple Silicon Mac, and Xcode Command Line Tools.</p>
+          <p data-i18n="installBuildText">macOS builds require macOS 14+, an Apple Silicon Mac, and Xcode Command Line Tools. Linux builds require a Swift 6 toolchain, GTK4, hidapi, and udev access.</p>
           <pre><code>make all
-open "build/Aula F75 Max Driver.app"</code></pre>
+open "build/Aula F75 Max Driver.app"
+
+# Linux
+make linux-deb
+sudo apt install ./build/aula-f75-max-driver_*.deb</code></pre>
         </article>
         <article class="install-card" data-reveal>
           <span class="step-number">3</span>
-          <h3 data-i18n="installPermissionsTitle">macOS permissions</h3>
-          <p data-i18n="installPermissionsText">If HID commands do not run, grant Input Monitoring permission to the app and restart it.</p>
+          <h3 data-i18n="installPermissionsTitle">Platform permissions</h3>
+          <p data-i18n="installPermissionsText">On macOS, grant Input Monitoring to the app if HID commands do not run. On Linux, the DEB installs the udev rule; replug the devices after installation.</p>
           <pre><code>System Settings
 Privacy &amp; Security
 Input Monitoring</code></pre>
@@ -193,7 +197,7 @@ Input Monitoring</code></pre>
 
   <footer class="site-footer">
     <span>Aula F75 Max Driver</span>
-    <span data-i18n="footerText">macOS HID utility for Epomaker x Aula F75 Max</span>
+    <span data-i18n="footerText">macOS and Linux HID utility for Epomaker x Aula F75 Max</span>
   </footer>
 
   <script src="site.js"></script>

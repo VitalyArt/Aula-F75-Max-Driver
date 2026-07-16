@@ -4,9 +4,9 @@
   <img src="docs/assets/app-icon.png" width="128" alt="Aula F75 Max Driver app icon">
 </p>
 
-Native utility for configuring the Epomaker x Aula F75 Max keyboard.
+Native utility for configuring the Epomaker x Aula F75 Max keyboard on macOS and Linux.
 
-The macOS app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. The Linux app uses `hidapi` over `hidraw` and a native GTK4 interface.
+The macOS app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. The Linux app uses `hidapi` over `hidraw` and a native GTK4 interface. Both versions share the same portable protocol code where possible.
 
 ## Website
 
@@ -15,7 +15,7 @@ The promo and documentation site lives in `docs/` and is ready for GitHub Pages.
 - Local entry point: `docs/index.html`
 - Static assets: `docs/assets/` and `docs/screenshots/`
 - GitHub Pages deployment workflow: `.github/workflows/pages.yml`
-- Build workflow: `.github/workflows/build.yml` validates macOS DMG packaging and Linux GTK builds through the Makefile.
+- Build workflow: `.github/workflows/build.yml` validates macOS DMG packaging and Linux DEB installer builds through the Makefile.
 - Default site language: English
 - Site languages: English, Russian, Spanish, Uzbek, Kazakh, Portuguese, Simplified Chinese
 
@@ -42,6 +42,7 @@ After pushing to `main` or `master`, GitHub Actions publishes the `docs/` direct
 - Provides a factory reset flow for display slots and keyboard configuration blocks used by this implementation.
 - Provides a diagnostic endpoint view for HID transport troubleshooting.
 - Supports app language selection with bundled localizations.
+- Ships native macOS and Linux builds with platform-specific integrations.
 - Supports Launch at Login on macOS.
 
 ## Requirements
@@ -84,7 +85,7 @@ Fedora dependencies:
 sudo dnf install gtk4-devel hidapi-devel pkgconf-pkg-config
 ```
 
-Install the udev rule before running device commands:
+Source builds need the udev rule before running device commands:
 
 ```sh
 sudo install -m 0644 packaging/linux/60-aula-f75-max.rules /etc/udev/rules.d/
@@ -152,7 +153,16 @@ Run the native Linux GTK app:
 make linux-run
 ```
 
-Package the Linux app and udev rule into `build/AulaF75MaxDriverLinux.tar.gz`:
+Build a Debian/Ubuntu installer package:
+
+```sh
+make linux-deb
+sudo apt install ./build/aula-f75-max-driver_*.deb
+```
+
+The DEB installs the application launcher, desktop entry, icon, Swift runtime libraries needed by the release binary, and the udev rule. Replug the keyboard and receiver after installation.
+
+Package a legacy tar.gz artifact for development workflows:
 
 ```sh
 make linux-package
@@ -165,7 +175,8 @@ Other commands:
 - `make macos-dmg` builds a styled drag-to-install `build/Aula F75 Max Driver.dmg` with the app and an Applications shortcut.
 - `make macos-run` builds and opens the macOS app bundle.
 - `make linux-build` builds the native Linux GTK app on Linux.
-- `make linux-package` packages the Linux binary and udev rule into `build/AulaF75MaxDriverLinux.tar.gz`.
+- `make linux-deb` builds the Debian/Ubuntu installer in `build/`.
+- `make linux-package` packages the Linux binary and udev rule into `build/AulaF75MaxDriverLinux.tar.gz` as a legacy developer artifact.
 - `make linux-run` runs the native Linux GTK app on Linux.
 - `make clean` removes `.build/` and `build/`.
 
