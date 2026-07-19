@@ -1,6 +1,11 @@
 .idea/
 .build/
 build/
+android/.gradle/
+android/build/
+android/local.properties
+android/.idea/
+android/*.iml
 
 # Xcode and SwiftPM local state
 DerivedData/
@@ -11,4 +16,3 @@ DerivedData/
 
 # macOS metadata
 .DS_Store
-

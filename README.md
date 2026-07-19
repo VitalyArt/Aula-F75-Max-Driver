@@ -4,9 +4,9 @@
   <img src="docs/assets/app-icon.png" width="128" alt="Aula F75 Max Driver app icon">
 </p>
 
-Native utility for configuring the Epomaker x Aula F75 Max keyboard on macOS and Linux.
+Native utility for configuring the Epomaker x Aula F75 Max keyboard on macOS, Linux, and Android.
 
-The macOS app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. The Linux app uses `hidapi` over `hidraw` and a native GTK4 interface. Both versions share the same portable protocol code where possible.
+The macOS app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. The Linux app uses `hidapi` over `hidraw` and a native GTK4 interface. The Android app uses the USB Host API and a Compose UI. The three versions share the same portable protocol code where possible.
 
 ## Website
 
@@ -15,7 +15,7 @@ The promo and documentation site lives in `docs/` and is ready for GitHub Pages.
 - Local entry point: `docs/index.html`
 - Static assets: `docs/assets/` and `docs/screenshots/`
 - GitHub Pages deployment workflow: `.github/workflows/pages.yml`
-- Build workflow: `.github/workflows/build.yml` validates macOS DMG packaging and Linux DEB installer builds through the Makefile.
+- Build workflow: `.github/workflows/build.yml` validates macOS DMG packaging, Linux DEB installer builds, and Android tests/debug APK builds on pull requests and pushes. Tagged builds also produce the Android release APK.
 - Default site language: English
 - Site languages: English, Russian, Spanish, Uzbek, Kazakh, Portuguese, Simplified Chinese
 
@@ -32,7 +32,7 @@ After pushing to `main` or `master`, GitHub Actions publishes the `docs/` direct
 - Detects wired USB HID endpoints for the keyboard.
 - Detects the 2.4G USB receiver.
 - Reads keyboard battery percentage through the 2.4G receiver.
-- Sends a local notification when battery level drops below 20%.
+- Sends a local low-battery notification on macOS and Linux when the level drops below 20%.
 - Controls RGB mode, brightness, speed, direction, colorful animation, and fixed color.
 - Configures response level, sleep timeout, Game Mode, and Command key restore behavior.
 - Syncs the keyboard display clock to local system time.
@@ -42,8 +42,10 @@ After pushing to `main` or `master`, GitHub Actions publishes the `docs/` direct
 - Provides a factory reset flow for display slots and keyboard configuration blocks used by this implementation.
 - Provides a diagnostic endpoint view for HID transport troubleshooting.
 - Supports app language selection with bundled localizations.
-- Ships native macOS and Linux builds with platform-specific integrations.
+- Ships native macOS, Linux, and Android builds with platform-specific integrations.
 - Supports Launch at Login on macOS.
+
+Android provides the same wired display, clock, reset, receiver battery, RGB, performance, and Game Mode controls through the system USB Host API. Desktop-only integrations such as Launch at Login, Linux desktop entries, and low-battery notifications are not available in the Android app.
 
 ## Requirements
 
@@ -94,6 +96,15 @@ sudo udevadm trigger
 ```
 
 Then replug the keyboard and receiver.
+
+### Android
+
+- Android 9 (API 28) or newer.
+- JDK 17 and the Android SDK (Android Studio is optional).
+- USB OTG support on the Android device.
+- Aula F75 Max keyboard and/or 2.4G receiver.
+
+The Android app uses the system USB permission prompt for HID access. Plug the keyboard or receiver into the device with an OTG adapter, open the app, tap **Grant USB access**, and approve the prompt. The project uses its checked-in Gradle 9.3 wrapper and keeps downloaded Gradle state under `android/.gradle/`.
 
 ## Build and Run
 
@@ -168,6 +179,29 @@ Package a legacy tar.gz artifact for development workflows:
 make linux-package
 ```
 
+### Android
+
+Build the Android debug APK and run unit tests:
+
+```sh
+make android-build
+make android-test
+```
+
+The debug APK is written to:
+
+```text
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Install it on a connected Android device with USB debugging enabled:
+
+```sh
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Android APK assets are expected in future GitHub Releases. Use the source build above when an APK is not listed on the release page.
+
 Other commands:
 
 - `make macos-build` builds the macOS SwiftUI app binary in release mode for `arm64`.
@@ -178,6 +212,8 @@ Other commands:
 - `make linux-deb` builds the Debian/Ubuntu installer in `build/`.
 - `make linux-package` packages the Linux binary and udev rule into `build/AulaF75MaxDriverLinux.tar.gz` as a legacy developer artifact.
 - `make linux-run` runs the native Linux GTK app on Linux.
+- `make android-build` builds the Android debug APK through the Android Gradle project.
+- `make android-test` runs the Android JVM unit tests.
 - `make clean` removes `.build/` and `build/`.
 
 The build output is local generated state and should not be committed.
@@ -231,6 +267,15 @@ The app polls battery periodically while the receiver is present. Manual battery
 
 Launch at Login is managed through the macOS ServiceManagement framework. It can be toggled from the app settings panel.
 
+### Android Notes
+
+- The Android build is a separate Gradle project under `android/`.
+- USB Host permission is required before the app can talk to the keyboard or receiver.
+- Use a wired USB-C connection through OTG for display upload, clock sync, and factory reset.
+- Connect the 2.4G receiver through OTG for battery, RGB, response, sleep, and Game Mode controls.
+- The Compose interface supports English, Russian, and the Android system-language option; unsupported system locales fall back to English.
+- Android-specific features like desktop entry integration and Launch at Login are not available on Android.
+
 ## Project Layout
 
 ```text
@@ -238,6 +283,12 @@ Launch at Login is managed through the macOS ServiceManagement framework. It can
 |-- Package.swift
 |-- Info.plist
 |-- Makefile
+|-- android/
+|   |-- app/
+|   |   `-- src/
+|   |       |-- main/
+|   |       `-- test/
+|   `-- gradle/
 |-- Sources/
 |   `-- AulaF75MaxDriver/
 |       |-- AulaF75MaxDriverApp.swift
@@ -276,10 +327,13 @@ Important files:
 - `AulaTypes.swift` contains the current macOS app protocol constants, shared errors, endpoint metadata, and upload progress types.
 - `AulaCore` contains portable packet builders and shared types used by the Linux implementation.
 - `Localization.swift` resolves bundled localized strings and language override behavior.
+- `android/app/src/main/java/com/vitalyart/aulaf75maxdriver/AulaApp.kt` contains the Android Compose interface.
+- `android/app/src/main/java/com/vitalyart/aulaf75maxdriver/AulaBackend.kt` performs Android USB Host device commands.
+- `android/app/src/main/java/com/vitalyart/aulaf75maxdriver/UsbHidSession.kt` manages claimed USB HID interfaces and report transfers.
 
 ## Architecture
 
-The macOS app is a Swift Package executable target using SwiftUI for UI and AppKit/IOKit for macOS integration. The Linux app is a separate native GTK4 executable using hidapi/hidraw.
+The macOS app is a Swift Package executable target using SwiftUI for UI and AppKit/IOKit for macOS integration. The Linux app is a separate native GTK4 executable using hidapi/hidraw. Android is a Kotlin/Compose application that accesses the same supported device identifiers through Android's USB Host API.
 
 High-level flow:
 
@@ -288,6 +342,8 @@ High-level flow:
 3. `AppViewModel` starts HID monitoring, runs device commands, updates logs, and manages background battery polling.
 4. `AulaDevice` and `WirelessAulaDevice` perform low-level HID report operations.
 5. `DisplayEncoder` prepares display payloads before upload.
+
+On Android, `AulaViewModel` coordinates the Compose UI, `AndroidAulaBackend` performs device commands, and `UsbHidSession` claims USB interfaces after the user grants USB Host permission.
 
 Device commands run off the main actor where appropriate, then publish UI state back on the main actor.
 
@@ -319,7 +375,7 @@ Bundled localizations currently include:
 - Portuguese
 - Simplified Chinese
 
-The selected language is stored in `UserDefaults` under `app.language.code`. The `system` option uses the default bundle resolution.
+The macOS and Linux apps bundle all seven localizations. Their selected language is stored in `UserDefaults` under `app.language.code`, and the `system` option uses the default bundle resolution. Android currently bundles English and Russian and stores its language choice in Android shared preferences.
 
 ## Testing
 
@@ -339,6 +395,13 @@ make linux-build
 make linux-run
 ```
 
+Validate the Android Kotlin models and debug APK with JDK 17 and an installed Android SDK:
+
+```sh
+make android-test
+make android-build
+```
+
 Manual validation:
 
 - Launch the packaged app.
@@ -350,6 +413,7 @@ Manual validation:
 - Upload a small test image to a non-critical display slot.
 - Switch app language and verify the UI updates correctly.
 - Toggle Launch at Login if that behavior changed.
+- On Android, connect through OTG, grant the USB permission prompt, and verify wired or receiver actions work from the Compose UI.
 
 If tests are added later, place them under `Tests/` and run them with:
 
@@ -364,7 +428,8 @@ swift test
 - Check the diagnostic endpoint panel.
 - Try reconnecting the keyboard or receiver.
 - Try a direct USB port instead of a hub.
-- Grant Input Monitoring permission and restart the app.
+- On macOS, grant Input Monitoring permission and restart the app.
+- On Android, confirm the phone or tablet supports USB OTG, then tap **Grant USB access** and approve the system prompt.
 - Run `make clean && make macos-app` if testing a fresh local macOS build.
 
 ### Battery is unavailable

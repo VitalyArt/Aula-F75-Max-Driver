@@ -17,6 +17,7 @@ LINUX_DEB ?=
 RELEASE_DIR ?= release
 RELEASE_TAG ?=
 SOURCE_MACOS_DMG ?= $(APP_NAME).dmg
+SOURCE_ANDROID_APK ?=
 SOURCE_LINUX_ARTIFACT ?= AulaF75MaxDriverLinux.tar.gz
 SOURCE_LINUX_DEB ?=
 
@@ -30,10 +31,11 @@ EXECUTABLE := .build/arm64-apple-macosx/$(CONFIGURATION)/$(EXECUTABLE_NAME)
 export APP_NAME RELEASE_BASE_NAME EXECUTABLE_NAME CONFIGURATION BUILD_DIR
 export LINUX_PRODUCT LINUX_ARTIFACT LINUX_DESKTOP_ID LINUX_APPSTREAM_ID
 export LINUX_PACKAGE_NAME LINUX_INSTALL_PREFIX LINUX_DEB
-export RELEASE_DIR RELEASE_TAG SOURCE_MACOS_DMG SOURCE_LINUX_ARTIFACT SOURCE_LINUX_DEB
+export RELEASE_DIR RELEASE_TAG SOURCE_MACOS_DMG SOURCE_ANDROID_APK SOURCE_LINUX_ARTIFACT SOURCE_LINUX_DEB
 export APP_DIR DMG_DIR DMG_PATH DMG_RW_PATH DMG_STYLE_SCRIPT EXECUTABLE
 
 .PHONY: help all build app dmg run
+.PHONY: android-build android-test
 .PHONY: macos-build macos-app macos-dmg macos-run
 .PHONY: linux-check-deps linux-install-udev linux-build linux-package linux-deb linux-run
 .PHONY: release-package clean
@@ -43,3 +45,9 @@ include make/macos.mk
 include make/linux.mk
 include make/release.mk
 include make/clean.mk
+
+android-build:
+	@bash android/gradlew assembleDebug
+
+android-test:
+	@bash android/gradlew test

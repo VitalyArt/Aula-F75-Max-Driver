@@ -69,11 +69,55 @@ jobs:
           path: "build/aula-f75-max-driver-${{ github.sha }}.deb"
           if-no-files-found: error
 
+  android-build:
+    name: Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Test Android app
+        run: make android-test
+
+      - name: Build Android debug APK
+        run: make android-build
+
+      - name: Upload Android debug artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: aula-f75-max-driver-android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Build Android release APK
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash android/gradlew assembleRelease
+
+      - name: Upload Android release artifact
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: aula-f75-max-driver-android-apk
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
+
   release:
     if: startsWith(github.ref, 'refs/tags/')
     needs:
       - macos-dmg
       - linux-build
+      - android-build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -94,8 +138,14 @@ jobs:
           name: aula-f75-max-driver-linux
           path: release
 
+      - name: Download Android artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: aula-f75-max-driver-android-apk
+          path: release
+
       - name: Prepare release assets
-        run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_LINUX_DEB="aula-f75-max-driver-${GITHUB_SHA}.deb"
+        run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_ANDROID_APK="app-release-unsigned.apk" SOURCE_LINUX_DEB="aula-f75-max-driver-${GITHUB_SHA}.deb"
 
       - name: Create or update GitHub release
         env:
@@ -105,15 +155,30 @@ jobs:
           set -euo pipefail
           safe_tag="${GITHUB_REF_NAME//\//-}"
           release_version="v${safe_tag#v}"
+          is_rc_tag=false
+          release_flags=()
+
+          if [[ "${GITHUB_REF_NAME}" =~ (^|.*/)v?[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+$ ]]; then
+            is_rc_tag=true
+            release_flags+=(--prerelease --latest=false)
+          fi
+
           assets=(
             "release/${RELEASE_BASE_NAME}-${release_version}.dmg"
+            "release/${RELEASE_BASE_NAME}-${release_version}.apk"
             release/${RELEASE_BASE_NAME}-${release_version}_*.deb
           )
 
           if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            if $is_rc_tag; then
+              release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" --jq '.id')"
+              gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/${release_id}" \
+                -f prerelease=true \
+                -f make_latest=false >/dev/null
+            fi
             gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
           else
-            gh release create "${GITHUB_REF_NAME}" "${assets[@]}" \
+            gh release create "${GITHUB_REF_NAME}" "${assets[@]}" "${release_flags[@]}" \
               --title "${GITHUB_REF_NAME}" \
               --generate-notes
           fi
