@@ -29,16 +29,24 @@ enum L10n {
               languageCode != defaultLanguageCode,
               let path = lprojPath(for: languageCode),
               let bundle = Bundle(path: path) else {
-            return Bundle.module
+            return resourceBundle
         }
 
         return bundle
     }
 
     private static func lprojPath(for languageCode: String) -> String? {
-        Bundle.module.path(forResource: languageCode, ofType: "lproj")
-            ?? Bundle.module.path(forResource: languageCode.lowercased(), ofType: "lproj")
+        resourceBundle.path(forResource: languageCode, ofType: "lproj")
+            ?? resourceBundle.path(forResource: languageCode.lowercased(), ofType: "lproj")
     }
+
+    private static let resourceBundle: Bundle = {
+        if Bundle.main.bundleURL.pathExtension == "app" {
+            return Bundle.main
+        }
+
+        return Bundle.module
+    }()
 
     private static func normalizedLanguageCode(_ languageCode: String?) -> String {
         guard let languageCode, !languageCode.isEmpty else {

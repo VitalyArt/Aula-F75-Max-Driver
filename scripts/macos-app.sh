@@ -9,7 +9,7 @@ mkdir -p "${APP_DIR}/Contents/MacOS"
 mkdir -p "${APP_DIR}/Contents/Resources"
 cp "${EXECUTABLE}" "${APP_DIR}/Contents/MacOS/${APP_NAME}"
 cp Info.plist "${APP_DIR}/Contents/Info.plist"
-cp "Sources/AulaF75MaxDriver/Resources/AppIcon.icns" "${APP_DIR}/Contents/Resources/AppIcon.icns"
+cp -R "Sources/AulaF75MaxDriver/Resources/." "${APP_DIR}/Contents/Resources/"
 
 # Clear any inherited quarantine metadata and re-sign the final app bundle.
 # This keeps Gatekeeper from treating the copied bundle as a damaged executable.
