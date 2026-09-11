@@ -14,8 +14,10 @@ final class BatteryNotificationService {
         guard !didRequestAuthorization else { return }
         didRequestAuthorization = true
 
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, error in
-            if let error {
+        Task {
+            do {
+                _ = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+            } catch {
                 NSLog("Battery notification authorization failed: \(error.localizedDescription)")
             }
         }
