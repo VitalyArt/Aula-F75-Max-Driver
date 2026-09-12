@@ -15,6 +15,22 @@ class AulaModelsTest {
     }
 
     @Test
+    fun `rgb report sends color channels in red green blue order`() {
+        val report = AulaWirelessReports.rgbLEDReport(
+            mode = 1,
+            brightness = 5,
+            speed = 3,
+            direction = 0,
+            colorful = 0,
+            color = 0x123456
+        )
+
+        assertEquals(0x12.toByte(), report[4])
+        assertEquals(0x34.toByte(), report[5])
+        assertEquals(0x56.toByte(), report[6])
+    }
+
+    @Test
     fun `battery query uses expected header`() {
         val payload = AulaWirelessReports.batteryQuery(includeReportID = false, length = 64)
 

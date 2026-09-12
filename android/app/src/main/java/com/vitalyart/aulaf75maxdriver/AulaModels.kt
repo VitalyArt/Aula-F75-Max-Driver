@@ -169,9 +169,9 @@ object AulaWirelessReports {
         this[2] = 0x00.toByte()
         this[3] = mode.toByte()
         if (mode != 0) {
-            this[4] = (color and 0xff).toByte()
+            this[4] = ((color shr 16) and 0xff).toByte()
             this[5] = ((color shr 8) and 0xff).toByte()
-            this[6] = ((color shr 16) and 0xff).toByte()
+            this[6] = (color and 0xff).toByte()
             this[11] = colorful.toByte()
             this[12] = brightness.toByte()
             this[13] = speed.toByte()
