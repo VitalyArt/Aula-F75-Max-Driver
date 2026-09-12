@@ -304,9 +304,9 @@ final class WirelessAulaDevice {
         body = [UInt8](repeating: 0, count: 64)
         body[0] = UInt8(mode)
         if mode != 0 {
-            body[1] = UInt8(color & 0xff)
+            body[1] = UInt8((color >> 16) & 0xff)
             body[2] = UInt8((color >> 8) & 0xff)
-            body[3] = UInt8((color >> 16) & 0xff)
+            body[3] = UInt8(color & 0xff)
             body[8] = UInt8(colorful)
             body[9] = UInt8(brightness)
             body[10] = UInt8(speed)
@@ -379,9 +379,9 @@ final class WirelessAulaDevice {
         report[2] = 0x00
         report[3] = UInt8(mode)
         if mode != 0 {
-            report[4] = UInt8(color & 0xff)
+            report[4] = UInt8((color >> 16) & 0xff)
             report[5] = UInt8((color >> 8) & 0xff)
-            report[6] = UInt8((color >> 16) & 0xff)
+            report[6] = UInt8(color & 0xff)
             report[11] = UInt8(colorful)
             report[12] = UInt8(brightness)
             report[13] = UInt8(speed)
