@@ -102,14 +102,36 @@ jobs:
 
       - name: Build Android release APK
         if: startsWith(github.ref, 'refs/tags/')
-        run: bash android/gradlew assembleRelease
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          : "${ANDROID_KEYSTORE_BASE64:?ANDROID_RELEASE_KEYSTORE_BASE64 secret is required}"
+          : "${ANDROID_KEYSTORE_PASSWORD:?ANDROID_RELEASE_KEYSTORE_PASSWORD secret is required}"
+          : "${ANDROID_KEY_ALIAS:?ANDROID_RELEASE_KEY_ALIAS secret is required}"
+          : "${ANDROID_KEY_PASSWORD:?ANDROID_RELEASE_KEY_PASSWORD secret is required}"
+
+          export ANDROID_KEYSTORE_PATH="${RUNNER_TEMP}/aula-f75-max-release.jks"
+          printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "${ANDROID_KEYSTORE_PATH}"
+          bash android/gradlew assembleRelease
+
+          apk_path="android/app/build/outputs/apk/release/app-release.apk"
+          "${ANDROID_HOME}/build-tools/34.0.0/apksigner" verify \
+            --verbose \
+            --print-certs \
+            "${apk_path}"
 
       - name: Upload Android release artifact
         if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: aula-f75-max-driver-android-apk
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
   release:
@@ -145,7 +167,7 @@ jobs:
           path: release
 
       - name: Prepare release assets
-        run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_ANDROID_APK="app-release-unsigned.apk" SOURCE_LINUX_DEB="aula-f75-max-driver-${GITHUB_SHA}.deb"
+        run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_ANDROID_APK="app-release.apk" SOURCE_LINUX_DEB="aula-f75-max-driver-${GITHUB_SHA}.deb"
 
       - name: Create or update GitHub release
         env:
