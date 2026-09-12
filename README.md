@@ -200,7 +200,14 @@ Install it on a connected Android device with USB debugging enabled:
 adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Android APK assets are expected in future GitHub Releases. Use the source build above when an APK is not listed on the release page.
+Tagged GitHub Actions builds sign the release APK with a persistent release key. Configure these repository secrets before creating a tag:
+
+- `ANDROID_RELEASE_KEYSTORE_BASE64`: the base64-encoded JKS or PKCS12 keystore.
+- `ANDROID_RELEASE_KEYSTORE_PASSWORD`: the keystore password.
+- `ANDROID_RELEASE_KEY_ALIAS`: the signing key alias.
+- `ANDROID_RELEASE_KEY_PASSWORD`: the signing key password.
+
+Keep an offline backup of the keystore and its passwords. Every update must use the same signing key as the installed app. The workflow stops before publishing if a signing secret is absent or if `apksigner` cannot verify the resulting APK.
 
 Other commands:
 
