@@ -39,3 +39,16 @@ hdiutil convert "${DMG_RW_PATH}" \
     -imagekey zlib-level=9 \
     -o "${DMG_PATH}"
 rm -f "${DMG_RW_PATH}"
+
+if [ -n "${NOTARYTOOL_PROFILE:-}" ]; then
+    if ! command -v xcrun >/dev/null 2>&1; then
+        printf '%s\n' 'xcrun is required for notarization but was not found'
+        exit 1
+    fi
+
+    xcrun notarytool submit "${DMG_PATH}" \
+        --keychain-profile "${NOTARYTOOL_PROFILE}" \
+        --wait \
+        --timeout "${NOTARYTOOL_TIMEOUT}"
+    xcrun stapler staple "${DMG_PATH}"
+fi
