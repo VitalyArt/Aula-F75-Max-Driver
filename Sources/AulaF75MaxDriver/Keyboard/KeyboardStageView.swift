@@ -3,7 +3,7 @@ import SwiftUI
 /// The Aula F75 Max drawn in code, with its RGB under-glow animated live.
 ///
 /// Drawing happens in one `Canvas` (fast, no view per key) inside a
-/// `TimelineView` that redraws about 30 times a second. Each key's glow colour
+/// `TimelineView` that redraws 20 times a second. Each key's glow colour
 /// comes from `LightingEffectRenderer`, so the preview follows whatever
 /// settings it is given — before anything is sent to the keyboard.
 ///
@@ -19,14 +19,36 @@ struct KeyboardStageView: View {
     @State private var isWindowVisible = true
 
     private let layout = KeyboardLayout.f75Max
+    /// Lighting effects are slow, smooth gradients, so 20 redraws a second
+    /// looks the same as 30 and costs a third less work.
+    private static let framesPerSecond: Double = 20
     /// Room around the keys for the case, in key units.
     private let padding = CGSize(width: 0.55, height: 0.5)
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !isAnimating || reduceMotion || !isVisible || !isWindowVisible)) { timeline in
+        // Four stacked layers. Only the two that change with the lighting
+        // effect redraw every frame; the case and the caps (with their 80 text
+        // legends, the most expensive part to draw) are drawn once.
+        ZStack {
             Canvas { context, size in
-                let time = timeline.date.timeIntervalSinceReferenceDate
-                draw(in: &context, size: size, time: time)
+                let geometry = StageGeometry(size: size, caseSize: caseSize, padding: padding)
+                drawCase(in: &context, origin: geometry.origin, unit: geometry.unit)
+            }
+            animatedLayer { context, geometry, glow in
+                drawUnderGlow(in: &context, glow: glow, unit: geometry.unit, toCanvas: geometry.toCanvas)
+            }
+            // Redrawn once a minute so the clock on the little screen stays right.
+            TimelineView(.everyMinute) { _ in
+                Canvas { context, size in
+                    let geometry = StageGeometry(size: size, caseSize: caseSize, padding: padding)
+                    drawCaps(in: &context, unit: geometry.unit, toCanvas: geometry.toCanvas)
+                    drawScreen(in: &context, unit: geometry.unit, toCanvas: geometry.toCanvas)
+                    drawKnob(in: &context, unit: geometry.unit, toCanvas: geometry.toCanvas)
+                }
+            }
+            animatedLayer { context, geometry, glow in
+                drawCapRims(in: &context, glow: glow, unit: geometry.unit, toCanvas: geometry.toCanvas)
+                drawAccents(in: &context, glow: glow, unit: geometry.unit, toCanvas: geometry.toCanvas)
             }
         }
         .aspectRatio(caseSize.width / caseSize.height, contentMode: .fit)
@@ -37,36 +59,31 @@ struct KeyboardStageView: View {
         .accessibilityLabel(L10n.text("Aula F75 Max keyboard preview"))
     }
 
+    private var isPaused: Bool {
+        !isAnimating || reduceMotion || !isVisible || !isWindowVisible
+    }
+
+    /// A canvas that redraws with the lighting animation and is handed the
+    /// current colour of every key.
+    private func animatedLayer(
+        _ draw: @escaping (inout GraphicsContext, StageGeometry, [String: Color]) -> Void
+    ) -> some View {
+        TimelineView(.animation(minimumInterval: 1.0 / Self.framesPerSecond, paused: isPaused)) { timeline in
+            Canvas { context, size in
+                let geometry = StageGeometry(size: size, caseSize: caseSize, padding: padding)
+                draw(&context, geometry, glowColors(time: timeline.date.timeIntervalSinceReferenceDate))
+            }
+            // Render this layer off-screen on the GPU (Metal) instead of
+            // rasterising it on the CPU every frame.
+            .drawingGroup()
+        }
+    }
+
     private var caseSize: CGSize {
         CGSize(width: layout.size.width + padding.width * 2, height: layout.size.height + padding.height * 2)
     }
 
     // MARK: - Drawing
-
-    private func draw(in context: inout GraphicsContext, size: CGSize, time: TimeInterval) {
-        let unit = min(size.width / caseSize.width, size.height / caseSize.height)
-        let origin = CGPoint(
-            x: (size.width - caseSize.width * unit) / 2,
-            y: (size.height - caseSize.height * unit) / 2
-        )
-        /// Converts a rectangle in key units to points in the canvas.
-        func toCanvas(_ rect: CGRect) -> CGRect {
-            CGRect(
-                x: origin.x + (rect.minX + padding.width) * unit,
-                y: origin.y + (rect.minY + padding.height) * unit,
-                width: rect.width * unit,
-                height: rect.height * unit
-            )
-        }
-
-        let glow = glowColors(time: time)
-        drawCase(in: &context, origin: origin, unit: unit)
-        drawUnderGlow(in: &context, glow: glow, unit: unit, toCanvas: toCanvas)
-        drawCaps(in: &context, glow: glow, unit: unit, toCanvas: toCanvas)
-        drawScreen(in: &context, unit: unit, toCanvas: toCanvas)
-        drawKnob(in: &context, unit: unit, toCanvas: toCanvas)
-        drawAccents(in: &context, glow: glow, unit: unit, toCanvas: toCanvas)
-    }
 
     /// One colour per key id, from the effect renderer.
     private func glowColors(time: TimeInterval) -> [String: Color] {
@@ -107,16 +124,24 @@ struct KeyboardStageView: View {
     /// The RGB light: coloured shapes under each key, blurred so the colour
     /// bleeds onto the plate around the caps like the real keyboard.
     private func drawUnderGlow(in context: inout GraphicsContext, glow: [String: Color], unit: CGFloat, toCanvas: (CGRect) -> CGRect) {
-        context.drawLayer { layer in
-            layer.addFilter(.blur(radius: unit * 0.22))
-            for key in layout.keys {
-                let rect = toCanvas(key.frame).insetBy(dx: unit * 0.02, dy: unit * 0.02)
-                layer.fill(Path(roundedRect: rect, cornerRadius: unit * 0.18), with: .color(glow[key.id, default: .clear]))
+        // Each key's glow is a pre-blurred white image (made once, see
+        // `GlowSprites`) tinted with the key's colour. Blurring the whole
+        // keyboard again on every frame was the main CPU cost of this view.
+        var resolvedByWidth: [CGFloat: GraphicsContext.ResolvedImage] = [:]
+        let margin = GlowSprites.marginUnits * unit
+
+        for key in layout.keys {
+            let width = key.frame.width
+            if resolvedByWidth[width] == nil, let sprite = GlowSprites.image(forKeyWidth: width) {
+                resolvedByWidth[width] = context.resolve(Image(decorative: sprite, scale: 1).renderingMode(.template))
             }
+            guard var image = resolvedByWidth[width] else { continue }
+            image.shading = .color(glow[key.id, default: .clear])
+            context.draw(image, in: toCanvas(key.frame).insetBy(dx: -margin, dy: -margin))
         }
     }
 
-    private func drawCaps(in context: inout GraphicsContext, glow: [String: Color], unit: CGFloat, toCanvas: (CGRect) -> CGRect) {
+    private func drawCaps(in context: inout GraphicsContext, unit: CGFloat, toCanvas: (CGRect) -> CGRect) {
         let showLegends = unit >= 24
 
         for key in layout.keys {
@@ -148,15 +173,22 @@ struct KeyboardStageView: View {
                 )
             )
 
-            // Faint coloured rim where the under-glow catches the cap edge.
-            context.stroke(capShape, with: .color(glow[key.id, default: .clear].opacity(0.45)), lineWidth: max(0.5, unit * 0.03))
-
             if showLegends, !key.label.isEmpty {
                 let legend = Text(key.label)
                     .font(.system(size: unit * 0.2, weight: .medium))
-                    .foregroundColor(key.tone == .light ? Color(white: 0.25) : glow[key.id, default: .white].opacity(0.85))
+                    .foregroundColor(key.tone == .light ? Color(white: 0.25) : Color(white: 0.62))
                 context.draw(legend, at: CGPoint(x: top.minX + unit * 0.08, y: top.maxY - unit * 0.06), anchor: .bottomLeading)
             }
+        }
+    }
+
+    /// Faint coloured rim where the under-glow catches each cap's edge.
+    /// Drawn in an animated layer on top of the static caps.
+    private func drawCapRims(in context: inout GraphicsContext, glow: [String: Color], unit: CGFloat, toCanvas: (CGRect) -> CGRect) {
+        for key in layout.keys {
+            let cap = toCanvas(key.frame).insetBy(dx: unit * 0.075, dy: unit * 0.075)
+            let capShape = Path(roundedRect: cap, cornerRadius: unit * 0.13, style: .continuous)
+            context.stroke(capShape, with: .color(glow[key.id, default: .clear].opacity(0.45)), lineWidth: max(0.5, unit * 0.03))
         }
     }
 
@@ -255,6 +287,89 @@ struct KeyboardStageView: View {
             let dot = CGRect(x: cell.minX - unit * 0.3 - radius, y: cell.midY - radius, width: radius * 2, height: radius * 2)
             context.fill(Path(ellipseIn: dot), with: .color(glow["Caps", default: .blue]))
         }
+    }
+}
+
+/// Where the keyboard sits inside a canvas of a given size: the scale of one
+/// key unit in points, and how to turn key-unit rectangles into points.
+struct StageGeometry {
+    let unit: CGFloat
+    let origin: CGPoint
+    let padding: CGSize
+
+    init(size: CGSize, caseSize: CGSize, padding: CGSize) {
+        unit = min(size.width / caseSize.width, size.height / caseSize.height)
+        origin = CGPoint(
+            x: (size.width - caseSize.width * unit) / 2,
+            y: (size.height - caseSize.height * unit) / 2
+        )
+        self.padding = padding
+    }
+
+    func toCanvas(_ rect: CGRect) -> CGRect {
+        CGRect(
+            x: origin.x + (rect.minX + padding.width) * unit,
+            y: origin.y + (rect.minY + padding.height) * unit,
+            width: rect.width * unit,
+            height: rect.height * unit
+        )
+    }
+}
+
+/// Soft white glow shapes, pre-blurred once per key width and reused on every
+/// frame. Drawing them tinted is much cheaper than blurring live.
+@MainActor
+enum GlowSprites {
+    /// Extra room around the key for the glow to spread into, in key units.
+    static let marginUnits: CGFloat = 0.45
+    /// Resolution the sprites are rendered at. The view scales them to fit,
+    /// and a blur has no fine detail, so a modest size is enough.
+    private static let pixelsPerUnit: CGFloat = 48
+    private static var cache: [CGFloat: CGImage] = [:]
+
+    static func image(forKeyWidth widthUnits: CGFloat) -> CGImage? {
+        if let cached = cache[widthUnits] {
+            return cached
+        }
+        let image = render(widthUnits: widthUnits)
+        cache[widthUnits] = image
+        return image
+    }
+
+    private static func render(widthUnits: CGFloat) -> CGImage? {
+        let width = Int(((widthUnits + marginUnits * 2) * pixelsPerUnit).rounded())
+        let height = Int(((1 + marginUnits * 2) * pixelsPerUnit).rounded())
+        guard let context = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            return nil
+        }
+
+        // Classic trick for a blurred shape: draw the shape off the canvas and
+        // let only its blurred shadow fall onto the canvas.
+        let inset = 0.02 * pixelsPerUnit
+        let keyRect = CGRect(
+            x: marginUnits * pixelsPerUnit + inset,
+            y: marginUnits * pixelsPerUnit + inset,
+            width: widthUnits * pixelsPerUnit - inset * 2,
+            height: pixelsPerUnit - inset * 2
+        )
+        let offscreen = keyRect.offsetBy(dx: CGFloat(width), dy: 0)
+        context.setShadow(
+            offset: CGSize(width: -CGFloat(width), height: 0),
+            blur: 0.22 * pixelsPerUnit * 2,
+            color: CGColor(gray: 1, alpha: 1)
+        )
+        context.addPath(CGPath(roundedRect: offscreen, cornerWidth: 0.18 * pixelsPerUnit, cornerHeight: 0.18 * pixelsPerUnit, transform: nil))
+        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.fillPath()
+        return context.makeImage()
     }
 }
 
