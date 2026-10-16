@@ -362,6 +362,19 @@ struct ContentView: View {
                     Spacer()
 
                     Button {
+                        model.toggleInputMonitoring()
+                    } label: {
+                        Label(
+                            model.isInputMonitoring ? L10n.text("Stop Input Monitor") : L10n.text("Start Input Monitor"),
+                            systemImage: model.isInputMonitoring ? "stop.circle" : "waveform.path"
+                        )
+                    }
+                    .controlSize(.small)
+                    .tint(model.isInputMonitoring ? .red : nil)
+                    .disabled(model.isWorking)
+                    .help(L10n.text("Logs raw HID input reports (key presses, knob clicks) to the Operation Log below."))
+
+                    Button {
                         model.manualRefresh()
                     } label: {
                         Label(L10n.text("Rescan"), systemImage: "arrow.clockwise")

@@ -178,3 +178,10 @@
 "Direction %d" = "Direction %d";
 "Level %d" = "Level %d";
 "Value %d" = "Value %d";
+"Start Input Monitor" = "Start Input Monitor";
+"Stop Input Monitor" = "Stop Input Monitor";
+"Logs raw HID input reports (key presses, knob clicks) to the Operation Log below." = "Logs raw HID input reports (key presses, knob clicks) to the Operation Log below.";
+"Input monitor started: %d/%d interface(s) opened. Press keys or the knob to see raw reports below." = "Input monitor started: %d/%d interface(s) opened. Press keys or the knob to see raw reports below.";
+"Input monitor stopped." = "Input monitor stopped.";
+"Input monitor: failed to open %@ (IOReturn 0x%08x)." = "Input monitor: failed to open %@ (IOReturn 0x%08x).";
+"Input: %@ rid=%d %@" = "Input: %@ rid=%d %@";

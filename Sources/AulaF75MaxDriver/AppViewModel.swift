@@ -45,10 +45,12 @@ final class AppViewModel: ObservableObject {
     @Published var gameModeEnabled = false
     @Published var launchAtLoginEnabled = LaunchAtLogin.isEnabled
     @Published var selectedLanguageCode: String
+    @Published var isInputMonitoring = false
 
     private let batteryRefreshIntervalNanoseconds: UInt64 = 300_000_000_000
     private let batteryNotificationService = BatteryNotificationService.shared
     private var deviceMonitor: HIDDeviceMonitor?
+    private var inputMonitor: HIDInputMonitor?
     private var batteryRefreshTask: Task<Void, Never>?
     private var lastEndpointSnapshot: DeviceEndpointSnapshot?
 
@@ -132,7 +134,34 @@ final class AppViewModel: ObservableObject {
     func stopMonitoring() {
         deviceMonitor?.stop()
         deviceMonitor = nil
+        inputMonitor?.stop()
+        inputMonitor = nil
+        isInputMonitoring = false
         stopBatteryRefreshTimer()
+    }
+
+    func toggleInputMonitoring() {
+        if isInputMonitoring {
+            inputMonitor?.stop()
+            inputMonitor = nil
+            isInputMonitoring = false
+            appendLog(L10n.text("Input monitor stopped."))
+            return
+        }
+
+        let monitor = HIDInputMonitor()
+        monitor.onReport = { [weak self] report in
+            guard let self else { return }
+            self.appendLog(self.formatInputReport(report))
+        }
+        monitor.onOpenFailure = { [weak self] label, result in
+            self?.appendLog(L10n.format("Input monitor: failed to open %@ (IOReturn 0x%08x).", L10n.text(label), UInt32(bitPattern: result)))
+        }
+
+        let (opened, total) = monitor.start()
+        inputMonitor = monitor
+        isInputMonitoring = true
+        appendLog(L10n.format("Input monitor started: %d/%d interface(s) opened. Press keys or the knob to see raw reports below.", opened, total))
     }
 
     func setLanguage(_ languageCode: String) {
@@ -467,6 +496,17 @@ final class AppViewModel: ObservableObject {
         if logLines.count > 200 {
             logLines.removeFirst(logLines.count - 200)
         }
+    }
+
+    private func formatInputReport(_ report: HIDInputMonitor.Report) -> String {
+        let limit = 32
+        var hex = report.bytes.isEmpty
+            ? "(empty)"
+            : report.bytes.prefix(limit).map { String(format: "%02x", $0) }.joined(separator: " ")
+        if report.bytes.count > limit {
+            hex += " …(\(report.bytes.count)B)"
+        }
+        return L10n.format("Input: %@ rid=%d %@", L10n.text(report.deviceLabel), report.reportID, hex)
     }
 }
 
