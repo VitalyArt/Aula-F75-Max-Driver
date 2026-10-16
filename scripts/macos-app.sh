@@ -18,5 +18,22 @@ if command -v xattr >/dev/null 2>&1; then
 fi
 
 if command -v codesign >/dev/null 2>&1; then
-    codesign --force --deep --sign - --timestamp=none "${APP_DIR}"
+    # Prefer a stable local signing identity if one is installed (see
+    # scripts/macos-setup-local-signing.sh), so macOS privacy grants such as
+    # Input Monitoring survive rebuilds instead of resetting every time, as
+    # they do with the content-hashed ad-hoc identity ("-"). Falls back to
+    # ad-hoc signing when no such identity exists, e.g. in CI.
+    codesign_identity="${CODESIGN_IDENTITY:-}"
+    if [[ -z "${codesign_identity}" ]]; then
+        # Deliberately omit -v here: it filters to identities macOS's trust
+        # policy fully validates, which excludes our self-signed local cert
+        # (it shows CSSMERR_TP_NOT_TRUSTED) even though codesign accepts it
+        # fine for local signing.
+        if security find-identity -p codesigning 2>/dev/null | grep -q "Aula F75 Max Driver Local Dev"; then
+            codesign_identity="Aula F75 Max Driver Local Dev"
+        else
+            codesign_identity="-"
+        fi
+    fi
+    codesign --force --deep --sign "${codesign_identity}" --timestamp=none "${APP_DIR}"
 fi
