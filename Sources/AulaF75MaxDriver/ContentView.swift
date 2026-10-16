@@ -203,6 +203,54 @@ struct ContentView: View {
                     }
                     .disabled(model.isWorking || !model.isWiredDevicePresent)
                 }
+
+                SectionDivider()
+
+                VStack(alignment: .leading, spacing: 10) {
+                    ActionHeader(
+                        title: L10n.text("Keymap inspector"),
+                        detail: L10n.text("Read-only dump of the keymap configuration block for protocol research. Does not modify the keyboard."),
+                        systemImage: "doc.text.magnifyingglass"
+                    )
+
+                    Button {
+                        model.dumpKeymap()
+                    } label: {
+                        Label(L10n.text("Dump Keymap Pages"), systemImage: "arrow.down.doc")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .disabled(model.isWorking || !model.isWiredDevicePresent)
+                }
+
+                SectionDivider()
+
+                VStack(alignment: .leading, spacing: 10) {
+                    ActionHeader(
+                        title: L10n.text("Keymap byte experiment"),
+                        detail: L10n.text("Writes to the keyboard: sets one byte in one page, zeros the rest of all 9 pages, to help localize the knob's byte precisely. Factory Reset recovers if needed."),
+                        systemImage: "exclamationmark.triangle"
+                    )
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(spacing: 14) {
+                            Stepper("\(L10n.text("Page")) \(model.keymapTestPageIndex)", value: $model.keymapTestPageIndex, in: 0...8)
+                            Stepper("\(L10n.text("Byte")) \(model.keymapTestByteOffset)", value: $model.keymapTestByteOffset, in: 0...63)
+                        }
+                        HStack(spacing: 14) {
+                            Stepper("\(L10n.text("Length")) \(model.keymapTestLength)", value: $model.keymapTestLength, in: 1...64)
+                            Stepper("\(L10n.text("Value")) 0x\(String(format: "%02X", model.keymapTestValue))", value: $model.keymapTestValue, in: 0...255)
+                        }
+                    }
+                    .foregroundStyle(.white.opacity(0.88))
+
+                    Button(role: .destructive) {
+                        model.testKeymapByteWrite()
+                    } label: {
+                        Label(L10n.text("Write Test Byte"), systemImage: "pencil.and.outline")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .disabled(model.isWorking || !model.isWiredDevicePresent)
+                }
             }
         }
     }

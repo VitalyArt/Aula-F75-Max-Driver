@@ -185,3 +185,17 @@
 "Input monitor stopped." = "Input monitor stopped.";
 "Input monitor: failed to open %@ (IOReturn 0x%08x)." = "Input monitor: failed to open %@ (IOReturn 0x%08x).";
 "Input: %@ rid=%d %@" = "Input: %@ rid=%d %@";
+"Keymap inspector" = "Keymap inspector";
+"Read-only dump of the keymap configuration block for protocol research. Does not modify the keyboard." = "Read-only dump of the keymap configuration block for protocol research. Does not modify the keyboard.";
+"Dump Keymap Pages" = "Dump Keymap Pages";
+"Reading keymap pages (read-only, no write)..." = "Reading keymap pages (read-only, no write)...";
+"Keymap dump (%d pages):\n%@" = "Keymap dump (%d pages):\n%@";
+"Keymap byte experiment" = "Keymap byte experiment";
+"Writes to the keyboard: sets one byte in one page, zeros the rest of all 9 pages, to help localize the knob's byte precisely. Factory Reset recovers if needed." = "Writes to the keyboard: sets one byte in one page, zeros the rest of all 9 pages, to help localize the knob's byte precisely. Factory Reset recovers if needed.";
+"Page" = "Page";
+"Byte" = "Byte";
+"Length" = "Length";
+"Value" = "Value";
+"Write Test Byte" = "Write Test Byte";
+"Writing keymap page %d bytes %d-%d = 0x%02x (rest of all 9 pages zero)..." = "Writing keymap page %d bytes %d-%d = 0x%02x (rest of all 9 pages zero)...";
+"Wrote page %d bytes %d-%d = 0x%02x. Click the knob now and check the log above." = "Wrote page %d bytes %d-%d = 0x%02x. Click the knob now and check the log above.";

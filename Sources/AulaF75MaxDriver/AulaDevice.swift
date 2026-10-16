@@ -218,19 +218,19 @@ final class AulaDevice {
     // Observed the evening of 2026-08-24: this device intermittently fails
     // GET_REPORT (and occasionally SET_REPORT) with timeout-flavored
     // IOReturn codes (0xe00002d6, 0x800020b, 0x8000206) under sustained
-    // command traffic, including mid-factoryReset.
+    // command traffic, including mid-factoryReset and mid-keymap-write.
     // 0xe00002d6 specifically was already root-caused in an earlier session
     // (see project memory "factory-reset-reboot-fix"): the 0x04/0xf0 "apply"
     // command makes the keyboard reboot mid-sequence, dropping the open HID
     // connection out from under any commands still in flight on it - normal
     // single-shot operations don't hit this because each calls
-    // AulaDevice.connect() fresh, but factoryReset sends several 0x04/0xf0
-    // commands within one long-lived connection. That
+    // AulaDevice.connect() fresh, but factoryReset and writeKeymapPages both
+    // send several 0x04/0xf0 commands within one long-lived connection. That
     // session fixed it with an explicit reconnect (close + rematch + reopen)
     // after a reboot-flavored failure. This is a simpler same-handle retry
     // instead - empirically it got every operation through on this same
-    // hardware tonight, including full factoryReset, but if it ever proves
-    // insufficient the reconnect approach is
+    // hardware tonight, including full factoryReset and repeated keymap
+    // writes, but if it ever proves insufficient the reconnect approach is
     // the known-correct fix, not more retries.
     @discardableResult
     private func commandExchange(_ packet: [UInt8]) throws -> [UInt8] {
@@ -298,10 +298,70 @@ final class AulaDevice {
         return Array(response.prefix(responseLength))
     }
 
+    /// Read-only probe: selects the keymap configuration region (same 0x11
+    /// sub-command factoryReset uses to write it) and reads back each page
+    /// via GET_REPORT instead of writing zero pages. Never sends page data,
+    /// so it should not alter stored configuration. Existence and semantics
+    /// of the per-page read cursor are not documented anywhere - this is
+    /// exploratory, used to find the knob's byte before attempting a write.
+    @discardableResult
+    func inspectKeymapPages() throws -> [[UInt8]] {
+        try commandExchange(Self.packet(0x04, 0x18))
+
+        var selectKeymap = Self.packet(0x04, 0x11)
+        selectKeymap[8] = 0x09
+        let selectResponse = try commandExchange(selectKeymap)
+
+        var pages: [[UInt8]] = [selectResponse]
+        defer {
+            // Always close the transaction we opened above, even if a page
+            // read below fails partway through - an unclosed 0x18/0x11
+            // bracket should not be left hanging on the device.
+            _ = try? commandExchange(Self.packet(0x04, 0x02))
+        }
+
+        for _ in 0..<8 {
+            Thread.sleep(forTimeInterval: 0.04)
+            guard let page = try? Self.getFeatureReport(device: commandDevice) else {
+                break
+            }
+            pages.append(page)
+        }
+
+        return pages
+    }
+
+    /// Writes a full 9-page keymap image, mirroring the exact transaction
+    /// factoryReset uses for this region (0x18 begin -> 0x11 select 9 pages
+    /// -> 9 page writes -> 0x02 end -> 0xf0 finish) but with caller-supplied
+    /// content instead of always-zero pages. Exploratory: used to localize
+    /// which byte(s) control the knob's push function. Writing all-zero
+    /// pages reproduces exactly what factoryReset already does for this
+    /// region, so that remains the known-safe fallback if a written pattern
+    /// causes unexpected behavior.
+    func writeKeymapPages(_ pages: [[UInt8]]) throws {
+        precondition(pages.count == 9 && pages.allSatisfy { $0.count == AulaConstants.commandLength })
+
+        try commandExchange(Self.packet(0x04, 0x18))
+
+        var keymap = Self.packet(0x04, 0x11)
+        keymap[8] = 0x09
+        try commandExchange(keymap)
+
+        for page in pages.dropLast() {
+            try Self.setReportWithRetry(device: commandDevice, bytes: page, operation: "keymap page")
+            Thread.sleep(forTimeInterval: 0.04)
+        }
+        try commandExchange(pages[8])
+
+        try commandExchange(Self.packet(0x04, 0x02))
+        try commandExchange(Self.packet(0x04, 0xf0))
+    }
+
     /// setReport with a few retries on transient failures - see the note on
     /// commandExchange. Used for the raw (unverified) page writes in
-    /// sendZeroPages, which call setReport directly rather than through
-    /// commandExchange.
+    /// sendZeroPages and the exploratory keymap write path, which call
+    /// setReport directly rather than through commandExchange.
     private static func setReportWithRetry(
         device: IOHIDDevice,
         bytes: [UInt8],

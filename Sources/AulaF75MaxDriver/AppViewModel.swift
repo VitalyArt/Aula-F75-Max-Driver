@@ -46,6 +46,10 @@ final class AppViewModel: ObservableObject {
     @Published var launchAtLoginEnabled = LaunchAtLogin.isEnabled
     @Published var selectedLanguageCode: String
     @Published var isInputMonitoring = false
+    @Published var keymapTestPageIndex = 8
+    @Published var keymapTestByteOffset = 0
+    @Published var keymapTestLength = 32
+    @Published var keymapTestValue = 0xcd
 
     private let batteryRefreshIntervalNanoseconds: UInt64 = 300_000_000_000
     private let batteryNotificationService = BatteryNotificationService.shared
@@ -202,6 +206,36 @@ final class AppViewModel: ObservableObject {
             let device = try AulaDevice.connect()
             try device.syncTime()
             return L10n.text("Keyboard clock synced.")
+        }
+    }
+
+    func dumpKeymap() {
+        runTask(startMessage: L10n.text("Reading keymap pages (read-only, no write)...")) {
+            let device = try AulaDevice.connect()
+            let pages = try device.inspectKeymapPages()
+            let lines = pages.enumerated().map { index, page in
+                "  page \(index): \(page.map { String(format: "%02x", $0) }.joined(separator: " "))"
+            }
+            return L10n.format("Keymap dump (%d pages):\n%@", pages.count, lines.joined(separator: "\n"))
+        }
+    }
+
+    func testKeymapByteWrite() {
+        let pageIndex = keymapTestPageIndex
+        let byteOffset = keymapTestByteOffset
+        let length = max(1, keymapTestLength)
+        let end = min(byteOffset + length, AulaConstants.commandLength)
+        let value = UInt8(clamping: keymapTestValue)
+
+        runTask(startMessage: L10n.format("Writing keymap page %d bytes %d-%d = 0x%02x (rest of all 9 pages zero)...", pageIndex, byteOffset, end - 1, value)) {
+            var pages = (0..<9).map { _ in [UInt8](repeating: 0, count: AulaConstants.commandLength) }
+            for i in byteOffset..<end {
+                pages[pageIndex][i] = value
+            }
+
+            let device = try AulaDevice.connect()
+            try device.writeKeymapPages(pages)
+            return L10n.format("Wrote page %d bytes %d-%d = 0x%02x. Click the knob now and check the log above.", pageIndex, byteOffset, end - 1, value)
         }
     }
 
