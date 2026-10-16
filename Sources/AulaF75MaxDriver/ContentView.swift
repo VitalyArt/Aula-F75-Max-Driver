@@ -454,28 +454,26 @@ struct ContentView: View {
         ) {
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(Array(model.logLines.enumerated()), id: \.offset) { index, line in
-                            Text(line)
-                                .id(index)
-                                .font(.system(.caption, design: .monospaced))
-                                .foregroundStyle(.white.opacity(0.78))
-                                .textSelection(.enabled)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-
+                    Group {
                         if model.logLines.isEmpty {
                             Text(L10n.text("No log entries yet."))
-                                .font(.system(.caption, design: .monospaced))
                                 .foregroundStyle(.white.opacity(0.45))
+                        } else {
+                            Text(model.logLines.joined(separator: "\n"))
+                                .foregroundStyle(.white.opacity(0.78))
+                                .textSelection(.enabled)
+                                .lineSpacing(6)
                         }
                     }
+                    .font(.system(.caption, design: .monospaced))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .id("logContent")
                     .padding(12)
                 }
                 .frame(height: 150)
                 .background(.black.opacity(0.18), in: RoundedRectangle(cornerRadius: 14))
-                .onChange(of: model.logLines.count) { _, newValue in
-                    proxy.scrollTo(max(newValue - 1, 0), anchor: .bottom)
+                .onChange(of: model.logLines.count) { _, _ in
+                    proxy.scrollTo("logContent", anchor: .bottom)
                 }
             }
         }
