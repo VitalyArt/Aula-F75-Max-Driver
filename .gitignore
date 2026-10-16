@@ -16,3 +16,6 @@ DerivedData/
 
 # macOS metadata
 .DS_Store
+
+# Brainstorm mockups and plan-execution scratch
+.superpowers/

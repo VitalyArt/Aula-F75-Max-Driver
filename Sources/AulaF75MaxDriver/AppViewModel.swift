@@ -29,9 +29,17 @@ final class AppViewModel: ObservableObject {
     @Published var wirelessEndpoints: [HIDEndpointInfo] = []
     @Published var logLines: [String] = []
     @Published var isWorking = false
-    @Published var selectedFile: URL?
+    @Published var selectedFile: URL? {
+        didSet { refreshScreenPreview() }
+    }
     @Published var slot = 1
-    @Published var fitMode: ScreenFitMode = .contain
+    @Published var fitMode: ScreenFitMode = .contain {
+        didSet { refreshScreenPreview() }
+    }
+    /// The selected image exactly as the keyboard screen will show it.
+    @Published private(set) var screenPreviewFrames: [ScreenPreviewFrame] = []
+    @Published private(set) var isPreparingScreenPreview = false
+    private var screenPreviewTask: Task<Void, Never>?
     @Published var progress = DisplayUploadProgress(sentChunks: 0, totalChunks: 0)
     @Published var batteryPercent: Int?
     @Published var rgbMode = 11
@@ -40,6 +48,12 @@ final class AppViewModel: ObservableObject {
     @Published var rgbDirection = 0
     @Published var rgbColor = Color.blue
     @Published var rgbColorful = true
+    /// The lighting last sent successfully in this session, or nil if none
+    /// was sent yet. Drives the "not applied" badge and the Revert button.
+    @Published private(set) var lastAppliedLighting: LightingSettings?
+    /// The lighting controls' values when the app started, so "has the user
+    /// edited anything yet?" can be answered before anything is applied.
+    private(set) var launchLighting: LightingSettings?
     @Published var keyResponseLevel = 1
     @Published var sleepTime = 1
     @Published var gameModeEnabled = false
@@ -80,6 +94,7 @@ final class AppViewModel: ObservableObject {
     init() {
         let storedCode = UserDefaults.standard.string(forKey: "app.language.code") ?? "system"
         selectedLanguageCode = L10n.configure(languageCode: storedCode)
+        launchLighting = lightingSettings
     }
 
     var isWiredDevicePresent: Bool {
@@ -103,7 +118,7 @@ final class AppViewModel: ObservableObject {
 
     var batteryStatusColor: Color {
         guard let percent = batteryPercent else {
-            return isDonglePresent ? .orange : .white.opacity(0.42)
+            return isDonglePresent ? .orange : .secondary
         }
         if percent <= 20 {
             return .red
@@ -181,23 +196,68 @@ final class AppViewModel: ObservableObject {
         manualRefresh()
     }
 
+    /// Image types the keyboard screen upload accepts.
+    static let screenImageTypes: [UTType] = [
+        .png,
+        .jpeg,
+        .gif,
+        .bmp,
+        .tiff,
+        UTType(filenameExtension: "webp") ?? .image
+    ]
+
     func chooseFile() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        panel.allowedContentTypes = [
-            .png,
-            .jpeg,
-            .gif,
-            .bmp,
-            .tiff,
-            UTType(filenameExtension: "webp") ?? .image
-        ]
+        panel.allowedContentTypes = Self.screenImageTypes
 
         if panel.runModal() == .OK {
             selectedFile = panel.url
             appendLog(L10n.format("Selected %@.", panel.url?.lastPathComponent ?? L10n.text("image")))
+        }
+    }
+
+    /// Selects an image dropped onto the Screen page, if it is a supported type.
+    func selectImage(at url: URL) {
+        let type = UTType(filenameExtension: url.pathExtension)
+        guard let type, Self.screenImageTypes.contains(where: { type.conforms(to: $0) }) else {
+            appendLog(L10n.format("%@ is not a supported image.", url.lastPathComponent))
+            return
+        }
+        selectedFile = url
+        appendLog(L10n.format("Selected %@.", url.lastPathComponent))
+    }
+
+    /// Re-encodes the selected image with the current fit mode, off the main
+    /// thread, and decodes it back so the preview matches the upload exactly.
+    func refreshScreenPreview() {
+        screenPreviewTask?.cancel()
+        guard let url = selectedFile else {
+            screenPreviewFrames = []
+            isPreparingScreenPreview = false
+            return
+        }
+
+        let fit = fitMode
+        isPreparingScreenPreview = true
+        screenPreviewTask = Task.detached(priority: .userInitiated) { [weak self] in
+            let frames: [ScreenPreviewFrame]
+            do {
+                let stream = try DisplayEncoder.encodeImage(at: url, fitMode: fit)
+                frames = ScreenPreviewDecoder.frames(from: stream)
+            } catch {
+                frames = []
+            }
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                // Check again on the main actor: a newer preview may have
+                // started (and cancelled this one) while we were waiting.
+                guard !Task.isCancelled else { return }
+                self?.screenPreviewFrames = frames
+                self?.isPreparingScreenPreview = false
+            }
         }
     }
 
@@ -293,7 +353,44 @@ final class AppViewModel: ObservableObject {
         requestBattery(logActivity: true)
     }
 
+    /// The lighting controls' current values as one comparable value.
+    var lightingSettings: LightingSettings {
+        let packed = rgbColor.rgbInteger
+        return LightingSettings(
+            mode: rgbMode,
+            brightness: rgbBrightness,
+            speed: rgbSpeed,
+            direction: rgbDirection,
+            colorful: rgbColorful,
+            red: (packed >> 16) & 0xff,
+            green: (packed >> 8) & 0xff,
+            blue: packed & 0xff
+        )
+    }
+
+    /// True when the controls differ from what was last sent to the keyboard.
+    var hasUnappliedLighting: Bool {
+        lastAppliedLighting != lightingSettings
+    }
+
+    /// Puts saved lighting values (a profile, or Revert) into the controls.
+    /// Sends nothing; call `applyRGB()` for that.
+    func loadLighting(_ settings: LightingSettings) {
+        rgbMode = settings.mode
+        rgbBrightness = settings.brightness
+        rgbSpeed = settings.speed
+        rgbDirection = settings.direction
+        rgbColorful = settings.colorful
+        rgbColor = Color(
+            .sRGB,
+            red: Double(settings.red) / 255,
+            green: Double(settings.green) / 255,
+            blue: Double(settings.blue) / 255
+        )
+    }
+
     func applyRGB() {
+        let applied = lightingSettings
         let mode = rgbMode
         let brightness = rgbBrightness
         let speed = rgbSpeed
@@ -311,6 +408,9 @@ final class AppViewModel: ObservableObject {
                 colorful: colorful,
                 color: color
             )
+            await MainActor.run {
+                self.lastAppliedLighting = applied
+            }
             let colorText = colorful ? L10n.text("Colorful") : String(format: "#%06X", color)
             return L10n.format(
                 "RGB set: %@ B%d S%d %@ %@.",

@@ -32,6 +32,12 @@ targets.append(
         ]
     )
 )
+targets.append(
+    .testTarget(
+        name: "AulaF75MaxDriverTests",
+        dependencies: ["AulaF75MaxDriver"]
+    )
+)
 #endif
 
 #if os(Linux)
