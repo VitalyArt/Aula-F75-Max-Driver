@@ -92,11 +92,11 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main Aula F75 Max Driver window</caption>
-      <image type="source">https://vitalyart.github.io/Aula-F75-Max-Driver/screenshots/main-window.png</image>
+      <image type="source">https://vitalyart.github.io/Aula-F75-Max-Driver/screenshots/linux-home.png</image>
     </screenshot>
     <screenshot>
-      <caption>HID endpoint diagnostics and app settings</caption>
-      <image type="source">https://vitalyart.github.io/Aula-F75-Max-Driver/screenshots/details-window.png</image>
+      <caption>Lighting effects and keyboard preview</caption>
+      <image type="source">https://vitalyart.github.io/Aula-F75-Max-Driver/screenshots/linux-lighting.png</image>
     </screenshot>
   </screenshots>
 
