@@ -242,22 +242,19 @@ final class AppViewModel: ObservableObject {
 
         let fit = fitMode
         isPreparingScreenPreview = true
-        screenPreviewTask = Task.detached(priority: .userInitiated) { [weak self] in
-            let frames: [ScreenPreviewFrame]
-            do {
-                let stream = try DisplayEncoder.encodeImage(at: url, fitMode: fit)
-                frames = ScreenPreviewDecoder.frames(from: stream)
-            } catch {
-                frames = []
-            }
+        screenPreviewTask = Task { @MainActor [weak self] in
+            let frames = await Task.detached(priority: .userInitiated) {
+                do {
+                    let stream = try DisplayEncoder.encodeImage(at: url, fitMode: fit)
+                    return ScreenPreviewDecoder.frames(from: stream)
+                } catch {
+                    return [ScreenPreviewFrame]()
+                }
+            }.value
+            // A newer preview may have cancelled this task while encoding.
             guard !Task.isCancelled else { return }
-            await MainActor.run {
-                // Check again on the main actor: a newer preview may have
-                // started (and cancelled this one) while we were waiting.
-                guard !Task.isCancelled else { return }
-                self?.screenPreviewFrames = frames
-                self?.isPreparingScreenPreview = false
-            }
+            self?.screenPreviewFrames = frames
+            self?.isPreparingScreenPreview = false
         }
     }
 
