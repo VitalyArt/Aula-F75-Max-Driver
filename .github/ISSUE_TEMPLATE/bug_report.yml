@@ -25,7 +25,7 @@ body:
     id: context
     attributes:
       label: Environment
-      description: Include macOS version, keyboard connection type, and any permissions granted.
+      description: Include your operating system and version, app version, keyboard connection type (USB cable or 2.4G receiver; USB OTG on Android), and any permissions granted.
   - type: textarea
     id: logs
     attributes:
