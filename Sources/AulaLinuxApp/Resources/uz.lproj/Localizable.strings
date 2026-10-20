@@ -178,3 +178,86 @@
 "Direction %d" = "%d-yo'nalish";
 "Level %d" = "%d-daraja";
 "Value %d" = "%d-qiymat";
+
+"Home" = "Bosh sahifa";
+
+"Lighting" = "Yoritish";
+
+"Screen" = "Ekran";
+
+"Settings" = "Sozlamalar";
+
+"Diagnostics" = "Diagnostika";
+
+"Activity Log" = "Faoliyat jurnali";
+
+"Advanced" = "Qoʻshimcha";
+
+"Keyboard Control" = "Klaviatura boshqaruvi";
+
+"No activity yet" = "Hali faoliyat yoʻq";
+
+"Open Lighting" = "Yoritishni ochish";
+
+"Open Screen" = "Ekranni ochish";
+
+"Screen clock" = "Ekran soati";
+
+"Refresh battery" = "Batareyani yangilash";
+
+// Shared desktop interface
+"Working…" = "Bajarilmoqda…";
+"Connect the keyboard with a USB-C cable to use these controls." = "Bu boshqaruvlardan foydalanish uchun klaviaturani USB-C kabeli bilan ulang.";
+"Plug in the 2.4G receiver to use these controls." = "Bu boshqaruvlardan foydalanish uchun 2.4G qabul qilgichni ulang.";
+"USB cable connected" = "USB kabel ulangan";
+"2.4G receiver connected" = "2.4G qabul qilgich ulangan";
+"Effects, colour and brightness" = "Effektlar, rang va yorqinlik";
+"Screen image" = "Ekran rasmi";
+"Show a picture or GIF on the keyboard display" = "Klaviatura ekranida rasm yoki GIF koʻrsatish";
+"Colour" = "Rang";
+"Rainbow" = "Kamalak";
+"Single colour" = "Bitta rang";
+"No file selected" = "Fayl tanlanmagan";
+"Choose File…" = "Faylni tanlash…";
+"Upload to Keyboard" = "Klaviaturaga yuklash";
+"Picture" = "Rasm";
+"PNG, JPEG, GIF, BMP, TIFF or WebP. Shown at 128 × 128." = "PNG, JPEG, GIF, BMP, TIFF yoki WebP. 128 × 128 oʻlchamda koʻrsatiladi.";
+"Key response" = "Tugmalar javobi";
+"Sleep after" = "Uyquga ketish";
+"Typing" = "Yozish";
+"Changes are sent when you press Apply." = "Oʻzgarishlar «Qoʻllash» bosilganda yuboriladi.";
+"Game Mode" = "Oʻyin rejimi";
+"General" = "Umumiy";
+"Danger Zone" = "Xavfli hudud";
+"Clears uploaded screen images and resets keyboard settings changed by this app." = "Ekranga yuklangan rasmlarni oʻchiradi va ushbu ilova oʻzgartirgan klaviatura sozlamalarini tiklaydi.";
+"Factory Reset Keyboard…" = "Klaviaturani zavod sozlamalariga qaytarish…";
+"Connections" = "Ulanishlar";
+"Copy Log" = "Jurnalni nusxalash";
+"Apply to Keyboard" = "Klaviaturaga qoʻllash";
+"Aula F75 Max keyboard preview" = "Aula F75 Max klaviaturasi koʻrinishi";
+"Calm Breath" = "Sokin nafas";
+"Changes are sent when you press Apply to Keyboard." = "Oʻzgarishlar «Klaviaturaga qoʻllash» bosilganda yuboriladi.";
+"Delete" = "Oʻchirish";
+"Delete this profile?" = "Bu profil oʻchirilsinmi?";
+"Delete…" = "Oʻchirish…";
+"Discard and Switch" = "Bekor qilib almashtirish";
+"Discard your unsaved lighting changes?" = "Saqlanmagan yoritish oʻzgarishlari bekor qilinsinmi?";
+"Exactly what the keyboard screen will show" = "Klaviatura ekrani aynan shuni koʻrsatadi";
+"No saved profiles yet. Set up a look you like and save it." = "Hali saqlangan profillar yoʻq. Yoqqan koʻrinishni sozlang va saqlang.";
+"Preview is an approximation of the keyboard's effect" = "Koʻrinish klaviatura effektining taxminiy tasviri";
+"Preview · not applied" = "Koʻrinish · qoʻllanmagan";
+"Profiles" = "Profillar";
+"Rainbow Wave" = "Kamalak toʻlqini";
+"Rename Profile" = "Profil nomini oʻzgartirish";
+"Rename…" = "Nomini oʻzgartirish…";
+"Revert" = "Qaytarish";
+"Save" = "Saqlash";
+"Save as New Profile" = "Yangi profil sifatida saqlash";
+"Save as New Profile…" = "Yangi profil sifatida saqlash…";
+"Still image" = "Harakatsiz rasm";
+"Update" = "Yangilash";
+"%d entries" = "%d ta yozuv";
+"Preparing preview…" = "Oldindan ko‘rish tayyorlanmoqda…";
+"Locks the Windows/Super key. Also sends the Typing settings above." = "Windows/Super tugmasini bloklaydi. Yuqoridagi yozish sozlamalarini ham yuboradi.";
+"Restore Windows/Super Key" = "Windows/Super tugmasini tiklash";
+"Linux udev hidraw access is required for keyboard commands." = "Linux klaviatura buyruqlari uchun udev orqali hidraw ruxsati kerak.";

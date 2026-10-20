@@ -178,3 +178,86 @@
 "Direction %d" = "Dirección %d";
 "Level %d" = "Nivel %d";
 "Value %d" = "Valor %d";
+
+"Home" = "Inicio";
+
+"Lighting" = "Iluminación";
+
+"Screen" = "Pantalla";
+
+"Settings" = "Ajustes";
+
+"Diagnostics" = "Diagnóstico";
+
+"Activity Log" = "Registro de actividad";
+
+"Advanced" = "Avanzado";
+
+"Keyboard Control" = "Control del teclado";
+
+"No activity yet" = "Sin actividad todavía";
+
+"Open Lighting" = "Abrir iluminación";
+
+"Open Screen" = "Abrir pantalla";
+
+"Screen clock" = "Reloj de pantalla";
+
+"Refresh battery" = "Actualizar batería";
+
+// Shared desktop interface
+"Working…" = "Trabajando…";
+"Connect the keyboard with a USB-C cable to use these controls." = "Conecta el teclado con un cable USB-C para usar estos controles.";
+"Plug in the 2.4G receiver to use these controls." = "Conecta el receptor 2.4G para usar estos controles.";
+"USB cable connected" = "Cable USB conectado";
+"2.4G receiver connected" = "Receptor 2.4G conectado";
+"Effects, colour and brightness" = "Efectos, color y brillo";
+"Screen image" = "Imagen de pantalla";
+"Show a picture or GIF on the keyboard display" = "Muestra una imagen o GIF en la pantalla del teclado";
+"Colour" = "Color";
+"Rainbow" = "Arcoíris";
+"Single colour" = "Un solo color";
+"No file selected" = "Ningún archivo seleccionado";
+"Choose File…" = "Elegir archivo…";
+"Upload to Keyboard" = "Subir al teclado";
+"Picture" = "Imagen";
+"PNG, JPEG, GIF, BMP, TIFF or WebP. Shown at 128 × 128." = "PNG, JPEG, GIF, BMP, TIFF o WebP. Se muestra a 128 × 128.";
+"Key response" = "Respuesta de teclas";
+"Sleep after" = "Suspender tras";
+"Typing" = "Escritura";
+"Changes are sent when you press Apply." = "Los cambios se envían al pulsar Aplicar.";
+"Game Mode" = "Modo juego";
+"General" = "General";
+"Danger Zone" = "Zona de peligro";
+"Clears uploaded screen images and resets keyboard settings changed by this app." = "Borra las imágenes subidas a la pantalla y restablece los ajustes del teclado cambiados por esta app.";
+"Factory Reset Keyboard…" = "Restablecer teclado de fábrica…";
+"Connections" = "Conexiones";
+"Copy Log" = "Copiar registro";
+"Apply to Keyboard" = "Aplicar al teclado";
+"Aula F75 Max keyboard preview" = "Vista previa del teclado Aula F75 Max";
+"Calm Breath" = "Respiración suave";
+"Changes are sent when you press Apply to Keyboard." = "Los cambios se envían al pulsar Aplicar al teclado.";
+"Delete" = "Eliminar";
+"Delete this profile?" = "¿Eliminar este perfil?";
+"Delete…" = "Eliminar…";
+"Discard and Switch" = "Descartar y cambiar";
+"Discard your unsaved lighting changes?" = "¿Descartar los cambios de iluminación sin guardar?";
+"Exactly what the keyboard screen will show" = "Exactamente lo que mostrará la pantalla del teclado";
+"No saved profiles yet. Set up a look you like and save it." = "Aún no hay perfiles. Crea un estilo que te guste y guárdalo.";
+"Preview is an approximation of the keyboard's effect" = "La vista previa es una aproximación del efecto del teclado";
+"Preview · not applied" = "Vista previa · sin aplicar";
+"Profiles" = "Perfiles";
+"Rainbow Wave" = "Ola arcoíris";
+"Rename Profile" = "Renombrar perfil";
+"Rename…" = "Renombrar…";
+"Revert" = "Revertir";
+"Save" = "Guardar";
+"Save as New Profile" = "Guardar como perfil nuevo";
+"Save as New Profile…" = "Guardar como perfil nuevo…";
+"Still image" = "Imagen fija";
+"Update" = "Actualizar";
+"%d entries" = "%d entradas";
+"Preparing preview…" = "Preparando vista previa…";
+"Locks the Windows/Super key. Also sends the Typing settings above." = "Bloquea la tecla Windows/Super. También envía los ajustes de escritura anteriores.";
+"Restore Windows/Super Key" = "Restaurar tecla Windows/Super";
+"Linux udev hidraw access is required for keyboard commands." = "Los comandos del teclado en Linux requieren acceso a hidraw mediante udev.";

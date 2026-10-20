@@ -47,7 +47,8 @@ public func aulaLinuxUploadDisplay(
     _ capacity: Int32,
     _ bytes: UnsafeRawPointer?,
     _ length: Int32,
-    _ slot: Int32
+    _ slot: Int32,
+    _ context: UnsafeMutableRawPointer?
 ) {
     writeResult(buffer, capacity) {
         guard let bytes, length > 0 else {
@@ -55,11 +56,10 @@ public func aulaLinuxUploadDisplay(
         }
         let data = Data(bytes: bytes, count: Int(length))
         let backend = LinuxHIDBackend()
-        var lastProgress = DisplayUploadProgress(sentChunks: 0, totalChunks: 0)
         try backend.uploadDisplayStream(data, slot: Int(slot)) { progress in
-            lastProgress = progress
+            aula_linux_report_upload_progress(context, Int32(progress.sentChunks), Int32(progress.totalChunks))
         }
-        return L10n.format("Uploaded %d frame(s) to slot %d.", lastProgress.sentChunks, slot)
+        return L10n.format("Uploaded %d frame(s) to slot %d.", Int(data[0]), slot)
     }
 }
 
