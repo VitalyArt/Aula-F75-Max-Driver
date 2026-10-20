@@ -1,3 +1,6 @@
+#if canImport(CoreGraphics)
+import CoreGraphics
+#endif
 import Foundation
 
 /// Keycap colour family. The F75 Max ships with a two-tone set: light grey on
