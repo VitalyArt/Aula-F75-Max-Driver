@@ -15,7 +15,6 @@ This repository ships native macOS, Linux, and Android apps. Shared portable Swi
 - `make linux-run`: runs the native Linux GTK app on Linux.
 - `make android-build`: builds the Android debug APK with JDK 17 and the Gradle wrapper.
 - `make android-test`: runs the Android JVM unit tests.
-- `make all`, `make build`, `make app`, `make dmg`, and `make run`: compatibility aliases for the macOS targets.
 - `make clean`: removes `.build/` and `build/`.
 
 There is no Swift test target in the current manifest. Android JVM tests live under `android/app/src/test/`.

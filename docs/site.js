@@ -1,5 +1,8 @@
 const translations = {
   en: {
+    captureNote: "Linux captures from PR #16 use mocked HID and isolated profiles. macOS captures show the redesigned interface.",
+    galleryText: "Preview 20 lighting effects, save local profiles, and inspect encoded GIF frames on macOS and Linux.",
+    galleryTitle: "Native desktop interfaces.",
     metaDescription: "Aula F75 Max Driver is a native macOS, Linux, and Android utility for configuring the Epomaker x Aula F75 Max keyboard, display, RGB lighting, battery, and 2.4G mode.",
     ogDescription: "A polished native macOS, Linux, and Android driver for Aula F75 Max: display uploads, RGB, battery, Game Mode, and HID diagnostics.",
     navAria: "Primary navigation",
@@ -40,11 +43,11 @@ const translations = {
     workflowItemReset: "Factory reset for display slots and configuration blocks used by this app.",
     workflowItemLogin: "Launch at Login on macOS and interface language selection on every platform.",
     workflowItemLocales: "Android includes English and Russian; desktop apps include seven localizations.",
-    detailsScreenshotAlt: "HID endpoint diagnostics and app settings",
+    detailsScreenshotAlt: "macOS Lighting with live keyboard preview and effect gallery",
     installEyebrow: "Install",
     installTitle: "Download a DMG, DEB, or Android APK.",
     installReadyTitle: "Ready-made build",
-    installReadyText: "Open GitHub Releases for the macOS DMG, Debian/Ubuntu DEB, and APK in future Android releases.",
+    installReadyText: "Open GitHub Releases for the macOS DMG, Debian/Ubuntu DEB, and Android APK.",
     installReadyLink: "Open releases/latest",
     installBuildTitle: "Build from source",
     installBuildText: "Desktop builds use Xcode tools or Swift 6 with GTK4 and hidapi. Android builds require JDK 17 and the Android SDK.",
@@ -56,6 +59,9 @@ const translations = {
     footerText: "macOS, Linux, and Android utility for Epomaker x Aula F75 Max"
   },
   ru: {
+    captureNote: "Снимки Linux из PR #16 сделаны с имитацией HID и отдельными профилями. Снимки macOS показывают обновлённый интерфейс.",
+    galleryText: "Предпросмотр 20 эффектов подсветки, локальные профили и просмотр кодированных кадров GIF на macOS и Linux.",
+    galleryTitle: "Нативные интерфейсы для компьютера.",
     metaDescription: "Aula F75 Max Driver - нативная утилита для macOS, Linux и Android для настройки клавиатуры Epomaker x Aula F75 Max, дисплея, RGB, батареи и режима 2.4G.",
     ogDescription: "Аккуратный нативный драйвер для Aula F75 Max на macOS, Linux и Android: загрузка на экран, RGB, батарея, Game Mode и диагностика HID.",
     navAria: "Основная навигация",
@@ -96,11 +102,11 @@ const translations = {
     workflowItemReset: "Factory reset для display slots и конфигурационных блоков, которые использует приложение.",
     workflowItemLogin: "Launch at Login на macOS и выбор языка интерфейса на каждой платформе.",
     workflowItemLocales: "Android включает английский и русский; приложения для компьютера включают семь локализаций.",
-    detailsScreenshotAlt: "Диагностика HID endpoint-ов и настройки приложения",
+    detailsScreenshotAlt: "Подсветка macOS с предпросмотром клавиатуры и галереей эффектов",
     installEyebrow: "Установка",
     installTitle: "Скачайте DMG, DEB или Android APK.",
     installReadyTitle: "Готовая сборка",
-    installReadyText: "В GitHub Releases доступны macOS DMG, Debian/Ubuntu DEB и APK в будущих Android-релизах.",
+    installReadyText: "В GitHub Releases доступны macOS DMG, Debian/Ubuntu DEB и Android APK.",
     installReadyLink: "Открыть releases/latest",
     installBuildTitle: "Сборка из исходников",
     installBuildText: "Для компьютера нужны инструменты Xcode или Swift 6 с GTK4 и hidapi. Для Android нужны JDK 17 и Android SDK.",
@@ -112,6 +118,9 @@ const translations = {
     footerText: "Утилита для macOS, Linux и Android для Epomaker x Aula F75 Max"
   },
   es: {
+    captureNote: "Las capturas de Linux del PR #16 usan HID simulado y perfiles aislados. Las de macOS muestran la interfaz rediseñada.",
+    galleryText: "Previsualiza 20 efectos, guarda perfiles locales y revisa los fotogramas GIF codificados en macOS y Linux.",
+    galleryTitle: "Interfaces de escritorio nativas.",
     metaDescription: "Aula F75 Max Driver es una utilidad nativa para macOS, Linux y Android que configura el teclado Epomaker x Aula F75 Max, la pantalla, RGB, batería y modo 2.4G.",
     ogDescription: "Un controlador nativo para Aula F75 Max en macOS, Linux y Android: pantalla, RGB, batería, Game Mode y diagnóstico HID.",
     navAria: "Navegación principal",
@@ -152,11 +161,11 @@ const translations = {
     workflowItemReset: "Restablecimiento de fábrica para slots de pantalla y bloques de configuración usados por esta app.",
     workflowItemLogin: "Launch at Login en macOS y selección del idioma en cada plataforma.",
     workflowItemLocales: "Android incluye inglés y ruso; las apps de escritorio incluyen siete localizaciones.",
-    detailsScreenshotAlt: "Diagnóstico de endpoints HID y ajustes de la app",
+    detailsScreenshotAlt: "Iluminación de macOS con vista previa y galería de efectos",
     installEyebrow: "Instalación",
     installTitle: "Descarga un DMG, DEB o APK de Android.",
     installReadyTitle: "Compilación lista",
-    installReadyText: "Abre GitHub Releases para obtener el DMG de macOS, el DEB para Debian/Ubuntu y el APK en futuras versiones de Android.",
+    installReadyText: "Abre GitHub Releases para obtener el DMG de macOS, el DEB para Debian/Ubuntu y el APK de Android.",
     installReadyLink: "Abrir releases/latest",
     installBuildTitle: "Compilar desde código fuente",
     installBuildText: "El escritorio usa Xcode o Swift 6 con GTK4 e hidapi. Android requiere JDK 17 y Android SDK.",
@@ -168,6 +177,9 @@ const translations = {
     footerText: "Utilidad para macOS, Linux y Android compatible con Epomaker x Aula F75 Max"
   },
   uz: {
+    captureNote: "PR #16 dagi Linux tasvirlari taqlid qilingan HID va alohida profillardan foydalanadi. macOS tasvirlari yangi interfeysni ko‘rsatadi.",
+    galleryText: "macOS va Linux’da 20 ta yoritish effektini ko‘ring, mahalliy profillarni saqlang va kodlangan GIF kadrlarini tekshiring.",
+    galleryTitle: "Kompyuter uchun mahalliy interfeyslar.",
     metaDescription: "Aula F75 Max Driver - Epomaker x Aula F75 Max klaviaturasi, displey, RGB, batareya va 2.4G rejimini sozlash uchun macOS, Linux va Android utilitasi.",
     ogDescription: "Aula F75 Max uchun macOS, Linux va Android drayveri: displeyga yuklash, RGB, batareya, Game Mode va HID diagnostikasi.",
     navAria: "Asosiy navigatsiya",
@@ -208,11 +220,11 @@ const translations = {
     workflowItemReset: "Ushbu ilova ishlatadigan display slots va konfiguratsiya bloklari uchun factory reset.",
     workflowItemLogin: "macOSda Launch at Login va har bir platformada interfeys tilini tanlash.",
     workflowItemLocales: "Android ingliz va rus tillarini, kompyuter ilovalari esa yetti lokalizatsiyani o'z ichiga oladi.",
-    detailsScreenshotAlt: "HID endpoint diagnostikasi va ilova sozlamalari",
+    detailsScreenshotAlt: "macOS yoritish oynasi va effektlar galereyasi",
     installEyebrow: "O'rnatish",
     installTitle: "DMG, DEB yoki Android APK yuklab oling.",
     installReadyTitle: "Tayyor build",
-    installReadyText: "GitHub Releases sahifasidan macOS DMG, Debian/Ubuntu DEB va kelajakdagi Android relizlarida APK faylini yuklab oling.",
+    installReadyText: "GitHub Releases sahifasidan macOS DMG, Debian/Ubuntu DEB va Android APK faylini yuklab oling.",
     installReadyLink: "releases/latest ochish",
     installBuildTitle: "Manbadan yig'ish",
     installBuildText: "Kompyuter buildi Xcode yoki GTK4 va hidapi bilan Swift 6 ishlatadi. Android uchun JDK 17 va Android SDK kerak.",
@@ -224,6 +236,9 @@ const translations = {
     footerText: "Epomaker x Aula F75 Max uchun macOS, Linux va Android utilitasi"
   },
   kk: {
+    captureNote: "PR #16 Linux суреттері HID имитациясы мен бөлек профильдерді қолданады. macOS суреттері жаңартылған интерфейсті көрсетеді.",
+    galleryText: "macOS пен Linux жүйесінде 20 жарық әсерін қараңыз, жергілікті профильдерді сақтаңыз және кодталған GIF кадрларын тексеріңіз.",
+    galleryTitle: "Компьютерге арналған төл интерфейстер.",
     metaDescription: "Aula F75 Max Driver - Epomaker x Aula F75 Max пернетақтасын, дисплейін, RGB жарығын, батареясын және 2.4G режимін баптауға арналған macOS, Linux және Android утилитасы.",
     ogDescription: "Aula F75 Max үшін macOS, Linux және Android драйвері: дисплейге жүктеу, RGB, батарея, Game Mode және HID диагностикасы.",
     navAria: "Негізгі навигация",
@@ -264,11 +279,11 @@ const translations = {
     workflowItemReset: "Осы қолданба пайдаланатын display slots және конфигурация блоктары үшін factory reset.",
     workflowItemLogin: "macOS-та Launch at Login және әр платформада интерфейс тілін таңдау.",
     workflowItemLocales: "Android ағылшын және орыс тілдерін, компьютер қолданбалары жеті локализацияны қамтиды.",
-    detailsScreenshotAlt: "HID endpoint диагностикасы және қолданба баптаулары",
+    detailsScreenshotAlt: "macOS жарықтандыру терезесі және әсерлер галереясы",
     installEyebrow: "Орнату",
     installTitle: "DMG, DEB немесе Android APK жүктеңіз.",
     installReadyTitle: "Дайын build",
-    installReadyText: "GitHub Releases бетінен macOS DMG, Debian/Ubuntu DEB және болашақ Android релиздеріндегі APK файлын жүктеңіз.",
+    installReadyText: "GitHub Releases бетінен macOS DMG, Debian/Ubuntu DEB және Android APK файлын жүктеңіз.",
     installReadyLink: "releases/latest ашу",
     installBuildTitle: "Бастапқы кодтан жинау",
     installBuildText: "Компьютер жинағы Xcode немесе GTK4 және hidapi бар Swift 6 қолданады. Android үшін JDK 17 және Android SDK қажет.",
@@ -280,6 +295,9 @@ const translations = {
     footerText: "Epomaker x Aula F75 Max үшін macOS, Linux және Android утилитасы"
   },
   pt: {
+    captureNote: "As capturas Linux do PR #16 usam HID simulado e perfis isolados. As capturas macOS mostram a interface redesenhada.",
+    galleryText: "Pré-visualize 20 efeitos, guarde perfis locais e veja os quadros GIF codificados no macOS e Linux.",
+    galleryTitle: "Interfaces nativas para desktop.",
     metaDescription: "Aula F75 Max Driver é um utilitário nativo para macOS, Linux e Android que configura o teclado Epomaker x Aula F75 Max, tela, RGB, bateria e modo 2.4G.",
     ogDescription: "Um driver nativo para Aula F75 Max no macOS, Linux e Android: envio para tela, RGB, bateria, Game Mode e diagnóstico HID.",
     navAria: "Navegação principal",
@@ -320,11 +338,11 @@ const translations = {
     workflowItemReset: "Factory reset para display slots e blocos de configuração usados por este app.",
     workflowItemLogin: "Launch at Login no macOS e seleção do idioma em cada plataforma.",
     workflowItemLocales: "O Android inclui inglês e russo; os apps desktop incluem sete localizações.",
-    detailsScreenshotAlt: "Diagnóstico de endpoints HID e configurações do app",
+    detailsScreenshotAlt: "Iluminação macOS com prévia do teclado e galeria de efeitos",
     installEyebrow: "Instalação",
     installTitle: "Baixe um DMG, DEB ou APK para Android.",
     installReadyTitle: "Build pronto",
-    installReadyText: "Abra GitHub Releases para obter o DMG para macOS, o DEB para Debian/Ubuntu e o APK em futuras versões do Android.",
+    installReadyText: "Abra GitHub Releases para obter o DMG para macOS, o DEB para Debian/Ubuntu e o APK de Android.",
     installReadyLink: "Abrir releases/latest",
     installBuildTitle: "Compilar do código-fonte",
     installBuildText: "O desktop usa Xcode ou Swift 6 com GTK4 e hidapi. O Android requer JDK 17 e Android SDK.",
@@ -336,6 +354,9 @@ const translations = {
     footerText: "Utilitário para macOS, Linux e Android compatível com Epomaker x Aula F75 Max"
   },
   "zh-Hans": {
+    captureNote: "PR #16 的 Linux 截图使用模拟 HID 和独立配置。macOS 截图展示重新设计的界面。",
+    galleryText: "在 macOS 和 Linux 上预览 20 种灯效、保存本地配置并查看编码后的 GIF 帧。",
+    galleryTitle: "原生桌面界面。",
     metaDescription: "Aula F75 Max Driver 是一款原生 macOS、Linux 和 Android 工具，用于配置 Epomaker x Aula F75 Max 键盘、屏幕、RGB 灯效、电池和 2.4G 模式。",
     ogDescription: "面向 Aula F75 Max 的原生 macOS、Linux 和 Android 驱动：屏幕上传、RGB、电池、Game Mode 和 HID 诊断。",
     navAria: "主导航",
@@ -376,11 +397,11 @@ const translations = {
     workflowItemReset: "对本应用使用的 display slots 和配置块执行 factory reset。",
     workflowItemLogin: "macOS 支持 Launch at Login，每个平台均可选择界面语言。",
     workflowItemLocales: "Android 包含英语和俄语；桌面应用包含七种本地化。",
-    detailsScreenshotAlt: "HID endpoint 诊断和应用设置",
+    detailsScreenshotAlt: "macOS 灯光页面，包含键盘预览和灯效库",
     installEyebrow: "安装",
     installTitle: "下载 DMG、DEB 或 Android APK。",
     installReadyTitle: "现成构建",
-    installReadyText: "打开 GitHub Releases，获取 macOS DMG、Debian/Ubuntu DEB，以及未来 Android 版本中的 APK。",
+    installReadyText: "打开 GitHub Releases，获取 macOS DMG、Debian/Ubuntu DEB 和 Android APK。",
     installReadyLink: "打开 releases/latest",
     installBuildTitle: "从源码构建",
     installBuildText: "桌面构建使用 Xcode 工具或带 GTK4 和 hidapi 的 Swift 6。Android 构建需要 JDK 17 和 Android SDK。",
@@ -392,6 +413,7 @@ const translations = {
     footerText: "面向 Epomaker x Aula F75 Max 的 macOS、Linux 和 Android 工具"
   }
 };
+
 
 const fallbackLanguage = "en";
 const languageStorageKey = "aula-docs-language";

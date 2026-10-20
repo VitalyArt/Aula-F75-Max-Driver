@@ -771,3 +771,17 @@ code {
     align-items: flex-start;
   }
 }
+
+.screenshot-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.screenshot-gallery figure { margin: 0; background: var(--panel); }
+.screenshot-gallery a { display: block; }
+.screenshot-gallery img { display: block; height: auto; }
+.screenshot-gallery figcaption { padding: 16px 20px; font-weight: 700; }
+.capture-note { margin-top: 24px; color: var(--muted); }
+@media (max-width: 760px) {
+  .screenshot-gallery { grid-template-columns: 1fr; }
+}
