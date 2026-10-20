@@ -15,6 +15,16 @@ import kotlin.math.max
 import kotlin.math.min
 
 object DisplayEncoder {
+    fun previewImage(context: Context, uri: Uri, fitMode: ScreenFitMode): Bitmap {
+        val source = ImageDecoder.createSource(context.contentResolver, uri)
+        val bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            val scale = min(1.0, 512.0 / max(info.size.width, info.size.height))
+            decoder.setTargetSize(max(1, (info.size.width * scale).toInt()), max(1, (info.size.height * scale).toInt()))
+        }
+        return renderFrame(bitmap, fitMode).also { bitmap.recycle() }
+    }
+
     fun encodeImage(context: Context, uri: Uri, fitMode: ScreenFitMode): EncodedDisplayStream {
         val bytes = context.contentResolver.openInputStream(uri)?.use { input ->
             input.readBytes()

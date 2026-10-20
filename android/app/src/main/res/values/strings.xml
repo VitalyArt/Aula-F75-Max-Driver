@@ -68,4 +68,26 @@
     <string name="reset_message">This clears the display slots and restores the configuration blocks used by this app. This cannot be undone.</string>
     <string name="cancel">Cancel</string>
     <string name="confirm_reset">Reset keyboard</string>
+    <string name="tab_home">Home</string>
+    <string name="keyboard_preview">Aula F75 Max keyboard preview</string>
+    <string name="preview_pending">Preview · not applied</string>
+    <string name="preview_approximation">Preview is an approximation of the keyboard effect</string>
+    <string name="receiver_required">Connect the 2.4G receiver and grant USB access to apply lighting.</string>
+    <string name="lighting_profiles">Lighting Profiles</string>
+    <string name="profiles_empty">No saved profiles yet. Set up a look and save it.</string>
+    <string name="profile_save_new">Save as New Profile</string>
+    <string name="profile_update">Update Profile</string>
+    <string name="profile_rename">Rename</string>
+    <string name="profile_delete">Delete</string>
+    <string name="profile_name">Profile name</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_discard">Discard unsaved lighting changes?</string>
+    <string name="profile_switch">Discard and Switch</string>
+    <string name="profile_delete_confirm">Delete this profile?</string>
+    <string name="decrease_value">Decrease</string>
+    <string name="increase_value">Increase</string>
+    <string name="receiver_access_required">The 2.4G receiver is connected. Grant USB access to control lighting.</string>
+    <string name="wired_required">Connect the keyboard by USB cable to upload an image.</string>
+    <string name="wired_access_required">The wired keyboard is connected. Grant USB access to upload an image.</string>
+    <string name="upload_complete">Image uploaded successfully</string>
 </resources>

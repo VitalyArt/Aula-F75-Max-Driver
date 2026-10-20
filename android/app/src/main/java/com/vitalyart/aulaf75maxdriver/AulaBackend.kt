@@ -11,12 +11,14 @@ import kotlin.math.min
 class AndroidAulaBackend(private val context: Context) {
     private val usbManager = context.getSystemService(UsbManager::class.java)
 
+    @Synchronized
     fun scanEndpoints(): List<HIDEndpointInfo> {
         return usbManager.deviceList.values
             .filter { isAulaDevice(it) }
             .flatMap { device ->
                 val product = device.productName ?: productName(device.vendorId, device.productId)
                 val transport = "usbHost"
+                val reports = UsbHidSession.reportInfoByInterface(context, device)
                 if (device.interfaceCount == 0) {
                     listOf(
                         HIDEndpointInfo(
@@ -37,19 +39,16 @@ class AndroidAulaBackend(private val context: Context) {
                         val usbInterface = device.getInterface(index)
                         val inputSize = endpointSize(usbInterface, UsbConstants.USB_DIR_IN)
                         val outputSize = endpointSize(usbInterface, UsbConstants.USB_DIR_OUT)
+                        val report = reports[usbInterface.id]
                         HIDEndpointInfo(
                             id = "${device.deviceName}:$index",
                             vendorID = device.vendorId,
                             productID = device.productId,
-                            usagePage = if (device.vendorId == AulaConstants.wiredVendorID) {
-                                AulaConstants.wiredCommandUsagePage
-                            } else {
-                                AulaConstants.wirelessCommandUsagePage
-                            },
+                            usagePage = report?.usagePages?.firstOrNull() ?: 0,
                             usage = 0,
-                            maxInputReportSize = inputSize,
-                            maxOutputReportSize = outputSize,
-                            maxFeatureReportSize = maxOf(64, inputSize, outputSize),
+                            maxInputReportSize = report?.inputBytes ?: inputSize,
+                            maxOutputReportSize = report?.outputBytes ?: outputSize,
+                            maxFeatureReportSize = report?.featureBytes ?: maxOf(64, inputSize, outputSize),
                             product = product,
                             transport = transport
                         )
@@ -59,6 +58,7 @@ class AndroidAulaBackend(private val context: Context) {
             .sortedWith(compareBy<HIDEndpointInfo> { it.vendorID }.thenBy { it.productID }.thenBy { it.id })
     }
 
+    @Synchronized
     fun syncTime(date: Date = Date()) {
         openWiredCommandSession().use { session ->
             commandExchange(session, AulaWiredPackets.packet(0x04, 0x18))
@@ -71,6 +71,7 @@ class AndroidAulaBackend(private val context: Context) {
         }
     }
 
+    @Synchronized
     fun uploadDisplayStream(
         stream: ByteArray,
         slot: Int,
@@ -115,6 +116,7 @@ class AndroidAulaBackend(private val context: Context) {
         }
     }
 
+    @Synchronized
     fun factoryReset(progress: (String) -> Unit) {
         openWiredCommandSession().use { session ->
             progress("Clearing display memory")
@@ -177,6 +179,7 @@ class AndroidAulaBackend(private val context: Context) {
         }
     }
 
+    @Synchronized
     fun queryBattery(): Int? {
         openDongleSession().use { session ->
             val lengths = listOf(64, 33, 32)
@@ -191,6 +194,7 @@ class AndroidAulaBackend(private val context: Context) {
         }
     }
 
+    @Synchronized
     fun applyRGB(mode: Int, brightness: Int, speed: Int, direction: Int, colorful: Boolean, color: Int) {
         openDongleSession().use { session ->
             sendOutputReport(session, AulaWirelessReports.rgbCommitReport(), "RGB commit")
@@ -210,6 +214,7 @@ class AndroidAulaBackend(private val context: Context) {
         }
     }
 
+    @Synchronized
     fun applyPerformance(level: Int, sleepTime: Int) {
         openDongleSession().use { session ->
             sendOutputReport(
@@ -224,6 +229,7 @@ class AndroidAulaBackend(private val context: Context) {
         }
     }
 
+    @Synchronized
     fun setGameMode(enabled: Boolean, level: Int, sleepTime: Int) {
         openDongleSession().use { session ->
             val value = if (enabled) 1 else 0
@@ -249,10 +255,7 @@ class AndroidAulaBackend(private val context: Context) {
             vendorId = AulaConstants.wiredVendorID,
             productId = AulaConstants.wiredProductID,
             label = "wired keyboard command endpoint",
-            interfacePredicate = { usbInterface ->
-                val outputSize = endpointSize(usbInterface, UsbConstants.USB_DIR_OUT)
-                outputSize in 1 until AulaConstants.chunkLength
-            }
+            requiredUsagePage = AulaConstants.wiredCommandUsagePage
         )
     }
 
@@ -262,11 +265,7 @@ class AndroidAulaBackend(private val context: Context) {
             vendorId = AulaConstants.wiredVendorID,
             productId = AulaConstants.wiredProductID,
             label = "wired keyboard display endpoint",
-            interfacePredicate = { usbInterface ->
-                val inputSize = endpointSize(usbInterface, UsbConstants.USB_DIR_IN)
-                val outputSize = endpointSize(usbInterface, UsbConstants.USB_DIR_OUT)
-                outputSize >= AulaConstants.chunkLength || inputSize >= AulaConstants.ackLength
-            }
+            requiredUsagePage = AulaConstants.wiredRawUsagePage
         )
     }
 
@@ -275,7 +274,8 @@ class AndroidAulaBackend(private val context: Context) {
             context = context,
             vendorId = AulaConstants.dongleVendorID,
             productId = AulaConstants.dongleProductID,
-            label = "2.4G receiver",
+            label = "2.4G receiver raw",
+            requiredUsagePage = AulaConstants.wirelessRawUsagePage,
             interfacePredicate = { usbInterface ->
                 endpointSize(usbInterface, UsbConstants.USB_DIR_OUT) in 1 until AulaConstants.chunkLength
             }
@@ -284,7 +284,9 @@ class AndroidAulaBackend(private val context: Context) {
 
     private fun commandExchange(session: UsbHidSession, packet: ByteArray) {
         sendFeatureReport(session, packet, "SET_REPORT")
-        session.readFeatureReport(AulaConstants.commandLength, 100)
+        if (session.readFeatureReport(AulaConstants.commandLength, 100) == null) {
+            throw AulaError.HidFailed("GET_REPORT", -1)
+        }
     }
 
     private fun sendZeroPages(session: UsbHidSession, count: Int) {
@@ -301,8 +303,8 @@ class AndroidAulaBackend(private val context: Context) {
 
     private fun sendOutputReport(session: UsbHidSession, bytes: ByteArray, operation: String) {
         val written = session.sendOutputReport(bytes)
-        if (written < 0) {
-            throw AulaError.HidFailed(operation, written)
+        if (written != bytes.size) {
+            throw AulaError.HidFailed("$operation ($written/${bytes.size} bytes)", written)
         }
     }
 

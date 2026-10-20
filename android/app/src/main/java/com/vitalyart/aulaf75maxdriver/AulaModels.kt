@@ -55,7 +55,7 @@ data class HIDEndpointInfo(
     val role: String
         get() {
             if (vendorID == AulaConstants.dongleVendorID && productID == AulaConstants.dongleProductID) {
-                return if (maxOutputReportSize >= AulaConstants.commandLength && maxInputReportSize >= AulaConstants.commandLength) {
+                return if (usagePage == AulaConstants.wirelessCommandUsagePage) {
                     "2.4G command"
                 } else {
                     "2.4G raw"

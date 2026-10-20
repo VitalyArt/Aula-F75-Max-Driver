@@ -11,4 +11,26 @@
     <string name="performance">Производительность</string><string name="performance_description">Настройте отклик и энергосбережение.</string><string name="response">Отклик клавиш</string><string name="sleep">Таймер сна</string><string name="game_mode">Игровой режим</string><string name="apply_performance">Применить настройки</string><string name="sync_time">Синхронизировать время</string>
     <string name="display_upload">Загрузка на экран</string><string name="display_description">Отправьте изображение или GIF на экран клавиатуры.</string><string name="no_image">Файл не выбран</string><string name="choose_file">Выбрать файл</string><string name="slot">Слот</string><string name="fit_mode">Кадрирование</string><string name="fit_contain">Вписать</string><string name="fit_cover">Заполнить</string><string name="fit_stretch">Растянуть</string><string name="upload_image">Загрузить на экран</string><string name="upload_progress">Загрузка: %1$d / %2$d блоков</string>
     <string name="device_diagnostics">Диагностика устройства</string><string name="endpoint_description">Здесь показаны подключённые HID-интерфейсы Aula.</string><string name="no_endpoints">HID-интерфейсы Aula не обнаружены.</string><string name="activity_log">Журнал действий</string><string name="no_logs">Действий пока нет.</string><string name="danger_zone">Опасная зона</string><string name="reset_description">Удалить слоты экрана и сбросить настройки клавиатуры.</string><string name="factory_reset">Сброс к заводским</string><string name="reset_title">Сбросить клавиатуру?</string><string name="reset_message">Будут очищены слоты экрана и сброшены блоки настроек, используемые приложением. Отменить действие нельзя.</string><string name="cancel">Отмена</string><string name="confirm_reset">Сбросить клавиатуру</string>
+    <string name="tab_home">Главная</string>
+    <string name="keyboard_preview">Предпросмотр клавиатуры Aula F75 Max</string>
+    <string name="preview_pending">Предпросмотр · не применено</string>
+    <string name="preview_approximation">Предпросмотр приблизительно воспроизводит эффект клавиатуры</string>
+    <string name="receiver_required">Для применения подсветки подключите приёмник 2.4G и предоставьте USB-доступ.</string>
+    <string name="lighting_profiles">Профили подсветки</string>
+    <string name="profiles_empty">Профилей пока нет. Настройте подсветку и сохраните её.</string>
+    <string name="profile_save_new">Сохранить как новый профиль</string>
+    <string name="profile_update">Обновить профиль</string>
+    <string name="profile_rename">Переименовать</string>
+    <string name="profile_delete">Удалить</string>
+    <string name="profile_name">Название профиля</string>
+    <string name="profile_save">Сохранить</string>
+    <string name="profile_discard">Сбросить несохранённые изменения подсветки?</string>
+    <string name="profile_switch">Сбросить и переключить</string>
+    <string name="profile_delete_confirm">Удалить этот профиль?</string>
+    <string name="decrease_value">Уменьшить</string>
+    <string name="increase_value">Увеличить</string>
+    <string name="receiver_access_required">Приёмник 2.4G подключён. Предоставьте USB-доступ для управления подсветкой.</string>
+    <string name="wired_required">Подключите клавиатуру USB-кабелем для загрузки изображения.</string>
+    <string name="wired_access_required">Клавиатура подключена по проводу. Предоставьте USB-доступ для загрузки изображения.</string>
+    <string name="upload_complete">Изображение загружено</string>
 </resources>

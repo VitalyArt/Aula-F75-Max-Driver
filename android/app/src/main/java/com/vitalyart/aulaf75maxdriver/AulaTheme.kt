@@ -10,20 +10,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 private val DarkColors = darkColorScheme(
-    primary = Color(0xFFFFB74D),
-    onPrimary = Color(0xFF2A1700),
-    primaryContainer = Color(0xFF593700),
-    onPrimaryContainer = Color(0xFFFFDDB3),
+    primary = Color(0xFF79AFFF),
+    onPrimary = Color(0xFF071C35),
+    primaryContainer = Color(0xFF233C5C),
+    onPrimaryContainer = Color(0xFFD4E4FF),
     secondary = Color(0xFF8ED1C6),
     onSecondary = Color(0xFF003731),
     tertiary = Color(0xFFC8B6FF),
-    background = Color(0xFF10100E),
-    onBackground = Color(0xFFE9E3D9),
-    surface = Color(0xFF1A1A17),
-    surfaceVariant = Color(0xFF25251F),
-    onSurface = Color(0xFFE9E3D9),
-    onSurfaceVariant = Color(0xFFCBC6BA),
-    outline = Color(0xFF938F85),
+    background = Color(0xFF242424),
+    onBackground = Color(0xFFECECEC),
+    surface = Color(0xFF303030),
+    surfaceVariant = Color(0xFF3A3A3A),
+    onSurface = Color(0xFFECECEC),
+    onSurfaceVariant = Color(0xFFBDBDBD),
+    outline = Color(0xFF767676),
     error = Color(0xFFFFB4AB),
     errorContainer = Color(0xFF93000A),
     onErrorContainer = Color(0xFFFFDAD6)
@@ -41,6 +41,11 @@ fun AulaTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = DarkColors,
         typography = AulaTypography,
-        content = content
+        content = {
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.material3.LocalContentColor provides DarkColors.onBackground,
+                content = content
+            )
+        }
     )
 }

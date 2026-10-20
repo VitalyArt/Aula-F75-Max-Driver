@@ -17,7 +17,9 @@ private const val USB_RECIP_INTERFACE = 0x01
 
 class UsbHidSession private constructor(
     private val connection: UsbDeviceConnection,
-    private val hidInterface: UsbInterface
+    private val hidInterface: UsbInterface,
+    private val useInterruptReports: Boolean = false,
+    private val inputReportSize: Int = 0
 ) : Closeable {
     companion object {
         fun open(
@@ -25,7 +27,8 @@ class UsbHidSession private constructor(
             vendorId: Int,
             productId: Int,
             label: String,
-            interfacePredicate: (UsbInterface) -> Boolean = { true }
+            interfacePredicate: (UsbInterface) -> Boolean = { true },
+            requiredUsagePage: Int? = null
         ): UsbHidSession {
             val usbManager = context.getSystemService(UsbManager::class.java)
             val device = usbManager.deviceList.values.firstOrNull {
@@ -39,13 +42,77 @@ class UsbHidSession private constructor(
             val connection = usbManager.openDevice(device)
                 ?: throw AulaError.OpenFailed("Failed to open USB device for $label.")
 
-            val hidInterface = selectHidInterface(device, interfacePredicate)
+            val selected = try {
+                if (requiredUsagePage == null) selectHidInterface(device, interfacePredicate) to HidReportInfo()
+                else {
+                    val observed = mutableListOf<String>()
+                    var match: Pair<UsbInterface, HidReportInfo>? = null
+                    for (index in 0 until device.interfaceCount) {
+                        val candidate = device.getInterface(index)
+                        if (candidate.interfaceClass != UsbConstants.USB_CLASS_HID) continue
+                        val info = readReportInfo(connection, candidate,
+                            allowInputOnlyVendor = vendorId == AulaConstants.wiredVendorID && productId == AulaConstants.wiredProductID)
+                        val description = "${candidate.id}:${info.usagePages.map { "0x%04x".format(it) }}"
+                        observed.add(description)
+                        android.util.Log.d("AulaUSB", "Interface $description input=${info.inputBytes} output=${info.outputBytes} feature=${info.featureBytes}")
+                        if (requiredUsagePage in info.usagePages && interfacePredicate(candidate)) {
+                            match = candidate to info
+                            break // Do not claim/release another channel which is already in use.
+                        }
+                    }
+                    match ?: throw AulaError.EndpointNotFound("$label usagePage=0x%04x; interfaces=%s".format(requiredUsagePage, observed.joinToString()))
+                }
+            } catch (error: Throwable) {
+                connection.close()
+                throw error
+            }
+            val hidInterface = selected.first
+            android.util.Log.d("AulaUSB", "Opening $label on interface ${hidInterface.id}")
             if (!connection.claimInterface(hidInterface, true)) {
                 connection.close()
                 throw AulaError.OpenFailed("Failed to claim USB interface ${hidInterface.id} for $label.")
             }
 
-            return UsbHidSession(connection, hidInterface)
+            return UsbHidSession(connection, hidInterface,
+                useInterruptReports = requiredUsagePage == AulaConstants.wirelessRawUsagePage || requiredUsagePage == AulaConstants.wiredRawUsagePage,
+                inputReportSize = selected.second.inputBytes)
+        }
+
+        /** GET_DESCRIPTOR(Report), addressed to this interface, before sending any vendor commands. */
+        private fun readReportInfo(connection: UsbDeviceConnection, usbInterface: UsbInterface,
+            allowInputOnlyVendor: Boolean = false): HidReportInfo {
+            // Android usbfs requires claiming an interface for interface-recipient requests.
+            // Never detach boot keyboard/mouse interfaces merely to inspect descriptors.
+            val vendorChannel = usbInterface.interfaceSubclass == 0 &&
+                (allowInputOnlyVendor || (0 until usbInterface.endpointCount).any {
+                    usbInterface.getEndpoint(it).direction == UsbConstants.USB_DIR_OUT
+                })
+            if (!connection.claimInterface(usbInterface, vendorChannel)) return HidReportInfo()
+            return try {
+                val buffer = ByteArray(4096)
+                val count = connection.controlTransfer(
+                    UsbConstants.USB_DIR_IN or UsbConstants.USB_TYPE_STANDARD or USB_RECIP_INTERFACE,
+                    0x06, 0x2200, usbInterface.id, buffer, buffer.size, 1000
+                )
+                android.util.Log.d("AulaUSB", "Report descriptor interface ${usbInterface.id}: $count bytes")
+                if (count > 0) HidReportDescriptor.parse(buffer.copyOf(count)) else HidReportInfo()
+            } finally {
+                connection.releaseInterface(usbInterface)
+            }
+        }
+
+        fun reportInfoByInterface(context: Context, device: UsbDevice): Map<Int, HidReportInfo> {
+            val manager = context.getSystemService(UsbManager::class.java)
+            if (!manager.hasPermission(device)) return emptyMap()
+            val connection = manager.openDevice(device) ?: return emptyMap()
+            return try {
+                (0 until device.interfaceCount).map { device.getInterface(it) }
+                    .filter { it.interfaceClass == UsbConstants.USB_CLASS_HID }
+                    .associate { it.id to readReportInfo(connection, it,
+                        allowInputOnlyVendor = device.vendorId == AulaConstants.wiredVendorID && device.productId == AulaConstants.wiredProductID) }
+            } finally {
+                connection.close()
+            }
         }
 
         fun openFirst(
@@ -97,6 +164,14 @@ class UsbHidSession private constructor(
         get() = hidInterface.id
 
     fun sendOutputReport(report: ByteArray, reportId: Int = 0): Int {
+        val output = if (useInterruptReports) interruptEndpoint(UsbConstants.USB_DIR_OUT) else null
+        if (output != null) {
+            val payload = if (reportId == 0) report else byteArrayOf(reportId.toByte()) + report
+            val count = connection.bulkTransfer(output, payload, payload.size, 1000)
+            android.util.Log.d("AulaUSB", "Interrupt OUT interface ${hidInterface.id} endpoint ${output.address}: $count/${payload.size} bytes")
+            if (count != payload.size) throw AulaError.HidFailed("interrupt OUT", count)
+            return count
+        }
         return sendReport(HID_REPORT_TYPE_OUTPUT, reportId, report)
     }
 
@@ -105,12 +180,27 @@ class UsbHidSession private constructor(
     }
 
     fun readInputReport(length: Int, timeoutMillis: Int): ByteArray? {
+        val input = if (useInterruptReports) interruptEndpoint(UsbConstants.USB_DIR_IN) else null
+        if (input != null) {
+            val reportLength = if (inputReportSize > 0) inputReportSize else input.maxPacketSize
+            val buffer = ByteArray(minOf(length, reportLength))
+            val count = connection.bulkTransfer(input, buffer, buffer.size, timeoutMillis)
+            return if (count > 0) buffer.copyOf(count) else null
+        }
         return readReport(HID_REPORT_TYPE_INPUT, 0, length, timeoutMillis)
     }
 
     fun readFeatureReport(length: Int, timeoutMillis: Int): ByteArray? {
         return readReport(HID_REPORT_TYPE_FEATURE, 0, length, timeoutMillis)
     }
+
+    private fun interruptEndpoint(direction: Int): android.hardware.usb.UsbEndpoint? =
+        (0 until hidInterface.endpointCount).map { hidInterface.getEndpoint(it) }.firstOrNull {
+            it.direction == direction && it.type == UsbConstants.USB_ENDPOINT_XFER_INT
+        }
+
+    // Android's USBDEVFS_BULK path also handles interrupt endpoints synchronously.
+    // Avoid closing queued UsbRequests on timeout: a later requestWait can reap freed native state.
 
     private fun sendReport(reportType: Int, reportId: Int, bytes: ByteArray): Int {
         val result = controlTransfer(
@@ -123,6 +213,7 @@ class UsbHidSession private constructor(
             1_000
         )
 
+        android.util.Log.d("AulaUSB", "SET_REPORT interface ${hidInterface.id} type=$reportType length=${bytes.size}: $result")
         if (result >= 0 && result != bytes.size) {
             throw AulaError.HidFailed("SET_REPORT", result)
         }
