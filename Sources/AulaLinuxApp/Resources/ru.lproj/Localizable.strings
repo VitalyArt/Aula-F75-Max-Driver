@@ -178,3 +178,86 @@
 "Direction %d" = "Направление %d";
 "Level %d" = "Уровень %d";
 "Value %d" = "Значение %d";
+
+"Home" = "Главная";
+
+"Lighting" = "Подсветка";
+
+"Screen" = "Экран";
+
+"Settings" = "Настройки";
+
+"Diagnostics" = "Диагностика";
+
+"Activity Log" = "Журнал действий";
+
+"Advanced" = "Дополнительно";
+
+"Keyboard Control" = "Управление клавиатурой";
+
+"No activity yet" = "Пока нет действий";
+
+"Open Lighting" = "Открыть подсветку";
+
+"Open Screen" = "Открыть экран";
+
+"Screen clock" = "Часы на экране";
+
+"Refresh battery" = "Обновить заряд";
+
+// Shared desktop interface
+"Working…" = "Выполняется…";
+"Connect the keyboard with a USB-C cable to use these controls." = "Подключите клавиатуру кабелем USB-C, чтобы использовать эти элементы.";
+"Plug in the 2.4G receiver to use these controls." = "Подключите приёмник 2.4G, чтобы использовать эти элементы.";
+"USB cable connected" = "Кабель USB подключён";
+"2.4G receiver connected" = "Приёмник 2.4G подключён";
+"Effects, colour and brightness" = "Эффекты, цвет и яркость";
+"Screen image" = "Изображение на экране";
+"Show a picture or GIF on the keyboard display" = "Показать картинку или GIF на экране клавиатуры";
+"Colour" = "Цвет";
+"Rainbow" = "Радуга";
+"Single colour" = "Один цвет";
+"No file selected" = "Файл не выбран";
+"Choose File…" = "Выбрать файл…";
+"Upload to Keyboard" = "Загрузить на клавиатуру";
+"Picture" = "Картинка";
+"PNG, JPEG, GIF, BMP, TIFF or WebP. Shown at 128 × 128." = "PNG, JPEG, GIF, BMP, TIFF или WebP. Показывается в 128 × 128.";
+"Key response" = "Отклик клавиш";
+"Sleep after" = "Сон через";
+"Typing" = "Набор текста";
+"Changes are sent when you press Apply." = "Изменения отправляются при нажатии «Применить».";
+"Game Mode" = "Игровой режим";
+"General" = "Основные";
+"Danger Zone" = "Опасная зона";
+"Clears uploaded screen images and resets keyboard settings changed by this app." = "Удаляет загруженные на экран изображения и сбрасывает настройки клавиатуры, изменённые этим приложением.";
+"Factory Reset Keyboard…" = "Сбросить клавиатуру к заводским…";
+"Connections" = "Подключения";
+"Copy Log" = "Копировать журнал";
+"Apply to Keyboard" = "Применить на клавиатуре";
+"Aula F75 Max keyboard preview" = "Предпросмотр клавиатуры Aula F75 Max";
+"Calm Breath" = "Спокойное дыхание";
+"Changes are sent when you press Apply to Keyboard." = "Изменения отправляются при нажатии «Применить на клавиатуре».";
+"Delete" = "Удалить";
+"Delete this profile?" = "Удалить этот профиль?";
+"Delete…" = "Удалить…";
+"Discard and Switch" = "Отменить и переключить";
+"Discard your unsaved lighting changes?" = "Отменить несохранённые изменения подсветки?";
+"Exactly what the keyboard screen will show" = "Ровно то, что покажет экран клавиатуры";
+"No saved profiles yet. Set up a look you like and save it." = "Сохранённых профилей пока нет. Настройте понравившийся вид и сохраните его.";
+"Preview is an approximation of the keyboard's effect" = "Предпросмотр приблизительно показывает эффект клавиатуры";
+"Preview · not applied" = "Предпросмотр · не применено";
+"Profiles" = "Профили";
+"Rainbow Wave" = "Радужная волна";
+"Rename Profile" = "Переименовать профиль";
+"Rename…" = "Переименовать…";
+"Revert" = "Вернуть";
+"Save" = "Сохранить";
+"Save as New Profile" = "Сохранить как новый профиль";
+"Save as New Profile…" = "Сохранить как новый профиль…";
+"Still image" = "Статичное изображение";
+"Update" = "Обновить";
+"%d entries" = "Записей: %d";
+"Preparing preview…" = "Подготовка предпросмотра…";
+"Locks the Windows/Super key. Also sends the Typing settings above." = "Блокирует клавишу Windows/Super. Также отправляет настройки набора текста выше.";
+"Restore Windows/Super Key" = "Восстановить клавишу Windows/Super";
+"Linux udev hidraw access is required for keyboard commands." = "Для команд клавиатуры в Linux нужен доступ к hidraw через udev.";

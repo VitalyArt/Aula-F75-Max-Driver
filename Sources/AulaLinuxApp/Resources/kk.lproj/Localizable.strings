@@ -178,3 +178,86 @@
 "Direction %d" = "%d-бағыт";
 "Level %d" = "%d-деңгей";
 "Value %d" = "%d-мән";
+
+"Home" = "Басты бет";
+
+"Lighting" = "Жарықтандыру";
+
+"Screen" = "Экран";
+
+"Settings" = "Баптаулар";
+
+"Diagnostics" = "Диагностика";
+
+"Activity Log" = "Әрекеттер журналы";
+
+"Advanced" = "Қосымша";
+
+"Keyboard Control" = "Пернетақтаны басқару";
+
+"No activity yet" = "Әзірге әрекет жоқ";
+
+"Open Lighting" = "Жарықтандыруды ашу";
+
+"Open Screen" = "Экранды ашу";
+
+"Screen clock" = "Экран сағаты";
+
+"Refresh battery" = "Батареяны жаңарту";
+
+// Shared desktop interface
+"Working…" = "Орындалуда…";
+"Connect the keyboard with a USB-C cable to use these controls." = "Бұл басқару элементтерін пайдалану үшін пернетақтаны USB-C кабелімен қосыңыз.";
+"Plug in the 2.4G receiver to use these controls." = "Бұл басқару элементтерін пайдалану үшін 2.4G қабылдағышын қосыңыз.";
+"USB cable connected" = "USB кабелі қосылған";
+"2.4G receiver connected" = "2.4G қабылдағышы қосылған";
+"Effects, colour and brightness" = "Эффектілер, түс және жарықтық";
+"Screen image" = "Экран суреті";
+"Show a picture or GIF on the keyboard display" = "Пернетақта экранында сурет не GIF көрсету";
+"Colour" = "Түс";
+"Rainbow" = "Кемпірқосақ";
+"Single colour" = "Бір түс";
+"No file selected" = "Файл таңдалмаған";
+"Choose File…" = "Файлды таңдау…";
+"Upload to Keyboard" = "Пернетақтаға жүктеу";
+"Picture" = "Сурет";
+"PNG, JPEG, GIF, BMP, TIFF or WebP. Shown at 128 × 128." = "PNG, JPEG, GIF, BMP, TIFF немесе WebP. 128 × 128 өлшемде көрсетіледі.";
+"Key response" = "Пернелер жауабы";
+"Sleep after" = "Ұйқы режимі";
+"Typing" = "Теру";
+"Changes are sent when you press Apply." = "Өзгерістер «Қолдану» басылғанда жіберіледі.";
+"Game Mode" = "Ойын режимі";
+"General" = "Жалпы";
+"Danger Zone" = "Қауіпті аймақ";
+"Clears uploaded screen images and resets keyboard settings changed by this app." = "Экранға жүктелген суреттерді өшіреді және осы қолданба өзгерткен пернетақта баптауларын қалпына келтіреді.";
+"Factory Reset Keyboard…" = "Пернетақтаны зауыттық баптауларға қайтару…";
+"Connections" = "Қосылымдар";
+"Copy Log" = "Журналды көшіру";
+"Apply to Keyboard" = "Пернетақтаға қолдану";
+"Aula F75 Max keyboard preview" = "Aula F75 Max пернетақтасының алдын ала көрінісі";
+"Calm Breath" = "Тыныш тыныс";
+"Changes are sent when you press Apply to Keyboard." = "Өзгерістер «Пернетақтаға қолдану» басылғанда жіберіледі.";
+"Delete" = "Жою";
+"Delete this profile?" = "Бұл профильді жою керек пе?";
+"Delete…" = "Жою…";
+"Discard and Switch" = "Бас тартып ауыстыру";
+"Discard your unsaved lighting changes?" = "Сақталмаған жарықтандыру өзгерістерінен бас тарту керек пе?";
+"Exactly what the keyboard screen will show" = "Пернетақта экраны дәл осыны көрсетеді";
+"No saved profiles yet. Set up a look you like and save it." = "Әзірге сақталған профильдер жоқ. Ұнаған көріністі баптап, сақтаңыз.";
+"Preview is an approximation of the keyboard's effect" = "Алдын ала көрініс пернетақта эффектісінің шамамен бейнесі";
+"Preview · not applied" = "Алдын ала көрініс · қолданылмаған";
+"Profiles" = "Профильдер";
+"Rainbow Wave" = "Кемпірқосақ толқыны";
+"Rename Profile" = "Профильдің атын өзгерту";
+"Rename…" = "Атын өзгерту…";
+"Revert" = "Қайтару";
+"Save" = "Сақтау";
+"Save as New Profile" = "Жаңа профиль ретінде сақтау";
+"Save as New Profile…" = "Жаңа профиль ретінде сақтау…";
+"Still image" = "Қозғалмайтын сурет";
+"Update" = "Жаңарту";
+"%d entries" = "%d жазба";
+"Preparing preview…" = "Алдын ала көрініс дайындалуда…";
+"Locks the Windows/Super key. Also sends the Typing settings above." = "Windows/Super пернесін бұғаттайды. Жоғарыдағы теру параметрлерін де жібереді.";
+"Restore Windows/Super Key" = "Windows/Super пернесін қалпына келтіру";
+"Linux udev hidraw access is required for keyboard commands." = "Linux жүйесінде пернетақта командаларына udev арқылы hidraw рұқсаты қажет.";

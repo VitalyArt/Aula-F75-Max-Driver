@@ -7,7 +7,8 @@ var products: [Product] = [
 ]
 
 var targets: [Target] = [
-    .target(name: "AulaCore")
+    .target(name: "AulaCore"),
+    .testTarget(name: "AulaCoreTests", dependencies: ["AulaCore"])
 ]
 
 #if os(macOS)
@@ -17,6 +18,7 @@ products.append(
 targets.append(
     .executableTarget(
         name: "AulaF75MaxDriver",
+        dependencies: ["AulaCore"],
         resources: [
             .process("Resources")
         ],

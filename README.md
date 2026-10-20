@@ -27,6 +27,18 @@ After pushing to `main` or `master`, GitHub Actions publishes the `docs/` direct
 
 ![Aula F75 Max Driver endpoint diagnostics and app settings](docs/screenshots/details-window.png)
 
+### Linux GTK interface
+
+English screenshots captured with mocked HID and an isolated configuration:
+
+![Linux Home page](docs/screenshots/linux-home.png)
+
+![Linux Lighting page with live keyboard preview and effect gallery](docs/screenshots/linux-lighting.png)
+
+![Linux lighting controls and saved profiles](docs/screenshots/linux-lighting-controls.png)
+
+![Linux Screen page with encoded GIF preview](docs/screenshots/linux-screen.png)
+
 ## Features
 
 - Detects wired USB HID endpoints for the keyboard.
@@ -332,7 +344,7 @@ Important files:
 - `DisplayEncoder.swift` converts image files into the keyboard display payload format.
 - `HIDDeviceMonitor.swift` watches for supported HID attach and removal events.
 - `AulaTypes.swift` contains the current macOS app protocol constants, shared errors, endpoint metadata, and upload progress types.
-- `AulaCore` contains portable packet builders and shared types used by the Linux implementation.
+- `AulaCore` contains portable packet builders, the keyboard layout, and the lighting settings/effect renderer shared by macOS and Linux.
 - `Localization.swift` resolves bundled localized strings and language override behavior.
 - `android/app/src/main/java/com/vitalyart/aulaf75maxdriver/AulaApp.kt` contains the Android Compose interface.
 - `android/app/src/main/java/com/vitalyart/aulaf75maxdriver/AulaBackend.kt` performs Android USB Host device commands.
@@ -401,6 +413,16 @@ Linux validation should be run on Ubuntu or Fedora after installing the document
 make linux-build
 make linux-run
 ```
+
+The shared lighting and keyboard geometry tests run on both desktop platforms:
+
+```sh
+swift test --filter LightingPreviewTests
+```
+
+On Linux, `bash scripts/linux-ui-test.sh` exercises the actual GTK widgets with mocked HID, isolated profiles, generated image/GIF fixtures, and screenshots/animation recordings in a temporary directory. It requires `xvfb`, `xauth`, `ffmpeg`, a C compiler, and the GTK development dependencies. No commands are sent to a physical keyboard. The check covers profile CRUD, failed Apply and Revert, RGB565 preview/upload consistency, GIF timing, upload progress, reduced animation, and closing during background preparation.
+
+Linux lighting profiles are stored in `$XDG_CONFIG_HOME/aula-f75-max-driver/lighting-profiles.json` (default: `~/.config/aula-f75-max-driver/lighting-profiles.json`). Previewing effects and saving profiles work without a receiver; sending a profile requires the receiver. The Home keyboard shows the last successfully applied lighting in the current session.
 
 Validate the Android Kotlin models and debug APK with JDK 17 and an installed Android SDK:
 

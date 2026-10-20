@@ -19,7 +19,7 @@ extern void aula_linux_refresh(char *buffer, int capacity);
 extern void aula_linux_query_battery(char *buffer, int capacity);
 extern void aula_linux_sync_time(char *buffer, int capacity);
 extern void aula_linux_factory_reset(char *buffer, int capacity);
-extern void aula_linux_upload_display(char *buffer, int capacity, const unsigned char *bytes, int length, int slot);
+extern void aula_linux_upload_display(char *buffer, int capacity, const unsigned char *bytes, int length, int slot, void *context);
 extern void aula_linux_endpoint_counts(int *wired, int *dongle);
 extern void aula_linux_apply_rgb(char *buffer, int capacity, int mode, int brightness, int speed, int direction, int colorful, int color);
 extern void aula_linux_apply_performance(char *buffer, int capacity, int level, int sleep_time);
@@ -139,7 +139,29 @@ void aula_linux_store_language(const char *language_code) {
     aula_linux_language_fallback_write(code);
 }
 
+typedef struct { int mode, brightness, speed, direction, colorful, color; } LightingState;
+
 typedef struct {
+    GtkStack *stack;
+    GtkListBox *navigation;
+    LightingState applied, launch;
+    gboolean has_applied, loading_controls, busy, closed;
+    GtkWidget *home_stage, *lighting_stage, *screen_stage, *effect_flow;
+    GtkWidget *preview_badge, *revert_button, *profiles_flow, *home_profiles;
+    GtkWidget *profile_update, *profile_rename, *profile_delete;
+    GtkWidget *frame_strip, *frame_label, *upload_progress, *log_count;
+    GtkTextView *log_view;
+    GtkWidget *controls[7];
+    int selected_profile, profile_count, log_entries;
+    LightingState selected_profile_settings;
+    gboolean has_profile_settings;
+    GBytes *display_bytes;
+    GPtrArray *display_frames;
+    guint preview_generation, animation_timer;
+    gint64 animation_start, last_clock_redraw;
+    int current_frame;
+    GtkWidget *page_title;
+    GtkWidget *status_message;
     GtkWidget *wired_value;
     GtkWidget *wired_detail;
     GtkWidget *dongle_value;
@@ -153,6 +175,7 @@ typedef struct {
     GtkWidget *choose_image_button;
     GtkWidget *upload_image_button;
     GtkWidget *selected_image_label;
+    GtkWidget *screen_preview;
     GtkWidget *display_slot;
     GtkWidget *fit_mode;
     char *selected_image_path;
@@ -262,8 +285,10 @@ static void on_language_changed(GtkComboBox *combo, gpointer user_data) {
 }
 
 static const char *localized(const char *key) {
-    static char buffer[1024];
-    aula_linux_localized_string(key, buffer, (int)sizeof(buffer));
+    static _Thread_local char buffers[8][1024];
+    static _Thread_local unsigned index;
+    char *buffer = buffers[index++ % 8];
+    aula_linux_localized_string(key, buffer, 1024);
     return buffer;
 }
 
@@ -356,7 +381,11 @@ static GtkWidget *make_panel(const char *title, const char *subtitle, const char
 
     GtkWidget *title_box = vbox_new(2);
     gtk_box_append(GTK_BOX(title_box), label_new(title, "panel-title"));
-    gtk_box_append(GTK_BOX(title_box), label_new(subtitle, "muted"));
+    if (subtitle[0]) {
+        GtkWidget *caption = label_new(subtitle, "muted");
+        gtk_label_set_max_width_chars(GTK_LABEL(caption), 30);
+        gtk_box_append(GTK_BOX(title_box), caption);
+    }
     gtk_box_append(GTK_BOX(head), title_box);
     gtk_box_append(GTK_BOX(panel), head);
 
@@ -405,23 +434,33 @@ static GtkWidget *make_spin(int min, int max, int value) {
 static GtkWidget *setting_row(const char *title, GtkWidget *control) {
     GtkWidget *row = hbox_new(12);
     GtkWidget *label = label_new(title, "setting-label");
-    gtk_widget_set_size_request(label, 128, -1);
+    gtk_widget_set_size_request(label, 100, -1);
     gtk_box_append(GTK_BOX(row), label);
     gtk_box_append(GTK_BOX(row), control);
     return row;
 }
 
+static LightingState current_lighting(AulaLinuxUI *ui);
+static void update_lighting_preview(AulaLinuxUI *ui);
+static void prepare_screen(AulaLinuxUI *ui);
+static void start_command(AulaLinuxUI *ui, int kind);
+static void confirm_reset(GtkButton *button, gpointer data);
+
 static void append_log(AulaLinuxUI *ui, const char *message) {
+    gtk_label_set_text(GTK_LABEL(ui->status_message), message);
     GtkTextIter end;
     gtk_text_buffer_get_end_iter(ui->log_buffer, &end);
     gtk_text_buffer_insert(ui->log_buffer, &end, message, -1);
     gtk_text_buffer_insert(ui->log_buffer, &end, "\n", -1);
-}
-
-static void run_buffer_action(AulaLinuxUI *ui, void (*action)(char *, int), char *out, int capacity) {
-    memset(out, 0, (size_t)capacity);
-    action(out, capacity);
-    append_log(ui, out[0] == '\0' ? "No output." : out);
+    ui->log_entries++;
+    char count[64];
+    format_localized(count, sizeof(count), "%d entries", ui->log_entries);
+    if (ui->log_count) gtk_label_set_text(GTK_LABEL(ui->log_count), count);
+    if (ui->log_view) {
+        GtkTextMark *mark = gtk_text_buffer_get_insert(ui->log_buffer);
+        gtk_text_buffer_place_cursor(ui->log_buffer, &end);
+        gtk_text_view_scroll_mark_onscreen(ui->log_view, mark);
+    }
 }
 
 static int selected_index(GtkWidget *combo, int fallback) {
@@ -440,28 +479,40 @@ static int selected_color(GtkWidget *color_button) {
 
 static void update_status_widgets(AulaLinuxUI *ui) {
     char value[64];
-    format_localized(value, sizeof(value), "wired %d endpoint(s)", ui->wired_count);
+    g_strlcpy(value, L("USB cable connected"), sizeof(value));
     gtk_label_set_text(GTK_LABEL(ui->wired_value), ui->wired_count > 0 ? value : L("Not connected"));
     gtk_label_set_text(GTK_LABEL(ui->wired_detail), ui->wired_count > 0 ? L("Ready for wired operations") : L("Connect the keyboard by USB-C."));
 
-    format_localized(value, sizeof(value), "2.4G %d endpoint(s)", ui->dongle_count);
+    g_strlcpy(value, L("2.4G receiver connected"), sizeof(value));
     gtk_label_set_text(GTK_LABEL(ui->dongle_value), ui->dongle_count > 0 ? value : L("Not connected"));
     gtk_label_set_text(GTK_LABEL(ui->dongle_detail), ui->dongle_count > 0 ? L("Required for battery, RGB and performance.") : L("Plug in the 2.4G receiver."));
 
-    gtk_label_set_text(GTK_LABEL(ui->ready_pill), (ui->wired_count > 0 || ui->dongle_count > 0) ? L("Ready") : L("Idle"));
+    gtk_label_set_text(GTK_LABEL(ui->ready_pill), ui->busy ? L("Working…") : (ui->wired_count > 0 || ui->dongle_count > 0) ? L("Ready") : L("Idle"));
     gtk_label_set_text(GTK_LABEL(ui->battery_detail), ui->dongle_count > 0 ? L("Query over the 2.4G dongle.") : L("Battery is unavailable without the dongle."));
 
-    gtk_widget_set_sensitive(ui->sync_button, ui->wired_count > 0);
-    gtk_widget_set_sensitive(ui->factory_reset_button, ui->wired_count > 0);
-    gtk_widget_set_sensitive(ui->upload_image_button, ui->wired_count > 0 && ui->selected_image_path != NULL);
-    gtk_widget_set_sensitive(ui->battery_button, ui->dongle_count > 0);
-    gtk_widget_set_sensitive(ui->apply_rgb_button, ui->dongle_count > 0);
-    gtk_widget_set_sensitive(ui->apply_performance_button, ui->dongle_count > 0);
-    gtk_widget_set_sensitive(ui->restore_command_button, ui->dongle_count > 0);
-    gtk_widget_set_sensitive(ui->game_mode_button, ui->dongle_count > 0);
+    gtk_widget_set_sensitive(ui->sync_button, ui->wired_count > 0 && !ui->busy);
+    gtk_widget_set_sensitive(ui->factory_reset_button, ui->wired_count > 0 && !ui->busy);
+    gtk_widget_set_sensitive(ui->upload_image_button, ui->wired_count > 0 && ui->display_bytes != NULL && !ui->busy);
+    gtk_widget_set_sensitive(ui->battery_button, ui->dongle_count > 0 && !ui->busy);
+    gtk_widget_set_sensitive(ui->apply_rgb_button, ui->dongle_count > 0 && !ui->busy);
+    gtk_widget_set_sensitive(ui->apply_performance_button, ui->dongle_count > 0 && !ui->busy);
+    gtk_widget_set_sensitive(ui->restore_command_button, ui->dongle_count > 0 && !ui->busy);
+    gtk_widget_set_sensitive(ui->game_mode_button, ui->dongle_count > 0 && !ui->busy);
+    if (ui->controls[4]) gtk_widget_set_sensitive(ui->controls[4], ui->dongle_count > 0 && !ui->busy);
+    if (ui->controls[5]) gtk_widget_set_sensitive(ui->controls[5], ui->dongle_count > 0 && !ui->busy);
+    if (ui->display_slot) gtk_widget_set_sensitive(ui->display_slot, ui->wired_count > 0 && !ui->busy);
+    GtkWidget *usb_note = g_object_get_data(G_OBJECT(ui->wired_detail), "requirement-note");
+    GtkWidget *receiver_note = g_object_get_data(G_OBJECT(ui->dongle_detail), "requirement-note");
+    GtkWidget *performance_note = g_object_get_data(G_OBJECT(ui->dongle_detail), "performance-note");
+    GtkWidget *clock = g_object_get_data(G_OBJECT(ui->sync_button), "screen-clock");
+    if (usb_note) gtk_widget_set_visible(usb_note, ui->wired_count == 0);
+    if (receiver_note) gtk_widget_set_visible(receiver_note, ui->dongle_count == 0);
+    if (performance_note) gtk_widget_set_visible(performance_note, ui->dongle_count == 0);
+    if (clock) gtk_widget_set_sensitive(clock, ui->wired_count > 0 && !ui->busy);
 }
 
 static gboolean refresh_status(AulaLinuxUI *ui) {
+    if (ui->busy) return FALSE;
     int previous_wired = ui->wired_count;
     int previous_dongle = ui->dongle_count;
     int wired = 0;
@@ -494,40 +545,16 @@ static void refresh_endpoints(AulaLinuxUI *ui, gboolean log_result) {
 }
 
 static gboolean query_battery(AulaLinuxUI *ui, gboolean log_result) {
-    if (ui->dongle_count <= 0) {
-        ui->battery_percent = -1;
-        gtk_label_set_text(GTK_LABEL(ui->battery_value), L("Unknown"));
-        return FALSE;
-    }
-
-    char buffer[8192];
-    memset(buffer, 0, sizeof(buffer));
-    aula_linux_query_battery(buffer, (int)sizeof(buffer));
-
-    int percent = -1;
-    gboolean ok = sscanf(buffer, "%*[^0-9]%d%%", &percent) == 1 && percent >= 0;
-    if (ok) {
-        char text[16];
-        snprintf(text, sizeof(text), "%d%%", percent);
-        gtk_label_set_text(GTK_LABEL(ui->battery_value), text);
-        if (log_result || ui->battery_percent != percent) {
-            append_log(ui, buffer[0] == '\0' ? "Battery updated." : buffer);
-        }
-        ui->battery_percent = percent;
-        ui->last_battery_query_usec = g_get_monotonic_time();
-        return TRUE;
-    }
-
-        gtk_label_set_text(GTK_LABEL(ui->battery_value), L("Unknown"));
-    if (log_result) {
-        append_log(ui, buffer[0] == '\0' ? "Battery query sent, but no percentage report was received." : buffer);
-    }
-    ui->last_battery_query_usec = g_get_monotonic_time();
-    return FALSE;
+    (void)log_result;
+    if (ui->busy || ui->dongle_count <= 0) return FALSE;
+    start_command(ui, 8);
+    return TRUE;
 }
 
 static gboolean poll_devices(gpointer user_data) {
     AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
+    if (ui->closed) { ui->refresh_timer_id = 0; return G_SOURCE_REMOVE; }
+    if (ui->busy) return G_SOURCE_CONTINUE;
     int previous_dongle = ui->dongle_count;
     gboolean changed = refresh_status(ui);
 
@@ -749,6 +776,7 @@ static void on_choose_image_done(GObject *source_object, GAsyncResult *result, g
     AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
     GError *error = NULL;
     GFile *file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source_object), result, &error);
+    if (ui->closed) { g_clear_object(&file); g_clear_error(&error); g_object_unref(ui->window); return; }
     if (file == NULL) {
         if (error != NULL) {
             if (!g_error_matches(error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED)) {
@@ -756,6 +784,7 @@ static void on_choose_image_done(GObject *source_object, GAsyncResult *result, g
             }
             g_error_free(error);
         }
+        g_object_unref(ui->window);
         return;
     }
 
@@ -763,6 +792,7 @@ static void on_choose_image_done(GObject *source_object, GAsyncResult *result, g
     if (path != NULL) {
         g_free(ui->selected_image_path);
         ui->selected_image_path = path;
+        prepare_screen(ui);
         char *basename = g_path_get_basename(path);
         gtk_label_set_text(GTK_LABEL(ui->selected_image_label), basename != NULL ? basename : path);
         char message[512];
@@ -772,6 +802,7 @@ static void on_choose_image_done(GObject *source_object, GAsyncResult *result, g
         update_status_widgets(ui);
     }
     g_object_unref(file);
+    g_object_unref(ui->window);
 }
 
 static void on_choose_image_clicked(GtkButton *button, gpointer user_data) {
@@ -779,73 +810,15 @@ static void on_choose_image_clicked(GtkButton *button, gpointer user_data) {
     AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
     GtkFileDialog *dialog = gtk_file_dialog_new();
     gtk_file_dialog_set_title(dialog, L("Choose File"));
-    gtk_file_dialog_open(dialog, NULL, NULL, on_choose_image_done, ui);
+    g_object_ref(ui->window);
+    gtk_file_dialog_open(dialog, ui->window, NULL, on_choose_image_done, ui);
     g_object_unref(dialog);
 }
 
-static void on_upload_image_clicked(GtkButton *button, gpointer user_data) {
-    (void)button;
-    AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
-    if (ui->selected_image_path == NULL) {
-        append_log(ui, L("Select an image or GIF first."));
-        return;
-    }
-
-    int fit = selected_index(ui->fit_mode, 0);
-    int slot = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(ui->display_slot));
-    unsigned char *stream = NULL;
-    int stream_length = 0;
-    char encode_error[512];
-    encode_error[0] = '\0';
-    if (!encode_display_image(ui->selected_image_path, fit, &stream, &stream_length, encode_error, sizeof(encode_error))) {
-        append_log(ui, encode_error[0] == '\0' ? "Failed to encode image." : encode_error);
-        return;
-    }
-
-    char encoded_message[96];
-    format_localized(encoded_message, sizeof(encoded_message), "Encoded %d frame(s), %d chunk(s).", (int)stream[0], stream_length / 4096);
-    append_log(ui, encoded_message);
-
-    char buffer[8192];
-    memset(buffer, 0, sizeof(buffer));
-    aula_linux_upload_display(buffer, (int)sizeof(buffer), stream, stream_length, slot);
-    append_log(ui, buffer[0] == '\0' ? L("No output.") : buffer);
-    g_free(stream);
-    refresh_status(ui);
-}
-
-static void on_sync_time_clicked(GtkButton *button, gpointer user_data) {
-    (void)button;
-    AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
-    char buffer[8192];
-    run_buffer_action(ui, aula_linux_sync_time, buffer, (int)sizeof(buffer));
-    refresh_status(ui);
-}
-
-static void on_factory_reset_clicked(GtkButton *button, gpointer user_data) {
-    (void)button;
-    AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
-    char buffer[8192];
-    run_buffer_action(ui, aula_linux_factory_reset, buffer, (int)sizeof(buffer));
-    refresh_status(ui);
-}
-
-static void on_apply_rgb_clicked(GtkButton *button, gpointer user_data) {
-    (void)button;
-    AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
-    char buffer[8192];
-    int mode = selected_index(ui->rgb_mode, 11);
-    int brightness = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(ui->rgb_brightness));
-    int speed = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(ui->rgb_speed));
-    int direction = selected_index(ui->rgb_direction, 0);
-    int colorful = gtk_switch_get_active(GTK_SWITCH(ui->rgb_colorful)) ? 1 : 0;
-    int color = selected_color(ui->rgb_color);
-
-    memset(buffer, 0, sizeof(buffer));
-    aula_linux_apply_rgb(buffer, (int)sizeof(buffer), mode, brightness, speed, direction, colorful, color);
-    append_log(ui, buffer[0] == '\0' ? L("No output.") : buffer);
-    refresh_status(ui);
-}
+static void on_upload_image_clicked(GtkButton *button, gpointer data) { (void)button; start_command(data, 1); }
+static void on_sync_time_clicked(GtkButton *button, gpointer data) { (void)button; start_command(data, 2); }
+static void on_factory_reset_clicked(GtkButton *button, gpointer data) { (void)button; start_command(data, 3); }
+static void on_apply_rgb_clicked(GtkButton *button, gpointer data) { (void)button; start_command(data, 4); }
 
 static int current_response_level(AulaLinuxUI *ui) {
     return selected_index(ui->response_level, 0) + 1;
@@ -855,37 +828,9 @@ static int current_sleep_time(AulaLinuxUI *ui) {
     return selected_index(ui->sleep_time, 1);
 }
 
-static void on_apply_performance_clicked(GtkButton *button, gpointer user_data) {
-    (void)button;
-    AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
-    char buffer[8192];
-    memset(buffer, 0, sizeof(buffer));
-    aula_linux_apply_performance(buffer, (int)sizeof(buffer), current_response_level(ui), current_sleep_time(ui));
-    append_log(ui, buffer[0] == '\0' ? L("No output.") : buffer);
-    refresh_status(ui);
-}
-
-static void on_restore_command_clicked(GtkButton *button, gpointer user_data) {
-    (void)button;
-    AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
-    char buffer[8192];
-    memset(buffer, 0, sizeof(buffer));
-    aula_linux_restore_command(buffer, (int)sizeof(buffer), current_response_level(ui), current_sleep_time(ui));
-    append_log(ui, buffer[0] == '\0' ? L("No output.") : buffer);
-    refresh_status(ui);
-}
-
-static void on_game_mode_clicked(GtkButton *button, gpointer user_data) {
-    (void)button;
-    AulaLinuxUI *ui = (AulaLinuxUI *)user_data;
-    char buffer[8192];
-    ui->game_mode_enabled = !ui->game_mode_enabled;
-    memset(buffer, 0, sizeof(buffer));
-    aula_linux_set_game_mode(buffer, (int)sizeof(buffer), ui->game_mode_enabled ? 1 : 0, current_response_level(ui), current_sleep_time(ui));
-    append_log(ui, buffer[0] == '\0' ? L("No output.") : buffer);
-    gtk_button_set_label(GTK_BUTTON(ui->game_mode_button), ui->game_mode_enabled ? L("Disable Game Mode") : L("Enable Game Mode"));
-    refresh_status(ui);
-}
+static void on_apply_performance_clicked(GtkButton *button, gpointer data) { (void)button; start_command(data, 5); }
+static void on_restore_command_clicked(GtkButton *button, gpointer data) { (void)button; start_command(data, 6); }
+static void on_game_mode_clicked(GtkButton *button, gpointer data) { (void)button; start_command(data, 7); }
 
 static void install_icon_search_path(void) {
     char exe_path[PATH_MAX];
@@ -914,24 +859,40 @@ static void install_icon_search_path(void) {
 static void install_css(void) {
     GtkCssProvider *provider = gtk_css_provider_new();
     const char *css =
-        "window { background: #111617; color: #f4f2ed; }"
-        ".page { padding: 24px; }"
-        ".hero-title { font-size: 34px; font-weight: 900; color: #ffffff; }"
-        ".subtitle, .muted { color: rgba(244,242,237,0.62); font-size: 12px; }"
-        ".ready-pill { color: #6ee7a8; background: rgba(36, 146, 91, 0.16); border: 1px solid rgba(110,231,168,0.32); border-radius: 999px; padding: 8px 14px; font-weight: 700; }"
-        ".status-card, .panel { background: rgba(255,255,255,0.075); border: 1px solid rgba(255,255,255,0.13); border-radius: 14px; padding: 16px; }"
-        ".panel-title { font-size: 17px; font-weight: 800; color: #ffffff; }"
-        ".eyebrow { color: rgba(244,242,237,0.58); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }"
-        ".status-value { font-size: 22px; font-weight: 900; color: #ffffff; }"
-        ".icon-box { background: rgba(245,146,65,0.14); border-radius: 10px; padding: 9px; color: #f59a42; }"
-        ".status-icon { background: rgba(47, 163, 138, 0.16); color: #65d6bd; }"
-        ".accent-icon { background: rgba(245,146,65,0.15); color: #f59a42; }"
-        ".setting-label { color: rgba(244,242,237,0.78); font-weight: 700; }"
-        ".section-title { color: #ffffff; font-weight: 800; font-size: 14px; }"
-        ".warning-box { background: rgba(245,146,65,0.10); border: 1px solid rgba(245,146,65,0.22); border-radius: 10px; padding: 12px; }"
-        "button { border-radius: 9px; padding: 8px 12px; }"
-        "button.suggested-action { background: #d97828; color: #ffffff; }"
-        "textview, textview text { background: rgba(0,0,0,0.22); color: rgba(244,242,237,0.82); font-family: monospace; }";
+        ".aula-window { background: @theme_bg_color; color: @theme_fg_color; }"
+        ".sidebar { background: alpha(@theme_fg_color, 0.035); padding: 20px 12px 12px; }"
+        ".sidebar list { background: transparent; }"
+        ".sidebar row { border-radius: 8px; padding: 9px 8px; margin: 2px 0; }"
+        ".brand { padding: 12px 6px 20px; }"
+        ".page { padding: 16px 28px 24px; }"
+        ".hero-title { font-size: 26px; font-weight: bold; padding: 20px 28px 6px; }"
+        ".subtitle, .muted { opacity: 0.65; font-size: 12px; }"
+        ".ready-pill { color: #38a86b; padding: 12px 6px; }"
+        ".status-card, .panel { background: alpha(@theme_base_color, 0.65); border: 1px solid alpha(@theme_fg_color, 0.10); border-radius: 12px; padding: 18px; }"
+        ".panel-title { font-size: 16px; font-weight: bold; }"
+        ".eyebrow { opacity: 0.65; font-size: 11px; }"
+        ".status-value { font-size: 24px; font-weight: bold; }"
+        ".icon-box { border-radius: 10px; padding: 9px; color: @theme_selected_bg_color; }"
+        ".setting-label, .section-title { font-weight: bold; }"
+        ".status-bar { border-radius: 999px; margin: 6px 28px 12px; padding: 8px 14px; background: alpha(@theme_base_color, 0.8); box-shadow: 0 3px 10px alpha(black, 0.12); }"
+        "button { border-radius: 8px; padding: 8px 12px; }"
+        "textview { border-radius: 8px; padding: 10px; }"
+        ".stage-backdrop { background: linear-gradient(135deg, #22252b, #101115); color: #f0f0f2; border-radius: 14px; padding: 16px; border: 1px solid alpha(white, .09); }"
+        ".stage-backdrop .status-card { background: transparent; border: none; padding: 8px; }"
+        ".stage-backdrop .status-value { font-size: 16px; }"
+        ".stage-backdrop .icon-box { color: #7eb5ff; }"
+        ".stage-backdrop button { background: #30323a; color: #eeeef0; }"
+        ".stage-backdrop button:hover { background: #3c3f48; }"
+        ".stage-backdrop button:disabled { opacity: .45; }"
+        ".stage-backdrop button.effect-tile { padding: 4px; border: 1px solid transparent; border-radius: 10px; background: transparent; }"
+        ".effect-title { font-size: 11px; }"
+        ".stage-backdrop button.selected-effect, button.selected-effect { border: 2px solid #68a6ff; background: alpha(#68a6ff, .16); }"
+        ".preview-badge { color: #ffba67; background: alpha(#ffad50, .14); border-radius: 12px; padding: 4px 10px; }"
+        ".screen-bezel { background: #050609; border: 8px solid #292c32; border-radius: 14px; padding: 4px; }"
+        ".warning-box { background: alpha(#e69a35, .12); color: #b77b24; border-radius: 8px; padding: 10px 12px; }"
+        "flowboxchild { padding: 0; }"
+        ".control-card { background: alpha(@theme_base_color, .6); border: 1px solid alpha(@theme_fg_color, .1); border-radius: 10px; padding: 12px; }"
+        ".segments button { padding: 7px 9px; }";
     gtk_css_provider_load_from_data(provider, css, -1);
     gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     g_object_unref(provider);
@@ -946,197 +907,323 @@ static void destroy_ui(gpointer data) {
         g_source_remove(ui->refresh_timer_id);
         ui->refresh_timer_id = 0;
     }
+    if (ui->animation_timer) g_source_remove(ui->animation_timer);
+    g_clear_pointer(&ui->display_bytes, g_bytes_unref);
+    g_clear_pointer(&ui->display_frames, g_ptr_array_unref);
     g_free(ui->selected_image_path);
     g_free(ui);
 }
 
+static void on_page_selected(GtkListBox *list, GtkListBoxRow *row, gpointer data) {
+    (void)list;
+    if (row == NULL) return;
+    AulaLinuxUI *ui = data;
+    const char *name = g_object_get_data(G_OBJECT(row), "page-name");
+    if (name == NULL) return;
+    gtk_stack_set_visible_child_name(ui->stack, name);
+    GtkStackPage *page = gtk_stack_get_page(ui->stack, gtk_stack_get_visible_child(ui->stack));
+    gtk_label_set_text(GTK_LABEL(ui->page_title), gtk_stack_page_get_title(page));
+    ui->last_clock_redraw = 0;
+}
+
+static void open_shortcut(GtkButton *button, gpointer data) {
+    GtkListBox *navigation = data;
+    int index = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(button), "row-index"));
+    gtk_list_box_select_row(navigation, gtk_list_box_get_row_at_index(navigation, index));
+}
+
+static void open_activity_log(GtkListBox *navigation) {
+    gtk_list_box_select_row(navigation, gtk_list_box_get_row_at_index(navigation, 7));
+}
+
+#include "LinuxPresentation.inc"
+
+static GtkWidget *wrapping_flow(int max, int spacing) {
+    GtkWidget *flow=gtk_flow_box_new();
+    gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(flow),GTK_SELECTION_NONE);
+    gtk_flow_box_set_min_children_per_line(GTK_FLOW_BOX(flow),1);
+    gtk_flow_box_set_max_children_per_line(GTK_FLOW_BOX(flow),max);
+    gtk_flow_box_set_row_spacing(GTK_FLOW_BOX(flow),spacing);
+    gtk_flow_box_set_column_spacing(GTK_FLOW_BOX(flow),spacing);
+    gtk_flow_box_set_homogeneous(GTK_FLOW_BOX(flow),TRUE);
+    return flow;
+}
+
+static GtkWidget *requirement_note(const char *text) {
+    GtkWidget *note=label_new(text,"warning-box");
+    return note;
+}
+
 static void activate(GtkApplication *app, gpointer user_data) {
     (void)user_data;
-    install_css();
-    install_icon_search_path();
-
-    AulaLinuxUI *ui = g_new0(AulaLinuxUI, 1);
-    ui->battery_percent = -1;
-
-    GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), L("Aula F75 Max Driver"));
-    gtk_window_set_icon_name(GTK_WINDOW(window), "aula-f75-max-driver");
-    gtk_window_set_default_size(GTK_WINDOW(window), 1180, 820);
-
-    GtkWidget *scroller = gtk_scrolled_window_new();
-    gtk_window_set_child(GTK_WINDOW(window), scroller);
-
-    GtkWidget *page = vbox_new(22);
-    add_class(page, "page");
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroller), page);
-
-    ui->app = app;
-    ui->window = GTK_WINDOW(window);
-
-    GtkWidget *header = hbox_new(18);
-    GtkWidget *header_text = vbox_new(6);
-    gtk_box_append(GTK_BOX(header_text), label_new("Aula F75 Max Driver", "hero-title"));
-    gtk_box_append(GTK_BOX(header_text), label_new("One focused control surface for USB screen tasks and 2.4G keyboard settings.", "subtitle"));
-    gtk_box_append(GTK_BOX(header), header_text);
-    ui->ready_pill = gtk_label_new(L("Idle"));
-    add_class(ui->ready_pill, "ready-pill");
-    gtk_widget_set_halign(ui->ready_pill, GTK_ALIGN_END);
-    gtk_widget_set_valign(ui->ready_pill, GTK_ALIGN_CENTER);
-    gtk_widget_set_hexpand(ui->ready_pill, FALSE);
-    gtk_box_append(GTK_BOX(header), ui->ready_pill);
-    gtk_box_append(GTK_BOX(page), header);
-
-    GtkWidget *status_grid = gtk_grid_new();
-    gtk_grid_set_column_spacing(GTK_GRID(status_grid), 14);
-    gtk_grid_set_column_homogeneous(GTK_GRID(status_grid), TRUE);
-    gtk_widget_set_hexpand(status_grid, TRUE);
-    gtk_grid_attach(GTK_GRID(status_grid), make_status_card("Wired USB", "network-wired-symbolic", &ui->wired_value, &ui->wired_detail), 0, 0, 1, 1);
-    gtk_grid_attach(GTK_GRID(status_grid), make_status_card("2.4G Dongle", "network-wireless-symbolic", &ui->dongle_value, &ui->dongle_detail), 1, 0, 1, 1);
-    gtk_grid_attach(GTK_GRID(status_grid), make_status_card("Battery", "battery-good-symbolic", &ui->battery_value, &ui->battery_detail), 2, 0, 1, 1);
-        gtk_label_set_text(GTK_LABEL(ui->battery_value), L("Unknown"));
-    gtk_box_append(GTK_BOX(page), status_grid);
-
-    GtkWidget *main_grid = gtk_grid_new();
-    gtk_grid_set_column_spacing(GTK_GRID(main_grid), 18);
-    gtk_grid_set_row_spacing(GTK_GRID(main_grid), 18);
-    gtk_grid_set_column_homogeneous(GTK_GRID(main_grid), TRUE);
-    gtk_widget_set_hexpand(main_grid, TRUE);
-    gtk_box_append(GTK_BOX(page), main_grid);
-
-    GtkWidget *wired_content = NULL;
-    GtkWidget *wired_panel = make_panel("USB Screen Workflow", "Wired operations require the keyboard over USB-C", "video-display-symbolic", &wired_content);
-    ui->sync_button = make_button("Sync Clock", "view-refresh-symbolic");
-    gtk_widget_add_css_class(ui->sync_button, "suggested-action");
-    g_signal_connect(ui->sync_button, "clicked", G_CALLBACK(on_sync_time_clicked), ui);
-    gtk_box_append(GTK_BOX(wired_content), ui->sync_button);
-
-    gtk_box_append(GTK_BOX(wired_content), label_new("Screen upload", "section-title"));
-
-    GtkWidget *file_row = hbox_new(10);
-    ui->choose_image_button = make_button("Choose File", "document-open-symbolic");
-    g_signal_connect(ui->choose_image_button, "clicked", G_CALLBACK(on_choose_image_clicked), ui);
-    gtk_box_append(GTK_BOX(file_row), ui->choose_image_button);
-    ui->selected_image_label = label_new("No file selected", "muted");
-    gtk_widget_set_hexpand(ui->selected_image_label, TRUE);
-    gtk_box_append(GTK_BOX(file_row), ui->selected_image_label);
-    gtk_box_append(GTK_BOX(wired_content), file_row);
-
-    ui->display_slot = make_spin(1, 255, 1);
-    ui->fit_mode = make_combo(fit_values, 3, 0);
-    gtk_box_append(GTK_BOX(wired_content), setting_row("Slot", ui->display_slot));
-    gtk_box_append(GTK_BOX(wired_content), setting_row("Fit", ui->fit_mode));
-
-    ui->upload_image_button = make_button("Upload to Keyboard Screen", "go-down-symbolic");
-    gtk_widget_add_css_class(ui->upload_image_button, "suggested-action");
-    g_signal_connect(ui->upload_image_button, "clicked", G_CALLBACK(on_upload_image_clicked), ui);
-    gtk_box_append(GTK_BOX(wired_content), ui->upload_image_button);
-
-    ui->factory_reset_button = make_button("Factory Reset Keyboard", "edit-delete-symbolic");
-    g_signal_connect(ui->factory_reset_button, "clicked", G_CALLBACK(on_factory_reset_clicked), ui);
-    gtk_box_append(GTK_BOX(wired_content), ui->factory_reset_button);
-
-    gtk_grid_attach(GTK_GRID(main_grid), wired_panel, 0, 0, 1, 1);
-
-    GtkWidget *wireless_content = NULL;
-    GtkWidget *wireless_panel = make_panel("2.4G Keyboard Control", "Ready for wireless commands", "input-keyboard-symbolic", &wireless_content);
-
-    GtkWidget *battery_row = hbox_new(12);
-    ui->battery_button = make_button("Query", "view-refresh-symbolic");
-    g_signal_connect(ui->battery_button, "clicked", G_CALLBACK(on_battery_clicked), ui);
-    gtk_box_append(GTK_BOX(battery_row), ui->battery_button);
-    gtk_box_append(GTK_BOX(wireless_content), battery_row);
-
-    gtk_box_append(GTK_BOX(wireless_content), label_new("RGB lighting", "section-title"));
-    ui->rgb_mode = make_combo(rgb_modes, (int)(sizeof(rgb_modes) / sizeof(rgb_modes[0])), 11);
-    ui->rgb_brightness = make_spin(1, 5, 5);
-    ui->rgb_speed = make_spin(1, 5, 3);
-    ui->rgb_direction = make_combo(directions, 4, 0);
-    ui->rgb_colorful = gtk_switch_new();
-    gtk_switch_set_active(GTK_SWITCH(ui->rgb_colorful), TRUE);
-    ui->rgb_color = gtk_color_button_new();
-    GdkRGBA default_color = { 0.29, 0.56, 0.89, 1.0 };
-    gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(ui->rgb_color), &default_color);
-    gtk_box_append(GTK_BOX(wireless_content), setting_row("Mode", ui->rgb_mode));
-    gtk_box_append(GTK_BOX(wireless_content), setting_row("Brightness", ui->rgb_brightness));
-    gtk_box_append(GTK_BOX(wireless_content), setting_row("Speed", ui->rgb_speed));
-    gtk_box_append(GTK_BOX(wireless_content), setting_row("Direction", ui->rgb_direction));
-    gtk_box_append(GTK_BOX(wireless_content), setting_row("Colorful", ui->rgb_colorful));
-    gtk_box_append(GTK_BOX(wireless_content), setting_row("Fixed color", ui->rgb_color));
-    ui->apply_rgb_button = make_button("Apply RGB Profile", "color-select-symbolic");
-    gtk_widget_add_css_class(ui->apply_rgb_button, "suggested-action");
-    g_signal_connect(ui->apply_rgb_button, "clicked", G_CALLBACK(on_apply_rgb_clicked), ui);
-    gtk_box_append(GTK_BOX(wireless_content), ui->apply_rgb_button);
-
-    gtk_box_append(GTK_BOX(wireless_content), label_new("Performance", "section-title"));
-    ui->response_level = make_combo(responses, 5, 0);
-    ui->sleep_time = make_combo(sleep_values, 4, 1);
-    gtk_box_append(GTK_BOX(wireless_content), setting_row("Response", ui->response_level));
-    gtk_box_append(GTK_BOX(wireless_content), setting_row("Sleep", ui->sleep_time));
-
-    GtkWidget *perf_actions = hbox_new(10);
-    ui->apply_performance_button = make_button("Apply", "emblem-ok-symbolic");
-    ui->restore_command_button = make_button("Restore Command", "edit-undo-symbolic");
-    g_signal_connect(ui->apply_performance_button, "clicked", G_CALLBACK(on_apply_performance_clicked), ui);
-    g_signal_connect(ui->restore_command_button, "clicked", G_CALLBACK(on_restore_command_clicked), ui);
-    gtk_box_append(GTK_BOX(perf_actions), ui->apply_performance_button);
-    gtk_box_append(GTK_BOX(perf_actions), ui->restore_command_button);
-    gtk_box_append(GTK_BOX(wireless_content), perf_actions);
-
-    ui->game_mode_button = gtk_button_new_with_label(L("Enable Game Mode"));
-    gtk_widget_add_css_class(ui->game_mode_button, "suggested-action");
-    g_signal_connect(ui->game_mode_button, "clicked", G_CALLBACK(on_game_mode_clicked), ui);
-    gtk_box_append(GTK_BOX(wireless_content), ui->game_mode_button);
-    gtk_grid_attach(GTK_GRID(main_grid), wireless_panel, 1, 0, 1, 2);
-
-    GtkWidget *endpoint_content = NULL;
-    GtkWidget *endpoint_panel = make_panel("Detected HID Endpoints", "Diagnostic view for permissions and transport troubleshooting", "network-transmit-receive-symbolic", &endpoint_content);
-    GtkWidget *rescan = make_button("Rescan", "view-refresh-symbolic");
-    g_signal_connect(rescan, "clicked", G_CALLBACK(on_rescan_clicked), ui);
-    gtk_box_append(GTK_BOX(endpoint_content), rescan);
-    GtkWidget *endpoint_scroller = gtk_scrolled_window_new();
-    gtk_widget_set_size_request(endpoint_scroller, -1, 220);
-    GtkWidget *endpoint_view = gtk_text_view_new();
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(endpoint_view), FALSE);
-    gtk_text_view_set_monospace(GTK_TEXT_VIEW(endpoint_view), TRUE);
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(endpoint_scroller), endpoint_view);
-    ui->endpoint_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(endpoint_view));
-    gtk_box_append(GTK_BOX(endpoint_content), endpoint_scroller);
-    gtk_grid_attach(GTK_GRID(main_grid), endpoint_panel, 0, 1, 1, 1);
-
-    GtkWidget *settings_content = NULL;
-    GtkWidget *settings_panel = make_panel("App Settings", "Local macOS behavior, independent of keyboard transport", "gearshape", &settings_content);
-    ui->language_combo = gtk_combo_box_text_new();
-    append_language_items(GTK_COMBO_BOX_TEXT(ui->language_combo));
-    char current_language[32];
-    memset(current_language, 0, sizeof(current_language));
-    aula_linux_current_language_code(current_language, (int)sizeof(current_language));
-    ui->selected_language_index = language_index_for_code(current_language);
-    gtk_combo_box_set_active(GTK_COMBO_BOX(ui->language_combo), ui->selected_language_index);
-    g_signal_connect(ui->language_combo, "changed", G_CALLBACK(on_language_changed), ui);
-    gtk_box_append(GTK_BOX(settings_content), setting_row("Language", ui->language_combo));
-    gtk_box_append(GTK_BOX(page), settings_panel);
-
-    GtkWidget *log_content = NULL;
-    GtkWidget *log_panel = make_panel("Operation Log", "Latest command output", "utilities-terminal-symbolic", &log_content);
-    GtkWidget *log_scroller = gtk_scrolled_window_new();
-    gtk_widget_set_size_request(log_scroller, -1, 150);
-    GtkWidget *log_view = gtk_text_view_new();
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(log_view), FALSE);
-    gtk_text_view_set_monospace(GTK_TEXT_VIEW(log_view), TRUE);
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(log_scroller), log_view);
-    ui->log_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(log_view));
-    gtk_box_append(GTK_BOX(log_content), log_scroller);
-    gtk_box_append(GTK_BOX(page), log_panel);
-
-    append_log(ui, "Linux app started.");
-    refresh_endpoints(ui, FALSE);
-    if (ui->dongle_count > 0) {
-        query_battery(ui, TRUE);
+    GtkWindow *existing=gtk_application_get_active_window(app);
+    if(existing) { gtk_window_present(existing); return; }
+    install_css(); install_icon_search_path();
+    AulaLinuxUI *ui=g_new0(AulaLinuxUI,1);
+    ui->battery_percent=-1; ui->selected_profile=-1;
+    ui->animation_start=g_get_monotonic_time();
+    GtkWidget *window=gtk_application_window_new(app);
+    ui->app=app; ui->window=GTK_WINDOW(window);
+    gtk_window_set_title(ui->window,L("Aula F75 Max Driver"));
+    gtk_window_set_icon_name(ui->window,"aula-f75-max-driver");
+    gtk_window_set_default_size(ui->window,1100,840);
+    gtk_widget_set_size_request(window,820,560);
+    add_class(window,"aula-window");
+    g_signal_connect(window,"close-request",G_CALLBACK(window_closing),ui);
+    GtkWidget *root=hbox_new(0); gtk_window_set_child(ui->window,root);
+    GtkWidget *sidebar=vbox_new(8); add_class(sidebar,"sidebar");
+    gtk_widget_set_hexpand(sidebar,FALSE); gtk_widget_set_size_request(sidebar,220,-1);
+    gtk_box_append(GTK_BOX(root),sidebar);
+    GtkWidget *brand=hbox_new(10); add_class(brand,"brand");
+    GtkWidget *app_icon=gtk_image_new_from_icon_name("aula-f75-max-driver"); gtk_image_set_pixel_size(GTK_IMAGE(app_icon),32);
+    gtk_box_append(GTK_BOX(brand),app_icon);
+    GtkWidget *brand_text=vbox_new(2);
+    gtk_box_append(GTK_BOX(brand_text),label_new("Aula F75 Max","panel-title"));
+    gtk_box_append(GTK_BOX(brand_text),label_new("Keyboard Control","muted"));
+    gtk_box_append(GTK_BOX(brand),brand_text); gtk_box_append(GTK_BOX(sidebar),brand);
+    GtkWidget *detail=vbox_new(0); gtk_box_append(GTK_BOX(root),detail);
+    ui->page_title=label_new("Home","hero-title"); gtk_box_append(GTK_BOX(detail),ui->page_title);
+    ui->stack=GTK_STACK(gtk_stack_new());
+    gtk_stack_set_transition_type(ui->stack,GTK_STACK_TRANSITION_TYPE_CROSSFADE);
+    gtk_stack_set_transition_duration(ui->stack,150);
+    gtk_stack_set_hhomogeneous(ui->stack,FALSE); gtk_stack_set_vhomogeneous(ui->stack,FALSE);
+    gtk_widget_set_vexpand(GTK_WIDGET(ui->stack),TRUE); gtk_box_append(GTK_BOX(detail),GTK_WIDGET(ui->stack));
+    const char *names[]={"home","lighting","screen","performance","settings","diagnostics","log"};
+    const char *titles[]={"Home","Lighting","Screen","Performance","Settings","Diagnostics","Activity Log"};
+    const char *icons[]={"go-home-symbolic","weather-clear-symbolic","video-display-symbolic","preferences-system-symbolic","emblem-system-symbolic","network-transmit-receive-symbolic","view-list-symbolic"};
+    GtkWidget *pages[7]; GtkWidget *navigation=gtk_list_box_new();
+    ui->navigation=GTK_LIST_BOX(navigation);
+    gtk_list_box_set_selection_mode(GTK_LIST_BOX(navigation),GTK_SELECTION_SINGLE);
+    gtk_box_append(GTK_BOX(sidebar),navigation);
+    for(int i=0;i<7;i++) {
+        if(i==5) {
+            GtkWidget *section=gtk_list_box_row_new();
+            gtk_list_box_row_set_selectable(GTK_LIST_BOX_ROW(section),FALSE);
+            gtk_list_box_row_set_activatable(GTK_LIST_BOX_ROW(section),FALSE);
+            gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(section),label_new("Advanced","muted"));
+            gtk_list_box_append(GTK_LIST_BOX(navigation),section);
+        }
+        GtkWidget *row=gtk_list_box_row_new(), *content=hbox_new(10);
+        gtk_box_append(GTK_BOX(content),gtk_image_new_from_icon_name(icons[i]));
+        gtk_box_append(GTK_BOX(content),label_new(titles[i],NULL));
+        gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row),content);
+        g_object_set_data(G_OBJECT(row),"page-name",(gpointer)names[i]); gtk_list_box_append(GTK_LIST_BOX(navigation),row);
+        GtkWidget *scroll=gtk_scrolled_window_new();
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),GTK_POLICY_NEVER,GTK_POLICY_AUTOMATIC);
+        pages[i]=vbox_new(16); add_class(pages[i],"page");
+        gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll),pages[i]);
+        gtk_stack_add_titled(ui->stack,scroll,names[i],L(titles[i]));
     }
-    ui->refresh_timer_id = g_timeout_add_seconds(2, poll_devices, ui);
+    g_signal_connect(navigation,"row-selected",G_CALLBACK(on_page_selected),ui);
+    GtkEventController *keys=gtk_event_controller_key_new();
+    g_signal_connect(keys,"key-pressed",G_CALLBACK(page_shortcuts),navigation);
+    gtk_widget_add_controller(window,keys);
+    GtkWidget *spacer=vbox_new(0); gtk_widget_set_vexpand(spacer,TRUE); gtk_box_append(GTK_BOX(sidebar),spacer);
+    ui->ready_pill=label_new("Ready","ready-pill"); gtk_box_append(GTK_BOX(sidebar),ui->ready_pill);
+    GtkWidget *status_button=gtk_button_new(); add_class(status_button,"status-bar");
+    ui->status_message=label_new("No activity yet","muted"); gtk_label_set_wrap(GTK_LABEL(ui->status_message),FALSE);
+    gtk_label_set_ellipsize(GTK_LABEL(ui->status_message),PANGO_ELLIPSIZE_END);
+    gtk_button_set_child(GTK_BUTTON(status_button),ui->status_message);
+    g_signal_connect_swapped(status_button,"clicked",G_CALLBACK(open_activity_log),navigation);
+    gtk_box_append(GTK_BOX(detail),status_button);
 
-    g_object_set_data_full(G_OBJECT(window), "aula-ui", ui, destroy_ui);
-    gtk_window_present(GTK_WINDOW(window));
+    // Home: one stage with the connection summary underneath.
+    GtkWidget *summary=vbox_new(16); add_class(summary,"stage-backdrop");
+    ui->home_stage=keyboard_stage(ui,0,260); gtk_box_append(GTK_BOX(summary),ui->home_stage);
+    GtkWidget *status=hbox_new(16);
+    GtkWidget *connections=vbox_new(4);
+    gtk_box_append(GTK_BOX(status),connections);
+    gtk_box_append(GTK_BOX(connections),make_status_card("Wired USB","network-wired-symbolic",&ui->wired_value,&ui->wired_detail));
+    gtk_box_append(GTK_BOX(connections),make_status_card("2.4G Receiver","network-wireless-symbolic",&ui->dongle_value,&ui->dongle_detail));
+    GtkWidget *battery=make_status_card("Battery","battery-good-symbolic",&ui->battery_value,&ui->battery_detail);
+    ui->battery_button=make_button("Refresh battery","view-refresh-symbolic");
+    g_signal_connect(ui->battery_button,"clicked",G_CALLBACK(on_battery_clicked),ui);
+    GtkWidget *battery_box=vbox_new(8); gtk_box_append(GTK_BOX(battery_box),battery); gtk_box_append(GTK_BOX(battery_box),ui->battery_button);
+    gtk_box_append(GTK_BOX(status),battery_box);
+    gtk_widget_set_valign(battery_box,GTK_ALIGN_CENTER);
+    gtk_box_append(GTK_BOX(summary),status); gtk_box_append(GTK_BOX(pages[0]),summary);
+    GtkWidget *home_profiles_content=NULL;
+    GtkWidget *home_profiles_panel=make_panel("Profiles","","view-grid-symbolic",&home_profiles_content);
+    ui->home_profiles=wrapping_flow(4,8); gtk_box_append(GTK_BOX(home_profiles_content),ui->home_profiles);
+    gtk_box_append(GTK_BOX(pages[0]),home_profiles_panel);
+    GtkWidget *quick=wrapping_flow(3,12); gtk_box_append(GTK_BOX(pages[0]),quick);
+    const char *quick_titles[]={"Screen clock","Lighting","Screen image"};
+    const char *quick_details[]={"Wired operations require the keyboard over USB-C","Effects, colour and brightness","Show a picture or GIF on the keyboard display"};
+    for(int i=0;i<3;i++) {
+        GtkWidget *content=NULL; GtkWidget *tile=make_panel(quick_titles[i],quick_details[i],icons[i==0?2:i],&content);
+        GtkWidget *button=make_button(i==0 ? "Sync Clock" : i==1 ? "Open Lighting" : "Open Screen",i==0?"view-refresh-symbolic":"go-next-symbolic");
+        if(i==0) { ui->sync_button=button; g_signal_connect(button,"clicked",G_CALLBACK(on_sync_time_clicked),ui); }
+        else { g_object_set_data(G_OBJECT(button),"row-index",GINT_TO_POINTER(i)); g_signal_connect(button,"clicked",G_CALLBACK(open_shortcut),navigation); }
+        gtk_box_append(GTK_BOX(content),button); gtk_flow_box_insert(GTK_FLOW_BOX(quick),tile,-1);
+    }
+
+    // Lighting: live model, effect gallery, controls, explicit apply, saved looks.
+    GtkWidget *lighting_backdrop=vbox_new(12); add_class(lighting_backdrop,"stage-backdrop");
+    ui->preview_badge=label_new("Preview · not applied","preview-badge");
+    gtk_widget_set_halign(ui->preview_badge,GTK_ALIGN_START);
+    gtk_box_append(GTK_BOX(lighting_backdrop),ui->preview_badge);
+    gtk_box_append(GTK_BOX(lighting_backdrop),label_new("Preview is an approximation of the keyboard's effect","muted"));
+    ui->lighting_stage=keyboard_stage(ui,1,330); gtk_box_append(GTK_BOX(lighting_backdrop),ui->lighting_stage);
+    ui->effect_flow=wrapping_flow(20,10);
+    for(int i=0;i<20;i++) {
+        GtkWidget *button=gtk_button_new(); add_class(button,"effect-tile"); GtkWidget *box=vbox_new(5);
+        GtkWidget *swatch=gtk_drawing_area_new(); gtk_widget_set_size_request(swatch,86,46);
+        EffectSample *sample=g_new(EffectSample,1); sample->ui=ui; sample->mode=i;
+        gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(swatch),draw_swatch,sample,g_free);
+        GtkWidget *title=label_new(rgb_modes[i],"effect-title");
+        gtk_label_set_max_width_chars(GTK_LABEL(title),14);
+        gtk_label_set_xalign(GTK_LABEL(title),.5);
+        gtk_box_append(GTK_BOX(box),swatch); gtk_box_append(GTK_BOX(box),title);
+        gtk_button_set_child(GTK_BUTTON(button),box);
+        g_object_set_data(G_OBJECT(button),"mode",GINT_TO_POINTER(i));
+        g_signal_connect(button,"clicked",G_CALLBACK(effect_selected),ui); gtk_flow_box_insert(GTK_FLOW_BOX(ui->effect_flow),button,-1);
+    }
+    gtk_box_append(GTK_BOX(lighting_backdrop),ui->effect_flow); gtk_box_append(GTK_BOX(pages[1]),lighting_backdrop);
+    GtkWidget *receiver_note=requirement_note("Plug in the 2.4G receiver to use these controls.");
+    gtk_box_append(GTK_BOX(pages[1]),receiver_note);
+    GtkWidget *lighting_controls=vbox_new(12);
+    gtk_box_append(GTK_BOX(pages[1]),lighting_controls); ui->controls[0]=lighting_controls;
+    ui->rgb_mode=make_combo(rgb_modes,20,11);
+    ui->rgb_brightness=make_spin(1,5,5); ui->rgb_speed=make_spin(1,5,3);
+    ui->rgb_direction=make_combo(directions,4,0); ui->rgb_colorful=gtk_switch_new();
+    gtk_widget_set_halign(ui->rgb_colorful,GTK_ALIGN_START); gtk_switch_set_active(GTK_SWITCH(ui->rgb_colorful),TRUE);
+    ui->rgb_color=gtk_color_button_new(); GdkRGBA color={0,.478,1,1}; gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(ui->rgb_color),&color);
+    gtk_widget_set_visible(ui->rgb_mode,FALSE);
+    gtk_box_append(GTK_BOX(lighting_controls),ui->rgb_mode);
+    GtkWidget *control_grid=wrapping_flow(2,12); gtk_box_append(GTK_BOX(lighting_controls),control_grid);
+    const char *numbers[]={"1","2","3","4","5"};
+    const char *color_modes[]={"Single colour","Rainbow"};
+    GtkWidget *color_controls=hbox_new(8);
+    gtk_box_append(GTK_BOX(color_controls),segments(ui->rgb_colorful,2,color_modes,2,0));
+    gtk_box_append(GTK_BOX(color_controls),ui->rgb_color);
+    GtkWidget *widgets[]={segments(ui->rgb_brightness,0,numbers,5,1),segments(ui->rgb_speed,0,numbers,5,1),segments(ui->rgb_direction,1,directions,4,0),color_controls};
+    const char *labels[]={"Brightness","Speed","Direction","Colour"};
+    for(int i=0;i<4;i++) {
+        GtkWidget *card=vbox_new(8); add_class(card,"control-card");
+        gtk_box_append(GTK_BOX(card),label_new(labels[i],"section-title")); gtk_box_append(GTK_BOX(card),widgets[i]);
+        gtk_flow_box_insert(GTK_FLOW_BOX(control_grid),card,-1);
+    }
+    GtkWidget *apply_row=hbox_new(10);
+    GtkWidget *apply_hint=label_new("Changes are sent when you press Apply to Keyboard.","muted");
+    gtk_widget_set_hexpand(apply_hint,TRUE); gtk_label_set_max_width_chars(GTK_LABEL(apply_hint),38);
+    gtk_box_append(GTK_BOX(apply_row),apply_hint);
+    ui->revert_button=make_button("Revert","edit-undo-symbolic"); g_signal_connect(ui->revert_button,"clicked",G_CALLBACK(revert_lighting),ui);
+    ui->apply_rgb_button=make_button("Apply to Keyboard","emblem-ok-symbolic"); add_class(ui->apply_rgb_button,"suggested-action");
+    g_signal_connect(ui->apply_rgb_button,"clicked",G_CALLBACK(on_apply_rgb_clicked),ui);
+    gtk_widget_set_hexpand(ui->revert_button,FALSE); gtk_widget_set_hexpand(ui->apply_rgb_button,FALSE);
+    gtk_box_append(GTK_BOX(apply_row),ui->revert_button); gtk_box_append(GTK_BOX(apply_row),ui->apply_rgb_button);
+    gtk_box_append(GTK_BOX(pages[1]),apply_row);
+    GtkWidget *profile_content=NULL;
+    GtkWidget *profile_panel=make_panel("Profiles","","view-grid-symbolic",&profile_content); gtk_box_append(GTK_BOX(pages[1]),profile_panel);
+    ui->profiles_flow=wrapping_flow(4,8); gtk_box_append(GTK_BOX(profile_content),ui->profiles_flow);
+    GtkWidget *profile_actions=wrapping_flow(4,8); ui->controls[1]=profile_actions;
+    GtkWidget *save_profile=make_button("Save as New Profile…","list-add-symbolic");
+    g_object_set_data(G_OBJECT(save_profile),"profile-action",GINT_TO_POINTER(1)); g_signal_connect(save_profile,"clicked",G_CALLBACK(profile_name_dialog),ui);
+    ui->profile_update=make_button("Update","document-save-symbolic"); g_signal_connect(ui->profile_update,"clicked",G_CALLBACK(profile_update_clicked),ui);
+    ui->profile_rename=make_button("Rename…","document-edit-symbolic"); g_object_set_data(G_OBJECT(ui->profile_rename),"profile-action",GINT_TO_POINTER(3));
+    g_signal_connect(ui->profile_rename,"clicked",G_CALLBACK(profile_name_dialog),ui);
+    ui->profile_delete=make_button("Delete…","edit-delete-symbolic"); g_signal_connect(ui->profile_delete,"clicked",G_CALLBACK(profile_delete_clicked),ui);
+    GtkWidget *profile_buttons[]={save_profile,ui->profile_update,ui->profile_rename,ui->profile_delete};
+    for(int i=0;i<4;i++) gtk_flow_box_insert(GTK_FLOW_BOX(profile_actions),profile_buttons[i],-1);
+    gtk_box_append(GTK_BOX(profile_content),profile_actions);
+    g_signal_connect(ui->rgb_mode,"changed",G_CALLBACK(lighting_changed),ui);
+    g_signal_connect(ui->rgb_brightness,"value-changed",G_CALLBACK(lighting_changed),ui);
+    g_signal_connect(ui->rgb_speed,"value-changed",G_CALLBACK(lighting_changed),ui);
+    g_signal_connect(ui->rgb_direction,"changed",G_CALLBACK(lighting_changed),ui);
+    g_signal_connect(ui->rgb_colorful,"notify::active",G_CALLBACK(colorful_changed),ui);
+    g_signal_connect(ui->rgb_color,"color-set",G_CALLBACK(lighting_changed),ui);
+    ui->launch=current_lighting(ui);
+
+    // Display: exact encoded pixels in a framed screen and on the keyboard.
+    GtkWidget *screen_backdrop=vbox_new(12); add_class(screen_backdrop,"stage-backdrop");
+    GtkWidget *screen_pair=wrapping_flow(2,20); gtk_box_append(GTK_BOX(screen_backdrop),screen_pair);
+    GtkWidget *screen_column=vbox_new(12);
+    ui->screen_preview=gtk_picture_new(); gtk_picture_set_content_fit(GTK_PICTURE(ui->screen_preview),GTK_CONTENT_FIT_CONTAIN);
+    gtk_picture_set_can_shrink(GTK_PICTURE(ui->screen_preview),TRUE);
+    gtk_widget_set_size_request(ui->screen_preview,192,192); gtk_widget_set_halign(ui->screen_preview,GTK_ALIGN_CENTER);
+    add_class(ui->screen_preview,"screen-bezel"); gtk_box_append(GTK_BOX(screen_column),ui->screen_preview);
+    ui->frame_label=label_new("Exactly what the keyboard screen will show","muted"); gtk_box_append(GTK_BOX(screen_column),ui->frame_label);
+    gtk_flow_box_insert(GTK_FLOW_BOX(screen_pair),screen_column,-1);
+    ui->screen_stage=keyboard_stage(ui,2,220); gtk_flow_box_insert(GTK_FLOW_BOX(screen_pair),ui->screen_stage,-1);
+    GtkWidget *frame_scroll=gtk_scrolled_window_new(); gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(frame_scroll),GTK_POLICY_AUTOMATIC,GTK_POLICY_NEVER);
+    ui->frame_strip=wrapping_flow(255,4); gtk_flow_box_set_min_children_per_line(GTK_FLOW_BOX(ui->frame_strip),255);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(frame_scroll),ui->frame_strip);
+    gtk_widget_set_size_request(frame_scroll,-1,64);
+    g_object_set_data(G_OBJECT(ui->frame_strip),"scroller",frame_scroll);
+    gtk_widget_set_visible(frame_scroll,FALSE); gtk_box_append(GTK_BOX(screen_backdrop),frame_scroll);
+    gtk_widget_set_visible(ui->frame_strip,FALSE); gtk_box_append(GTK_BOX(pages[2]),screen_backdrop);
+    GtkWidget *usb_note=requirement_note("Connect the keyboard with a USB-C cable to use these controls."); gtk_box_append(GTK_BOX(pages[2]),usb_note);
+    GtkWidget *picture_content=NULL;
+    GtkWidget *picture_panel=make_panel("Picture","PNG, JPEG, GIF, BMP, TIFF or WebP. Shown at 128 × 128.","image-x-generic-symbolic",&picture_content);
+    ui->controls[2]=picture_content; gtk_box_append(GTK_BOX(pages[2]),picture_panel);
+    ui->selected_image_label=label_new("No file selected","muted");
+    gtk_label_set_ellipsize(GTK_LABEL(ui->selected_image_label),PANGO_ELLIPSIZE_MIDDLE); gtk_label_set_wrap(GTK_LABEL(ui->selected_image_label),FALSE);
+    ui->choose_image_button=make_button("Choose File…","document-open-symbolic"); g_signal_connect(ui->choose_image_button,"clicked",G_CALLBACK(on_choose_image_clicked),ui);
+    GtkWidget *file_row=hbox_new(12); gtk_box_append(GTK_BOX(file_row),ui->selected_image_label); gtk_box_append(GTK_BOX(file_row),ui->choose_image_button);
+    gtk_box_append(GTK_BOX(picture_content),file_row);
+    ui->display_slot=make_spin(1,255,1); ui->fit_mode=make_combo(fit_values,3,0);
+    gtk_box_append(GTK_BOX(picture_content),setting_row("Fit",segments(ui->fit_mode,1,fit_values,3,0))); gtk_box_append(GTK_BOX(picture_content),setting_row("Slot",ui->display_slot));
+    g_signal_connect(ui->fit_mode,"changed",G_CALLBACK(fit_changed),ui);
+    ui->upload_progress=gtk_progress_bar_new(); gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(ui->upload_progress),TRUE);
+    gtk_box_append(GTK_BOX(picture_content),ui->upload_progress);
+    ui->upload_image_button=make_button("Upload to Keyboard","go-down-symbolic"); add_class(ui->upload_image_button,"suggested-action");
+    g_signal_connect(ui->upload_image_button,"clicked",G_CALLBACK(on_upload_image_clicked),ui); gtk_box_append(GTK_BOX(picture_content),ui->upload_image_button);
+    GtkDropTarget *drop=gtk_drop_target_new(G_TYPE_FILE,GDK_ACTION_COPY); g_signal_connect(drop,"drop",G_CALLBACK(image_dropped),ui);
+    gtk_widget_add_controller(pages[2],GTK_EVENT_CONTROLLER(drop));
+    GtkWidget *clock_content=NULL; GtkWidget *clock_panel=make_panel("Screen clock","Wired operations require the keyboard over USB-C","preferences-system-time-symbolic",&clock_content);
+    GtkWidget *clock_button=make_button("Sync Clock","view-refresh-symbolic");
+    g_signal_connect(clock_button,"clicked",G_CALLBACK(on_sync_time_clicked),ui); gtk_box_append(GTK_BOX(clock_content),clock_button); gtk_box_append(GTK_BOX(pages[2]),clock_panel);
+    ui->controls[3]=clock_content;
+
+    GtkWidget *performance_note=requirement_note("Plug in the 2.4G receiver to use these controls."); gtk_box_append(GTK_BOX(pages[3]),performance_note);
+    GtkWidget *performance_columns=wrapping_flow(2,16); gtk_box_append(GTK_BOX(pages[3]),performance_columns);
+    GtkWidget *typing=NULL; GtkWidget *typing_panel=make_panel("Typing","Changes are sent when you press Apply.","input-keyboard-symbolic",&typing);
+    ui->controls[4]=typing; gtk_flow_box_insert(GTK_FLOW_BOX(performance_columns),typing_panel,-1);
+    ui->response_level=make_combo(responses,5,0); ui->sleep_time=make_combo(sleep_values,4,1);
+    gtk_box_append(GTK_BOX(typing),setting_row("Key response",ui->response_level)); gtk_box_append(GTK_BOX(typing),setting_row("Sleep after",segments(ui->sleep_time,1,sleep_values,4,0)));
+    ui->apply_performance_button=make_button("Apply","emblem-ok-symbolic"); add_class(ui->apply_performance_button,"suggested-action");
+    g_signal_connect(ui->apply_performance_button,"clicked",G_CALLBACK(on_apply_performance_clicked),ui); gtk_box_append(GTK_BOX(typing),ui->apply_performance_button);
+    GtkWidget *game=NULL; GtkWidget *game_panel=make_panel("Game Mode","Locks the Windows/Super key. Also sends the Typing settings above.","input-gaming-symbolic",&game);
+    ui->controls[5]=game; gtk_flow_box_insert(GTK_FLOW_BOX(performance_columns),game_panel,-1);
+    ui->game_mode_button=make_button("Enable Game Mode","changes-prevent-symbolic"); g_signal_connect(ui->game_mode_button,"clicked",G_CALLBACK(on_game_mode_clicked),ui);
+    ui->restore_command_button=make_button("Restore Windows/Super Key","edit-undo-symbolic"); g_signal_connect(ui->restore_command_button,"clicked",G_CALLBACK(on_restore_command_clicked),ui);
+    gtk_box_append(GTK_BOX(game),ui->game_mode_button); gtk_box_append(GTK_BOX(game),ui->restore_command_button);
+
+    GtkWidget *general=NULL; GtkWidget *general_panel=make_panel("General","Language","emblem-system-symbolic",&general); gtk_box_append(GTK_BOX(pages[4]),general_panel);
+    ui->language_combo=gtk_combo_box_text_new(); append_language_items(GTK_COMBO_BOX_TEXT(ui->language_combo));
+    char language[32]={0}; aula_linux_current_language_code(language,sizeof(language)); ui->selected_language_index=language_index_for_code(language);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(ui->language_combo),ui->selected_language_index); g_signal_connect(ui->language_combo,"changed",G_CALLBACK(on_language_changed),ui);
+    gtk_box_append(GTK_BOX(general),setting_row("Language",ui->language_combo));
+    GtkWidget *danger=NULL; GtkWidget *danger_panel=make_panel("Danger Zone","Clears uploaded screen images and resets keyboard settings changed by this app.","dialog-warning-symbolic",&danger);
+    ui->factory_reset_button=make_button("Factory Reset Keyboard…","edit-delete-symbolic"); add_class(ui->factory_reset_button,"destructive-action");
+    g_signal_connect(ui->factory_reset_button,"clicked",G_CALLBACK(confirm_reset),ui);
+    gtk_box_append(GTK_BOX(danger),ui->factory_reset_button); gtk_box_append(GTK_BOX(pages[4]),danger_panel);
+    GtkWidget *endpoints=NULL; GtkWidget *endpoint_panel=make_panel("Connections","Diagnostic view for permissions and transport troubleshooting","network-transmit-receive-symbolic",&endpoints);
+    GtkWidget *rescan=make_button("Rescan","view-refresh-symbolic"); g_signal_connect(rescan,"clicked",G_CALLBACK(on_rescan_clicked),ui); gtk_box_append(GTK_BOX(endpoints),rescan);
+    gtk_box_append(GTK_BOX(endpoints),label_new("Linux udev hidraw access is required for keyboard commands.","muted"));
+    GtkWidget *endpoint_view=gtk_text_view_new(); gtk_text_view_set_editable(GTK_TEXT_VIEW(endpoint_view),FALSE); gtk_text_view_set_monospace(GTK_TEXT_VIEW(endpoint_view),TRUE);
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(endpoint_view),GTK_WRAP_WORD_CHAR); ui->endpoint_buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(endpoint_view));
+    GtkWidget *endpoint_scroll=gtk_scrolled_window_new(); gtk_widget_set_size_request(endpoint_scroll,-1,260);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(endpoint_scroll),endpoint_view); gtk_box_append(GTK_BOX(endpoints),endpoint_scroll); gtk_box_append(GTK_BOX(pages[5]),endpoint_panel);
+
+    GtkWidget *log_header=hbox_new(12); ui->log_count=label_new("0 entries","muted"); gtk_box_append(GTK_BOX(log_header),ui->log_count);
+    GtkWidget *copy=make_button("Copy Log","edit-copy-symbolic"); g_signal_connect(copy,"clicked",G_CALLBACK(copy_log),ui); gtk_box_append(GTK_BOX(log_header),copy);
+    gtk_box_append(GTK_BOX(pages[6]),log_header);
+    GtkWidget *log_scroll=gtk_scrolled_window_new(); gtk_widget_set_vexpand(log_scroll,TRUE); gtk_widget_set_size_request(log_scroll,-1,320);
+    ui->log_view=GTK_TEXT_VIEW(gtk_text_view_new()); gtk_text_view_set_editable(ui->log_view,FALSE); gtk_text_view_set_monospace(ui->log_view,TRUE);
+    gtk_text_view_set_wrap_mode(ui->log_view,GTK_WRAP_WORD_CHAR); ui->log_buffer=gtk_text_view_get_buffer(ui->log_view);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(log_scroll),GTK_WIDGET(ui->log_view)); gtk_box_append(GTK_BOX(pages[6]),log_scroll);
+    g_object_set_data(G_OBJECT(ui->wired_detail),"requirement-note",usb_note);
+    g_object_set_data(G_OBJECT(ui->dongle_detail),"requirement-note",receiver_note);
+    g_object_set_data(G_OBJECT(ui->dongle_detail),"performance-note",performance_note);
+    g_object_set_data(G_OBJECT(ui->sync_button),"screen-clock",clock_button);
+    gtk_list_box_select_row(GTK_LIST_BOX(navigation),gtk_list_box_get_row_at_index(GTK_LIST_BOX(navigation),0));
+    append_log(ui,L("Linux app started.")); refresh_endpoints(ui,FALSE);
+    update_lighting_preview(ui); refresh_profiles(ui);
+    ui->animation_timer=g_timeout_add(50,animate_previews,ui);
+    ui->refresh_timer_id=g_timeout_add_seconds(2,poll_devices,ui);
+    g_object_set_data_full(G_OBJECT(window),"aula-ui",ui,destroy_ui);
+    gtk_window_present(ui->window);
 }
 
 int aula_linux_app_run(int argc, char **argv) {
