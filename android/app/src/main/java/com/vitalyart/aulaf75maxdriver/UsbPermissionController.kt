@@ -19,12 +19,12 @@ class UsbPermissionController(
     private val permissionIntent = PendingIntent.getBroadcast(
         context,
         0,
-        Intent(action),
+        Intent(action).setPackage(context.packageName),
         PendingIntent.FLAG_IMMUTABLE
     )
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == action) {
+            if (intent?.action in listOf(action, UsbManager.ACTION_USB_DEVICE_ATTACHED, UsbManager.ACTION_USB_DEVICE_DETACHED)) {
                 onPermissionResult()
             }
         }
@@ -34,13 +34,24 @@ class UsbPermissionController(
         ContextCompat.registerReceiver(
             context,
             receiver,
-            IntentFilter(action),
+            IntentFilter(action).apply {
+                addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+                addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+            },
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
     }
 
     fun hasPermissionForAnyAulaDevice(): Boolean {
         return usbManager.deviceList.values.any { isAulaDevice(it) && usbManager.hasPermission(it) }
+    }
+
+    fun hasWiredPermission(): Boolean = usbManager.deviceList.values.any {
+        it.vendorId == AulaConstants.wiredVendorID && it.productId == AulaConstants.wiredProductID && usbManager.hasPermission(it)
+    }
+
+    fun hasReceiverPermission(): Boolean = usbManager.deviceList.values.any {
+        it.vendorId == AulaConstants.dongleVendorID && it.productId == AulaConstants.dongleProductID && usbManager.hasPermission(it)
     }
 
     fun requestPermissionForFirstAulaDevice(): Boolean {

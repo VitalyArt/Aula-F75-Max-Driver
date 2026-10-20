@@ -51,7 +51,7 @@ English screenshots from [PR #16](https://github.com/VitalyArt/Aula-F75-Max-Driv
 - Sends a local low-battery notification on macOS and Linux when the level drops below 20%.
 - Controls RGB mode, brightness, speed, direction, colorful animation, and fixed color.
 - Previews all 20 lighting effects on a detailed keyboard in the macOS and Linux apps.
-- Saves, updates, renames, and deletes local desktop lighting profiles; previews work without a receiver.
+- Saves, updates, renames, and deletes local lighting profiles on all three platforms; previews work without a receiver.
 - Separates lighting edits from Apply and Revert on desktop.
 - Previews the exact encoded 128 × 128 RGB565 display frames on desktop, with GIF animation, frame thumbnails, and upload progress.
 - Configures response level, sleep timeout, Game Mode, and Command key restore behavior.
@@ -295,6 +295,12 @@ macOS profiles are stored in `UserDefaults` under `lighting.profiles.v1`. Linux 
 Launch at Login is managed through the macOS ServiceManagement framework. It can be toggled from the app settings panel.
 
 ### Android Notes
+
+- **Home**, **Lighting**, **Screen**, and **Device** use bottom navigation on phones and a navigation rail at 600 dp and above.
+- Home shows the last successfully applied lighting in the current session. Lighting provides a live F75 Max preview, all 20 effect tiles, and local saved profiles. Screen previews the selected image and fit mode on the keyboard display (GIF preview shows its first frame).
+- Editing lighting only changes the preview until **Apply**. Selecting a saved profile also applies it when the receiver has USB permission and the app is idle; otherwise it only loads the preview. There is no deferred automatic application after connecting a receiver.
+- Profiles are stored in private Android SharedPreferences as JSON under `lighting.profiles.v1`; they are independent of desktop profiles and firmware. The starter profiles are Rainbow Wave, Calm Breath, and Off. Profile switching confirms before discarding unsaved edits.
+- Preview animation runs at up to 20 fps, pauses when off screen or in the background, and respects the system animator-duration setting. Effect thumbnails are static approximations.
 
 - The Android build is a separate Gradle project under `android/`.
 - USB Host permission is required before the app can talk to the keyboard or receiver.
