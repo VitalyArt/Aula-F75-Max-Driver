@@ -6,7 +6,7 @@
 
 Native utility for configuring the Epomaker x Aula F75 Max keyboard on macOS, Linux, and Android.
 
-The macOS app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. The Linux app uses `hidapi` over `hidraw` and a native GTK4 interface. The Android app uses the USB Host API and a Compose UI. The three versions share the same portable protocol code where possible.
+The macOS app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. The Linux app uses `hidapi` over `hidraw` and a native GTK4 interface. The Android app uses the USB Host API and a Compose UI. macOS and Linux share portable Swift protocol and preview code in `AulaCore`; Android implements the protocol in Kotlin.
 
 ## Website
 
@@ -23,13 +23,17 @@ After pushing to `main` or `master`, GitHub Actions publishes the `docs/` direct
 
 ## Screenshots
 
-![Aula F75 Max Driver main window](docs/screenshots/main-window.png)
+### macOS SwiftUI interface
 
-![Aula F75 Max Driver endpoint diagnostics and app settings](docs/screenshots/details-window.png)
+Native SwiftUI pages rendered at 1100 × 840, matching the standard Linux screenshots. Captured in an isolated process with HID monitoring disabled:
+
+![macOS Home with keyboard preview](docs/screenshots/redesign-home.png)
+
+![macOS Lighting with live effect previews and saved profiles](docs/screenshots/redesign-lighting.png)
 
 ### Linux GTK interface
 
-English screenshots captured with mocked HID and an isolated configuration:
+English screenshots from [PR #16](https://github.com/VitalyArt/Aula-F75-Max-Driver/pull/16), captured with mocked HID and an isolated configuration:
 
 ![Linux Home page](docs/screenshots/linux-home.png)
 
@@ -46,6 +50,10 @@ English screenshots captured with mocked HID and an isolated configuration:
 - Reads keyboard battery percentage through the 2.4G receiver.
 - Sends a local low-battery notification on macOS and Linux when the level drops below 20%.
 - Controls RGB mode, brightness, speed, direction, colorful animation, and fixed color.
+- Previews all 20 lighting effects on a detailed keyboard in the macOS and Linux apps.
+- Saves, updates, renames, and deletes local desktop lighting profiles; previews work without a receiver.
+- Separates lighting edits from Apply and Revert on desktop.
+- Previews the exact encoded 128 × 128 RGB565 display frames on desktop, with GIF animation, frame thumbnails, and upload progress.
 - Configures response level, sleep timeout, Game Mode, and Command key restore behavior.
 - Syncs the keyboard display clock to local system time.
 - Uploads PNG, JPEG, GIF, BMP, TIFF, and WebP images to the 128 x 128 keyboard display.
@@ -150,16 +158,6 @@ Create a DMG installer image:
 
 ```sh
 make macos-dmg
-```
-
-Compatibility aliases are kept for the original macOS workflow:
-
-```sh
-make all
-make build
-make app
-make dmg
-make run
 ```
 
 ### Linux
@@ -282,6 +280,16 @@ Use the 2.4G receiver for:
 
 The app polls battery periodically while the receiver is present. Manual battery query is also available from the main window.
 
+### Desktop previews and profiles
+
+Use **Home**, **Lighting**, **Screen**, **Performance**, and **Settings** in the sidebar. **Diagnostics** and **Activity Log** contain troubleshooting tools.
+
+On **Lighting**, choose an effect to preview it, adjust its controls, then use **Apply to Keyboard** to send the settings through the receiver. **Revert** restores the last applied settings. Save named profiles to reuse a look. Selecting a saved profile can also apply it when the receiver is connected and idle.
+
+On **Screen**, choose an image or GIF and a fit mode to preview the encoded frames before uploading over USB-C. Previewing files does not require a keyboard.
+
+macOS profiles are stored in `UserDefaults` under `lighting.profiles.v1`. Linux profiles use `$XDG_CONFIG_HOME/aula-f75-max-driver/lighting-profiles.json`.
+
 ### Launch at Login
 
 Launch at Login is managed through the macOS ServiceManagement framework. It can be toggled from the app settings panel.
@@ -398,7 +406,7 @@ The macOS and Linux apps bundle all seven localizations. Their selected language
 
 ## Testing
 
-There is currently no automated test target in `Package.swift`. The shared `AulaCore` target is compiled as part of the package build.
+`Package.swift` defines shared `AulaCoreTests` and macOS-only `AulaF75MaxDriverTests`. The macOS tests cover keyboard geometry, lighting effects, saved profiles, and screen preview decoding.
 
 Recommended validation before a release:
 
@@ -444,7 +452,7 @@ Manual validation:
 - Toggle Launch at Login if that behavior changed.
 - On Android, connect through OTG, grant the USB permission prompt, and verify wired or receiver actions work from the Compose UI.
 
-If tests are added later, place them under `Tests/` and run them with:
+Run the Swift test suites available on the current desktop platform with:
 
 ```sh
 swift test
@@ -487,7 +495,7 @@ Launch at Login depends on macOS ServiceManagement behavior and app bundle ident
 
 - The app is currently packaged from SwiftPM with a Makefile, not from a full Xcode app project.
 - There is no WidgetKit extension. The standard macOS Batteries widget cannot be extended from this package layout.
-- Automated tests are not configured yet.
+- Linux GTK integration checks require Linux; physical HID behavior still needs hardware.
 - Hardware-dependent behavior requires a real Aula F75 Max keyboard and receiver.
 - The protocol implementation is based on observed/public packet flows and may need updates for firmware variants.
 

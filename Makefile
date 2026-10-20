@@ -34,7 +34,7 @@ export LINUX_PACKAGE_NAME LINUX_INSTALL_PREFIX LINUX_DEB
 export RELEASE_DIR RELEASE_TAG SOURCE_MACOS_DMG SOURCE_ANDROID_APK SOURCE_LINUX_ARTIFACT SOURCE_LINUX_DEB
 export APP_DIR DMG_DIR DMG_PATH DMG_RW_PATH DMG_STYLE_SCRIPT EXECUTABLE
 
-.PHONY: help all build app dmg run
+.PHONY: help
 .PHONY: android-build android-test
 .PHONY: macos-build macos-app macos-dmg macos-run
 .PHONY: linux-check-deps linux-install-udev linux-build linux-package linux-deb linux-run
