@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Download, install and connect Aula F75 Max Driver on macOS, Linux or Android.">
+        <meta name="theme-color" content="#101722">
+        <meta property="og:title" content="Aula F75 Max Driver · Linux">
+        <meta property="og:description" content="Download, install and connect Aula F75 Max Driver on macOS, Linux or Android.">
+        <meta property="og:type" content="website">
+        <meta property="og:image" content="assets/app-icon.png">
+        <title>Aula F75 Max Driver · Linux</title>
+        <link rel="icon" href="assets/app-icon.png">
+        <link rel="stylesheet" href="styles.css">
+        <script src="translations.js" defer>
+        </script>
+        <script src="site.js" defer>
+        </script>
+    </head>
+    <body>
+        <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+        <header class="site-header">
+            <a class="brand" href="index.html">
+                <img src="assets/app-icon.png" width="36" height="36" alt=""> <span>Aula F75 Max Driver</span>
+            </a>
+            <nav aria-label="Platforms" data-i18n-aria="platforms">
+                <a href="macos.html">macOS</a>
+                <a href="linux.html" aria-current="page">Linux</a>
+                <a href="android.html">Android</a>
+            </nav>
+            <label class="language">
+                <span data-i18n="language">Language</span>
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="ru">Русский</option>
+                    <option value="es">Español</option>
+                    <option value="uz">O‘zbekcha</option>
+                    <option value="kk">Қазақша</option>
+                    <option value="pt">Português</option>
+                    <option value="zh-Hans">简体中文</option>
+                </select>
+            </label>
+        </header>
+        <main id="main" class="guide-page">
+            <header class="guide-heading">
+                <p data-i18n="guide" class="eyebrow">User guide</p>
+                <h1>Linux</h1>
+                <p data-i18n="linuxReq" class="requirements">Debian / Ubuntu · DEB package</p>
+                <div class="download" data-platform="linux">
+                    <p class="release-info" hidden></p>
+                    <div class="download-options">
+                        <a class="button" href="https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/latest" data-i18n="downloadPage">Open download page</a>
+                    </div>
+                    <p class="download-hint">
+                        <span data-i18n="chooseFile">Choose the file ending in</span> <strong>.deb</strong>
+                    </p>
+                </div>
+            </header>
+            <nav class="toc" aria-label="Contents" data-i18n-aria="contents">
+                <a href="#install" data-i18n="install">Install and open</a>
+                <a href="#connect" data-i18n="connect">Connect your keyboard</a>
+                <a href="#preview" data-i18n="preview">Inside the app</a>
+                <a href="#help" data-i18n="help">If something is not working</a>
+            </nav>
+            <section id="install">
+                <h2 data-i18n="install">Install and open</h2>
+                <ol class="steps">
+                    <li>
+                        <p data-i18n="linuxInstall">Download the DEB for your computer’s architecture. Open a terminal in the folder containing the downloaded file and run:</p>
+                        <p data-i18n="linuxOne" class="muted">Keep just one downloaded Aula DEB in that folder, matching your architecture.</p>
+                        <div class="commands">
+                            <pre tabindex="0"><code>sudo apt update
+sudo apt install ./AulaF75MaxDriver-v*_*.deb</code></pre>
+                            <button type="button" class="copy-button" data-i18n="copy" hidden>Copy commands</button>
+                            <span class="copy-status" role="status">
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <p data-i18n="linuxReplug">The package installs dependencies and the device access rule. Unplug and reconnect the keyboard and receiver after installation.</p>
+                    </li>
+                    <li>
+                        <p data-i18n="linuxLaunch">Open Aula F75 Max Driver from your applications menu.</p>
+                    </li>
+                </ol>
+                <details>
+                    <summary data-i18n="terminal">Open using Terminal</summary>
+                    <div class="commands">
+                        <pre tabindex="0"><code>AulaF75MaxDriverLinux</code></pre>
+                        <button type="button" class="copy-button" data-i18n="copy" hidden>Copy commands</button>
+                        <span class="copy-status" role="status">
+                        </span>
+                    </div>
+                </details>
+            </section>
+            <section id="connect">
+                <h2 data-i18n="connect">Connect your keyboard</h2>
+                <div class="connection-notes">
+                    <p data-i18n="cable">USB cable: connect the keyboard in wired mode to upload an image or GIF and sync its clock.</p>
+                    <p data-i18n="receiver">2.4G receiver: connect the receiver and switch the keyboard to 2.4G mode to adjust lighting and read the battery.</p>
+                </div>
+                <p data-i18n="connected">Open Home to check that your keyboard or receiver is connected.</p>
+            </section>
+            <section id="preview">
+                <h2 data-i18n="preview">Inside the app</h2>
+                <div class="screenshots">
+                    <figure >
+                        <a href="screenshots/linux-home.png" aria-label="Open full screenshot" data-i18n-aria="fullImage">
+                            <img src="screenshots/linux-home.png" alt="Home shows your connection and battery status." data-i18n-alt="homeCaption" width="1100" height="840" loading="lazy" decoding="async">
+                        </a>
+                        <figcaption data-i18n="homeCaption">Home shows your connection and battery status.</figcaption>
+                    </figure>
+                    <figure >
+                        <a href="screenshots/linux-lighting.png" aria-label="Open full screenshot" data-i18n-aria="fullImage">
+                            <img src="screenshots/linux-lighting.png" alt="Lighting lets you choose an effect and adjust it before applying." data-i18n-alt="lightingCaption" width="1100" height="840" loading="lazy" decoding="async">
+                        </a>
+                        <figcaption data-i18n="lightingCaption">Lighting lets you choose an effect and adjust it before applying.</figcaption>
+                    </figure>
+                    <figure >
+                        <a href="screenshots/linux-screen.png" aria-label="Open full screenshot" data-i18n-aria="fullImage">
+                            <img src="screenshots/linux-screen.png" alt="Screen lets you preview an image or GIF before uploading it over USB." data-i18n-alt="screenCaption" width="1100" height="840" loading="lazy" decoding="async">
+                        </a>
+                        <figcaption data-i18n="screenCaption">Screen lets you preview an image or GIF before uploading it over USB.</figcaption>
+                    </figure>
+                </div>
+            </section>
+            <section id="help">
+                <h2 data-i18n="help">If something is not working</h2>
+                <details>
+                    <summary data-i18n="notFound">Keyboard not detected?</summary>
+                    <p data-i18n="linuxHelp">Reconnect the keyboard and receiver after installing the DEB. Use a USB data cable and the correct keyboard mode. Launch the app normally, without sudo.</p>
+                </details>
+                <div class="support-link">
+                    <a href="https://github.com/VitalyArt/Aula-F75-Max-Driver/issues/new?template=bug_report.yml" data-i18n="reportProblem">Report a problem on GitHub</a>
+                    <p data-i18n="reportHint">Include your operating system, app version, connection type and the step that did not work.</p>
+                </div>
+            </section>
+        </main>
+        <footer>
+            <span>Aula F75 Max Driver</span>
+            <a href="https://github.com/VitalyArt/Aula-F75-Max-Driver" data-i18n="source">Source code</a>
+        </footer>
+    </body>
+</html>
