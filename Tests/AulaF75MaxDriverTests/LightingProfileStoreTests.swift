@@ -4,12 +4,7 @@ import XCTest
 @MainActor
 final class LightingProfileStoreTests: XCTestCase {
     private let key = "lighting.profiles.test"
-    private var defaults: UserDefaults!
-
-    override func setUp() {
-        super.setUp()
-        defaults = UserDefaults(suiteName: UUID().uuidString)
-    }
+    private let defaults = UserDefaults(suiteName: UUID().uuidString)!
 
     private let sample = LightingSettings(mode: 8, brightness: 3, speed: 2, direction: 1, colorful: false, red: 10, green: 20, blue: 30)
 
