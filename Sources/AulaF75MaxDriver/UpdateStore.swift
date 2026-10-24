@@ -14,6 +14,8 @@ final class UpdateStore: ObservableObject {
     }
     @Published private(set) var installing = false
     private let installer = SparkleUpdateInstaller()
+    private let feedClient = MacOSUpdateFeedClient()
+    @Published private var resolvedFeed: URL?
     @Published private(set) var checking = false
     @Published private(set) var release: AppRelease?
     @Published private(set) var error: String?
@@ -30,18 +32,23 @@ final class UpdateStore: ObservableObject {
         dismissed = defaults.string(forKey: "updates.dismissed")
         if let data = defaults.data(forKey: "updates.releases"), let cached = try? JSONDecoder().decode([AppRelease].self, from: data) {
             release = AppRelease.newest(cached, current: version, channel: channel, suffix: ".dmg")
+            resolvedFeed = release?.legacySparkleFeedURL
+            if let release, defaults.string(forKey: "updates.feedTag") == release.tag_name,
+               let address = defaults.string(forKey: "updates.feedURL"), address == release.pagesSparkleFeedURL?.absoluteString {
+                resolvedFeed = release.pagesSparkleFeedURL
+            }
         }
     }
     var showBanner: Bool { release != nil && release?.tag_name != dismissed }
     var supportsInstallation: Bool {
-        release?.assets.contains { $0.name.hasSuffix(".appcast.xml") && AppRelease.trustedURL($0.browser_download_url, asset: true) != nil } == true
+        resolvedFeed != nil
     }
     var actionTitle: String { L10n.text(supportsInstallation ? "Update…" : "Download") }
     func dismiss() { dismissed = release?.tag_name; UserDefaults.standard.set(dismissed, forKey: "updates.dismissed") }
     func install(canRelaunch: @escaping () -> Bool) {
-        guard !installing, let release else { return }
+        guard !installing, !checking, let release else { return }
         // Releases published before Sparkle integration can only be installed manually.
-        guard supportsInstallation else {
+        guard let feed = resolvedFeed else {
             error = nil
             if let asset = release.assets.first(where: { $0.name.hasSuffix(".dmg") }),
                let url = AppRelease.trustedURL(asset.browser_download_url, asset: true),
@@ -52,7 +59,7 @@ final class UpdateStore: ObservableObject {
             return
         }
         installing = true; error = nil
-        installer.start(release: release, canRelaunch: canRelaunch) { [weak self] error in
+        installer.start(release: release, feed: feed, canRelaunch: canRelaunch) { [weak self] error in
             self?.installing = false; self?.error = error
         }
     }
@@ -64,14 +71,21 @@ final class UpdateStore: ObservableObject {
         previous?.cancel()
         lastAttempt = Date()
         let selected = channel
-        checking = true; error = nil; release = nil
+        checking = true; error = nil; release = nil; resolvedFeed = nil
         task = Task {
             await previous?.value
             guard !Task.isCancelled else { return }
             do {
                 let releases = try await client.releases()
                 guard !Task.isCancelled, channel == selected else { return }
-                release = AppRelease.newest(releases, current: version, channel: selected, suffix: ".dmg")
+                let candidate = AppRelease.newest(releases, current: version, channel: selected, suffix: ".dmg")
+                let feed: URL?
+                if let candidate { feed = try await feedClient.feed(for: candidate) }
+                else { feed = nil }
+                guard !Task.isCancelled, channel == selected else { return }
+                release = candidate; resolvedFeed = feed
+                UserDefaults.standard.set(candidate?.tag_name, forKey: "updates.feedTag")
+                UserDefaults.standard.set(feed?.absoluteString, forKey: "updates.feedURL")
                 lastCheck = Date(); UserDefaults.standard.set(lastCheck, forKey: "updates.lastCheck")
             } catch {
                 guard !Task.isCancelled, channel == selected else { return }
@@ -102,7 +116,7 @@ struct UpdatesCard: View {
                     Label(release.tag_name, systemImage: "arrow.down.circle.fill").font(.headline)
                     if release.prerelease || (release.version?.stage ?? 3) < 3 { Text(L10n.text("Pre-release")).font(.caption).foregroundStyle(.orange) }
                     HStack {
-                        Button(updates.actionTitle) { updates.install { !model.isWorking } }.buttonStyle(.borderedProminent).disabled(model.isWorking || updates.installing)
+                        Button(updates.actionTitle) { updates.install { !model.isWorking } }.buttonStyle(.borderedProminent).disabled(model.isWorking || updates.installing || updates.checking)
                         if let url = AppRelease.trustedURL(release.html_url) { Link(L10n.text("What’s new"), destination: url) }
                     }
                     if !updates.supportsInstallation { Text(L10n.text("This release does not support in-app installation.")).font(.caption).foregroundStyle(.secondary) }
@@ -125,7 +139,7 @@ struct UpdateBanner: View {
                     Label("\(L10n.text("Update available")): \(release.tag_name)", systemImage: "arrow.down.circle")
                     Spacer()
                     if updates.installing { ProgressView().controlSize(.small) }
-                    Button(updates.actionTitle) { updates.install { !model.isWorking } }.disabled(model.isWorking || updates.installing)
+                    Button(updates.actionTitle) { updates.install { !model.isWorking } }.disabled(model.isWorking || updates.installing || updates.checking)
                     Button { updates.dismiss() } label: { Image(systemName: "xmark") }.accessibilityLabel(L10n.text("Dismiss"))
                 }
                 if let error = updates.error { Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled) }

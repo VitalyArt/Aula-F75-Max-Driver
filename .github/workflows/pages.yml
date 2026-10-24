@@ -6,6 +6,7 @@ on:
       - main
       - master
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -25,12 +26,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Build static site
         run: make site-build
+
+      - name: Include signed update feeds
+        run: bash scripts/copy-update-feeds.sh build/site
 
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
