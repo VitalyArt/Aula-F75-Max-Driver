@@ -12,10 +12,9 @@ final class SparkleUpdateInstaller: NSObject, SPUUpdaterDelegate {
     private var completion: ((String?) -> Void)?
     private var postponedRelaunch: Task<Void, Never>?
 
-    func start(release: AppRelease, canRelaunch: @escaping () -> Bool, completion: @escaping (String?) -> Void) {
+    func start(release: AppRelease, feed: URL, canRelaunch: @escaping () -> Bool, completion: @escaping (String?) -> Void) {
         guard controller?.updater.sessionInProgress != true else { return }
-        guard let asset = release.assets.first(where: { $0.name.hasSuffix(".appcast.xml") }),
-              let feed = AppRelease.trustedURL(asset.browser_download_url, asset: true),
+        guard (feed == release.pagesSparkleFeedURL || feed == release.legacySparkleFeedURL),
               Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String != nil else {
             completion(L10n.text("This release does not support in-app installation.")); return
         }
