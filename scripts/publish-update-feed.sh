@@ -12,6 +12,10 @@ index_dir="$(mktemp -d)"
 trap 'rm -rf "$index_dir"' EXIT
 export GIT_INDEX_FILE="$index_dir/index"
 branch=sparkle-feeds
+commit_tree() {
+    git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+        commit-tree "$tree" "$@" -m "chore: publish signed macOS feed for $tag"
+}
 for attempt in 1 2 3 4 5; do
     parent=""
     if git ls-remote --exit-code --heads origin "$branch" > "$index_dir/remote"; then
@@ -25,13 +29,12 @@ for attempt in 1 2 3 4 5; do
     fi
     git update-index --add --cacheinfo "100644,$feed_blob,updates/macos/$tag.xml"
     tree="$(git write-tree)"
-    parents=()
     if [[ -n "$parent" ]]; then
         if [[ "$tree" == "$(git rev-parse "$parent^{tree}")" ]]; then exit 0; fi
-        parents=(-p "$parent")
+        commit="$(commit_tree -p "$parent")"
+    else
+        commit="$(commit_tree)"
     fi
-    commit="$(git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-        commit-tree "$tree" "${parents[@]}" -m "chore: publish signed macOS feed for $tag")"
     if git push origin "$commit:refs/heads/$branch"; then exit 0; fi
     # A concurrent release may have published another feed. Merge its tree and retry.
 done
