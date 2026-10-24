@@ -25,8 +25,12 @@ class FeedPublishingTests(unittest.TestCase):
             git('commit', '-m', 'initial')
             source_head = git('rev-parse', 'HEAD')
             def script(name, *args, check=True):
-                return subprocess.run(['bash', str(ROOT / 'scripts' / name), *map(str, args)], cwd=checkout,
-                                      capture_output=True, text=True, check=check)
+                # Exercise macOS's system Bash 3 as well as Linux's system Bash.
+                result = subprocess.run(['/bin/bash', str(ROOT / 'scripts' / name), *map(str, args)], cwd=checkout,
+                                        capture_output=True, text=True)
+                if check and result.returncode:
+                    self.fail(f'{name} failed:\n{result.stdout}\n{result.stderr}')
+                return result
             site = root / 'site'
             script('copy-update-feeds.sh', site)  # first deployment, no feeds branch yet
             feed = root / 'feed.xml'
