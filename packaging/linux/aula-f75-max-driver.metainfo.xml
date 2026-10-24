@@ -65,8 +65,8 @@
     </ul>
   </description>
 
-  <launchable type="desktop-id">aula-f75-max-driver.desktop</launchable>
-  <icon type="stock">aula-f75-max-driver</icon>
+  <launchable type="desktop-id">vitalyart.aula-f75-max-driver.desktop</launchable>
+  <icon type="stock">vitalyart.aula-f75-max-driver</icon>
   <provides>
     <binary>AulaF75MaxDriverLinux</binary>
     <id>aula-f75-max-driver.desktop</id>

@@ -965,7 +965,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window=gtk_application_window_new(app);
     ui->app=app; ui->window=GTK_WINDOW(window);
     gtk_window_set_title(ui->window,L("Aula F75 Max Driver"));
-    gtk_window_set_icon_name(ui->window,"aula-f75-max-driver");
+    gtk_window_set_icon_name(ui->window,"vitalyart.aula-f75-max-driver");
     gtk_window_set_default_size(ui->window,1100,840);
     gtk_widget_set_size_request(window,820,560);
     add_class(window,"aula-window");
@@ -975,7 +975,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_hexpand(sidebar,FALSE); gtk_widget_set_size_request(sidebar,220,-1);
     gtk_box_append(GTK_BOX(root),sidebar);
     GtkWidget *brand=hbox_new(10); add_class(brand,"brand");
-    GtkWidget *app_icon=gtk_image_new_from_icon_name("aula-f75-max-driver"); gtk_image_set_pixel_size(GTK_IMAGE(app_icon),32);
+    GtkWidget *app_icon=gtk_image_new_from_icon_name("vitalyart.aula-f75-max-driver"); gtk_image_set_pixel_size(GTK_IMAGE(app_icon),32);
     gtk_box_append(GTK_BOX(brand),app_icon);
     GtkWidget *brand_text=vbox_new(2);
     gtk_box_append(GTK_BOX(brand_text),label_new("Aula F75 Max","panel-title"));
