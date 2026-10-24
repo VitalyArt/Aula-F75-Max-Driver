@@ -41,6 +41,7 @@ export APP_DIR DMG_DIR DMG_PATH DMG_RW_PATH DMG_STYLE_SCRIPT EXECUTABLE
 .PHONY: release-package clean
 
 include make/help.mk
+include make/site.mk
 include make/macos.mk
 include make/linux.mk
 include make/release.mk

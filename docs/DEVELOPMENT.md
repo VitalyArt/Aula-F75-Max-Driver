@@ -65,6 +65,7 @@ The project uses its checked-in Gradle wrapper; downloaded Gradle state is kept 
 - `Sources/AulaF75MaxDriver/` contains the SwiftUI app, AppKit integrations, IOKit HID transport, display encoder, notifications, and login helper.
 - `Sources/AulaLinuxApp/`, `Sources/AulaLinuxHID/`, and `Sources/CAulaLinuxGTK/` provide the GTK4 UI, hidapi/hidraw transport, and C bridge.
 - `android/` is a separate Kotlin/Compose Gradle project using the Android USB Host API.
+- `site/` contains the static website and screenshots; `docs/` contains developer documentation, validation reports, and design plans. `assets/app-icon.png` is the shared source icon used by the README, Linux packaging, and website build.
 - `Package.swift` defines the Swift targets; `Info.plist` configures the macOS app bundle. `Makefile`, `make/`, and `scripts/` provide build and packaging commands.
 
 On macOS, `AulaF75MaxDriverApp` creates `AppViewModel`; views invoke its actions and render published state. The view model coordinates HID monitoring, device operations, battery polling, and logs. `AulaDevice` handles wired commands, `WirelessAulaDevice` handles the receiver, and `DisplayEncoder` prepares display payloads. Device work runs off the main actor where appropriate.
@@ -128,7 +129,18 @@ macOS may require Input Monitoring permission. Linux needs hidraw access through
 
 ## Website and releases
 
-The static user site starts at [index.html](index.html), with platform guides, assets, screenshots, and seven site languages. English is the default. The [Pages workflow](../.github/workflows/pages.yml) publishes `docs/` on pushes to `main` or `master` and supports manual dispatch.
+The static user site starts at [site/index.html](../site/index.html), with platform guides, screenshots, and seven site languages. English is the default.
+
+Build and preview it from the repository root:
+
+```sh
+make site-build
+python3 -m http.server --directory build/site
+```
+
+Open http://localhost:8000 in a browser. The build replaces only `build/site/`, copies all website files (including hidden files), and adds the shared icon as `assets/app-icon.png`. Preview the built directory so the icon is available. Generated copies should not be committed.
+
+The [Pages workflow](../.github/workflows/pages.yml) builds and publishes only `build/site/` on pushes to `main` or `master` and supports manual dispatch. Developer documentation and plans are excluded; public page and asset URLs remain unchanged.
 
 The [build workflow](../.github/workflows/build.yml) builds the macOS DMG, Linux DEB, and Android debug APK and runs Android tests on pushes and pull requests. Tagged builds also produce the signed Android release APK and create or update a GitHub release. Swift suites and Linux UI checks must be run separately; they are not part of that workflow.
 

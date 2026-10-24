@@ -29,10 +29,13 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Build static site
+        run: make site-build
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: build/site
 
       - name: Deploy to GitHub Pages
         id: deployment
