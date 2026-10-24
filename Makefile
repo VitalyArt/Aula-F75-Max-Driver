@@ -8,7 +8,7 @@ BUILD_DIR := build
 
 LINUX_PRODUCT := AulaF75MaxDriverLinux
 LINUX_ARTIFACT := $(BUILD_DIR)/AulaF75MaxDriverLinux.tar.gz
-LINUX_DESKTOP_ID := aula-f75-max-driver
+LINUX_DESKTOP_ID := vitalyart.aula-f75-max-driver
 LINUX_APPSTREAM_ID := vitalyart.aula-f75-max-driver
 LINUX_PACKAGE_NAME := aula-f75-max-driver
 LINUX_INSTALL_PREFIX := /opt/$(LINUX_PACKAGE_NAME)
