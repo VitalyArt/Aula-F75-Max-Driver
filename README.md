@@ -4,512 +4,97 @@
   <img src="docs/assets/app-icon.png" width="128" alt="Aula F75 Max Driver app icon">
 </p>
 
-Native utility for configuring the Epomaker x Aula F75 Max keyboard on macOS, Linux, and Android.
+Configure your Epomaker x Aula F75 Max keyboard on macOS, Linux, and Android.
 
-The macOS app communicates directly with the keyboard and its 2.4G receiver through macOS HID APIs. The Linux app uses `hidapi` over `hidraw` and a native GTK4 interface. The Android app uses the USB Host API and a Compose UI. macOS and Linux share portable Swift protocol and preview code in `AulaCore`; Android implements the protocol in Kotlin.
+**[Download the latest version](https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/latest)**
 
-## Website
+## What you can do
 
-The promo and documentation site lives in `docs/` and is ready for GitHub Pages.
+- Customize RGB lighting, preview effects, and save your favorite profiles.
+- Put an image or animated GIF on the keyboard display.
+- Sync the keyboard clock with your device's local time.
+- Check battery level and adjust performance, sleep, and Game Mode settings.
+- Get low-battery notifications on macOS and Linux.
 
-- Local entry point: `docs/index.html`
-- Static assets: `docs/assets/` and `docs/screenshots/`
-- GitHub Pages deployment workflow: `.github/workflows/pages.yml`
-- Build workflow: `.github/workflows/build.yml` validates macOS DMG packaging, Linux DEB installer builds, and Android tests/debug APK builds on pull requests and pushes. Tagged builds also produce the Android release APK.
-- Default site language: English
-- Site languages: English, Russian, Spanish, Uzbek, Kazakh, Portuguese, Simplified Chinese
+## Download and install
 
-After pushing to `main` or `master`, GitHub Actions publishes the `docs/` directory through Pages. The workflow can also be started manually from the Actions tab.
+Open the [download page](https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/latest) and choose the file for your device. You do not need developer tools to install the app.
+
+| Platform | Requirements | Download |
+| --- | --- | --- |
+| macOS | macOS 14 or newer, Apple Silicon Mac | `.dmg` |
+| Linux | Debian / Ubuntu, package matching your computer's architecture | `.deb` |
+| Android | Android 9 or newer, USB OTG support | `.apk` |
+
+### macOS
+
+1. Open the downloaded DMG and drag **Aula F75 Max Driver** into **Applications**.
+2. Open the app from Applications.
+3. If macOS blocks it, dismiss the warning, open **System Settings → Privacy & Security**, and click **Open Anyway** for the app. Confirm to open it.
+
+### Linux
+
+Download the DEB matching your computer's architecture. Open a terminal in its download folder and run the following, keeping only the Aula DEB you want to install in that folder:
+
+```sh
+sudo apt update
+sudo apt install ./AulaF75MaxDriver-v*_*.deb
+```
+
+Unplug and reconnect the keyboard and receiver after installation, then open **Aula F75 Max Driver** from your applications menu. Run the app normally, without `sudo`.
+
+### Android
+
+1. Open the downloaded APK. If prompted, allow your browser or file manager to install apps, then complete installation.
+2. Connect the keyboard or receiver using a USB OTG adapter.
+3. Open the app, tap **Grant USB access**, and approve the system prompt.
+
+## Connect your keyboard
+
+Choose the connection for the task you want to perform:
+
+| Connection | Keyboard mode | Available functions |
+| --- | --- | --- |
+| USB data cable | Wired / USB | Upload images and GIFs, sync the clock, factory reset |
+| 2.4G USB receiver | 2.4G wireless | Read battery level, change RGB lighting, performance, sleep, and Game Mode settings |
+
+On Android, connect either accessory through OTG and grant USB access. Open **Home** to check the connection status.
+
+- **Lighting:** choose an effect, adjust it, then click **Apply to Keyboard** on desktop or **Apply** on Android. Save profiles to reuse your settings. Lighting previews and saved profiles also work without a connected receiver.
+- **Screen:** choose an image or GIF, select how it fits the display, and upload it over USB. On desktop you can preview the animation; Android previews the first GIF frame.
+- **Clock:** connect the keyboard by USB and use the clock sync action.
 
 ## Screenshots
 
-### macOS SwiftUI interface
-
-Native SwiftUI pages rendered at 1100 × 840, matching the standard Linux screenshots. Captured in an isolated process with HID monitoring disabled:
-
-![macOS Home with keyboard preview](docs/screenshots/redesign-home.png)
-
-![macOS Lighting with live effect previews and saved profiles](docs/screenshots/redesign-lighting.png)
-
-### Linux GTK interface
-
-English screenshots from [PR #16](https://github.com/VitalyArt/Aula-F75-Max-Driver/pull/16), captured with mocked HID and an isolated configuration:
-
-![Linux Home page](docs/screenshots/linux-home.png)
-
-![Linux Lighting page with live keyboard preview and effect gallery](docs/screenshots/linux-lighting.png)
-
-![Linux lighting controls and saved profiles](docs/screenshots/linux-lighting-controls.png)
-
-![Linux Screen page with encoded GIF preview](docs/screenshots/linux-screen.png)
-
-## Features
-
-- Detects wired USB HID endpoints for the keyboard.
-- Detects the 2.4G USB receiver.
-- Reads keyboard battery percentage through the 2.4G receiver.
-- Sends a local low-battery notification on macOS and Linux when the level drops below 20%.
-- Controls RGB mode, brightness, speed, direction, colorful animation, and fixed color.
-- Previews all 20 lighting effects on a detailed keyboard in the macOS and Linux apps.
-- Saves, updates, renames, and deletes local lighting profiles on all three platforms; previews work without a receiver.
-- Separates lighting edits from Apply and Revert on desktop.
-- Previews the exact encoded 128 × 128 RGB565 display frames on desktop, with GIF animation, frame thumbnails, and upload progress.
-- Configures response level, sleep timeout, Game Mode, and Command key restore behavior.
-- Syncs the keyboard display clock to local system time.
-- Uploads PNG, JPEG, GIF, BMP, TIFF, and WebP images to the 128 x 128 keyboard display.
-- Supports animated GIF uploads with frame delays.
-- Supports display fit modes: fit, fill, and stretch.
-- Provides a factory reset flow for display slots and keyboard configuration blocks used by this implementation.
-- Provides a diagnostic endpoint view for HID transport troubleshooting.
-- Supports app language selection with bundled localizations.
-- Ships native macOS, Linux, and Android builds with platform-specific integrations.
-- Supports Launch at Login on macOS.
-
-Android provides the same wired display, clock, reset, receiver battery, RGB, performance, and Game Mode controls through the system USB Host API. Desktop-only integrations such as Launch at Login, Linux desktop entries, and low-battery notifications are not available in the Android app.
-
-## Requirements
-
 ### macOS
 
-- macOS 14 or newer.
-- Apple Silicon Mac.
-- Xcode Command Line Tools or a full Xcode installation.
-- Aula F75 Max keyboard.
-- USB-C wired connection for display upload, clock sync, and factory reset.
-- 2.4G USB receiver for battery, RGB, performance, and Game Mode controls.
-
-Some HID operations may require macOS Input Monitoring permission. If commands fail even though the keyboard is connected, grant permission in:
-
-```text
-System Settings -> Privacy & Security -> Input Monitoring
-```
-
-Then restart the app.
+![macOS lighting effects and keyboard preview](docs/screenshots/redesign-lighting.png)
 
 ### Linux
 
-- Ubuntu or Fedora on x86_64.
-- Swift 6 toolchain.
-- GTK4 development libraries.
-- hidapi development libraries.
-- Aula F75 Max keyboard and/or 2.4G receiver.
-- udev access to the supported hidraw devices.
-
-Ubuntu dependencies:
-
-```sh
-sudo apt install libgtk-4-dev libhidapi-dev pkg-config
-```
-
-Fedora dependencies:
-
-```sh
-sudo dnf install gtk4-devel hidapi-devel pkgconf-pkg-config
-```
-
-Source builds need the udev rule before running device commands:
-
-```sh
-sudo install -m 0644 packaging/linux/60-aula-f75-max.rules /etc/udev/rules.d/
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-```
-
-Then replug the keyboard and receiver.
+![Linux screen image and GIF preview](docs/screenshots/linux-screen.png)
 
 ### Android
 
-- Android 9 (API 28) or newer.
-- JDK 17 and the Android SDK (Android Studio is optional).
-- USB OTG support on the Android device.
-- Aula F75 Max keyboard and/or 2.4G receiver.
+<img src="docs/screenshots/android-home.png" width="320" alt="Android home and keyboard status">
 
-The Android app uses the system USB permission prompt for HID access. Plug the keyboard or receiver into the device with an OTG adapter, open the app, tap **Grant USB access**, and approve the prompt. The project uses its checked-in Gradle 9.3 wrapper and keeps downloaded Gradle state under `android/.gradle/`.
+## If something is not working
 
-## Build and Run
+**Keyboard not detected?** Check the keyboard mode and use a USB data cable. Reconnect the keyboard or receiver, and try a direct USB port instead of a hub. On Linux, reconnect both accessories after installing the DEB.
 
-Show available Make targets:
+**macOS detects the keyboard but commands fail?** Allow the app in **System Settings → Privacy & Security → Input Monitoring**, then restart it. This permission is separate from allowing the app's first launch.
 
-```sh
-make help
-```
+**Android cannot access the keyboard?** Confirm your device supports USB OTG, tap **Grant USB access**, and approve the prompt.
 
-### macOS
+**Battery is unavailable, or lighting settings will not apply?** These functions require the 2.4G receiver and the keyboard in 2.4G mode. A wired connection alone does not provide battery readings.
 
-Build and package the app:
+**Image upload or clock sync fails?** Use a USB data cable with the keyboard in wired mode. For uploads, try a small still image first.
 
-```sh
-make macos-app
-```
+Still stuck? [Report a problem](https://github.com/VitalyArt/Aula-F75-Max-Driver/issues/new?template=bug_report.yml) with your operating system, app version, connection type, and the step that failed. The app's **Diagnostics** and **Activity Log** can help identify the problem.
 
-Open the packaged app:
+## For developers
 
-```sh
-open "build/Aula F75 Max Driver.app"
-```
-
-Build and open in one step:
-
-```sh
-make macos-run
-```
-
-Create a DMG installer image:
-
-```sh
-make macos-dmg
-```
-
-### Linux
-
-Build the native Linux GTK app:
-
-```sh
-make linux-build
-```
-
-Run the native Linux GTK app:
-
-```sh
-make linux-run
-```
-
-Build a Debian/Ubuntu installer package:
-
-```sh
-make linux-deb
-sudo apt install ./build/AulaF75MaxDriver-v*_*.deb
-```
-
-The DEB installs the application launcher, desktop entry, icon, Swift runtime libraries needed by the release binary, and the udev rule. Replug the keyboard and receiver after installation.
-
-Package a legacy tar.gz artifact for development workflows:
-
-```sh
-make linux-package
-```
-
-### Android
-
-Build the Android debug APK and run unit tests:
-
-```sh
-make android-build
-make android-test
-```
-
-The debug APK is written to:
-
-```text
-android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-Install it on a connected Android device with USB debugging enabled:
-
-```sh
-adb install -r android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-Tagged GitHub Actions builds sign the release APK with a persistent release key. Configure these repository secrets before creating a tag:
-
-- `ANDROID_RELEASE_KEYSTORE_BASE64`: the base64-encoded JKS or PKCS12 keystore.
-- `ANDROID_RELEASE_KEYSTORE_PASSWORD`: the keystore password.
-- `ANDROID_RELEASE_KEY_ALIAS`: the signing key alias.
-- `ANDROID_RELEASE_KEY_PASSWORD`: the signing key password.
-
-Keep an offline backup of the keystore and its passwords. Every update must use the same signing key as the installed app. The workflow stops before publishing if a signing secret is absent or if `apksigner` cannot verify the resulting APK.
-
-Other commands:
-
-- `make macos-build` builds the macOS SwiftUI app binary in release mode for `arm64`.
-- `make macos-app` builds and packages `build/Aula F75 Max Driver.app`.
-- `make macos-dmg` builds a styled drag-to-install `build/Aula F75 Max Driver.dmg` with the app and an Applications shortcut.
-- `make macos-run` builds and opens the macOS app bundle.
-- `make linux-build` builds the native Linux GTK app on Linux.
-- `make linux-deb` builds the Debian/Ubuntu installer in `build/`.
-- `make linux-package` packages the Linux binary and udev rule into `build/AulaF75MaxDriverLinux.tar.gz` as a legacy developer artifact.
-- `make linux-run` runs the native Linux GTK app on Linux.
-- `make android-build` builds the Android debug APK through the Android Gradle project.
-- `make android-test` runs the Android JVM unit tests.
-- `make clean` removes `.build/` and `build/`.
-
-The build output is local generated state and should not be committed.
-
-## Usage
-
-### Device Detection
-
-The app starts a HID monitor when the main window appears. It automatically rescans when supported devices are connected or removed.
-
-The overview cards show:
-
-- Wired USB state.
-- 2.4G receiver state.
-- Battery state.
-
-The endpoint diagnostics panel lists visible HID endpoints, usage pages, report sizes, product names, and transports. Use this panel first when a device command does not work.
-
-### Wired USB Workflow
-
-Use a wired USB-C connection for:
-
-- Keyboard clock sync.
-- Keyboard display image upload.
-- Factory reset.
-
-Display upload supports still images and animated GIFs. Images are rendered to the keyboard screen size of `128 x 128`, converted to RGB565, chunked into 4096-byte HID output reports, and sent to the selected display slot.
-
-Slots must be in the range `1...255`.
-
-Fit modes:
-
-- `Fit` preserves aspect ratio and letterboxes when needed.
-- `Fill` preserves aspect ratio and crops when needed.
-- `Stretch` fills the full display without preserving aspect ratio.
-
-### 2.4G Keyboard Control
-
-Use the 2.4G receiver for:
-
-- Battery query.
-- RGB lighting profile.
-- Response level.
-- Sleep timeout.
-- Game Mode.
-- Command key restore.
-
-The app polls battery periodically while the receiver is present. Manual battery query is also available from the main window.
-
-### Desktop previews and profiles
-
-Use **Home**, **Lighting**, **Screen**, **Performance**, and **Settings** in the sidebar. **Diagnostics** and **Activity Log** contain troubleshooting tools.
-
-On **Lighting**, choose an effect to preview it, adjust its controls, then use **Apply to Keyboard** to send the settings through the receiver. **Revert** restores the last applied settings. Save named profiles to reuse a look. Selecting a saved profile can also apply it when the receiver is connected and idle.
-
-On **Screen**, choose an image or GIF and a fit mode to preview the encoded frames before uploading over USB-C. Previewing files does not require a keyboard.
-
-macOS profiles are stored in `UserDefaults` under `lighting.profiles.v1`. Linux profiles use `$XDG_CONFIG_HOME/aula-f75-max-driver/lighting-profiles.json`.
-
-### Launch at Login
-
-Launch at Login is managed through the macOS ServiceManagement framework. It can be toggled from the app settings panel.
-
-### Android Notes
-
-- **Home**, **Lighting**, **Screen**, and **Device** use bottom navigation on phones and a navigation rail at 600 dp and above.
-- Home shows the last successfully applied lighting in the current session. Lighting provides a live F75 Max preview, all 20 effect tiles, and local saved profiles. Screen previews the selected image and fit mode on the keyboard display (GIF preview shows its first frame).
-- Editing lighting only changes the preview until **Apply**. Selecting a saved profile also applies it when the receiver has USB permission and the app is idle; otherwise it only loads the preview. There is no deferred automatic application after connecting a receiver.
-- Profiles are stored in private Android SharedPreferences as JSON under `lighting.profiles.v1`; they are independent of desktop profiles and firmware. The starter profiles are Rainbow Wave, Calm Breath, and Off. Profile switching confirms before discarding unsaved edits.
-- Preview animation runs at up to 20 fps, pauses when off screen or in the background, and respects the system animator-duration setting. Effect thumbnails are static approximations.
-
-- The Android build is a separate Gradle project under `android/`.
-- USB Host permission is required before the app can talk to the keyboard or receiver.
-- Use a wired USB-C connection through OTG for display upload, clock sync, and factory reset.
-- Connect the 2.4G receiver through OTG for battery, RGB, response, sleep, and Game Mode controls.
-- The Compose interface supports English, Russian, and the Android system-language option; unsupported system locales fall back to English.
-- Android-specific features like desktop entry integration and Launch at Login are not available on Android.
-
-## Project Layout
-
-```text
-.
-|-- Package.swift
-|-- Info.plist
-|-- Makefile
-|-- android/
-|   |-- app/
-|   |   `-- src/
-|   |       |-- main/
-|   |       `-- test/
-|   `-- gradle/
-|-- Sources/
-|   `-- AulaF75MaxDriver/
-|       |-- AulaF75MaxDriverApp.swift
-|       |-- ContentView.swift
-|       |-- AppViewModel.swift
-|       |-- AulaDevice.swift
-|       |-- WirelessAulaDevice.swift
-|       |-- DisplayEncoder.swift
-|       |-- HIDDeviceMonitor.swift
-|       |-- BatteryNotificationService.swift
-|       |-- LaunchAtLogin.swift
-|       |-- Localization.swift
-|       |-- AulaTypes.swift
-|       `-- Resources/
-|           |-- en.lproj/
-|           |-- ru.lproj/
-|           |-- es.lproj/
-|           |-- uz.lproj/
-|           |-- kk.lproj/
-|           |-- pt.lproj/
-|           `-- zh-Hans.lproj/
-`-- build/
-```
-
-Linux-specific code is split into separate targets under `Sources/AulaCore/`, `Sources/AulaLinuxHID/`, `Sources/AulaLinuxApp/`, and `Sources/CAulaLinuxGTK/`.
-
-Important files:
-
-- `AulaF75MaxDriverApp.swift` defines the SwiftUI app, main window, and AppKit window appearance configuration.
-- `ContentView.swift` contains the main SwiftUI interface.
-- `AppViewModel.swift` owns app state, task orchestration, device refreshes, battery polling, and log messages.
-- `AulaDevice.swift` handles wired keyboard HID communication.
-- `WirelessAulaDevice.swift` handles 2.4G receiver communication.
-- `DisplayEncoder.swift` converts image files into the keyboard display payload format.
-- `HIDDeviceMonitor.swift` watches for supported HID attach and removal events.
-- `AulaTypes.swift` contains the current macOS app protocol constants, shared errors, endpoint metadata, and upload progress types.
-- `AulaCore` contains portable packet builders, the keyboard layout, and the lighting settings/effect renderer shared by macOS and Linux.
-- `Localization.swift` resolves bundled localized strings and language override behavior.
-- `android/app/src/main/java/com/vitalyart/aulaf75maxdriver/AulaApp.kt` contains the Android Compose interface.
-- `android/app/src/main/java/com/vitalyart/aulaf75maxdriver/AulaBackend.kt` performs Android USB Host device commands.
-- `android/app/src/main/java/com/vitalyart/aulaf75maxdriver/UsbHidSession.kt` manages claimed USB HID interfaces and report transfers.
-
-## Architecture
-
-The macOS app is a Swift Package executable target using SwiftUI for UI and AppKit/IOKit for macOS integration. The Linux app is a separate native GTK4 executable using hidapi/hidraw. Android is a Kotlin/Compose application that accesses the same supported device identifiers through Android's USB Host API.
-
-High-level flow:
-
-1. `AulaF75MaxDriverApp` creates a shared `AppViewModel`.
-2. `ContentView` renders state and invokes view model actions.
-3. `AppViewModel` starts HID monitoring, runs device commands, updates logs, and manages background battery polling.
-4. `AulaDevice` and `WirelessAulaDevice` perform low-level HID report operations.
-5. `DisplayEncoder` prepares display payloads before upload.
-
-On Android, `AulaViewModel` coordinates the Compose UI, `AndroidAulaBackend` performs device commands, and `UsbHidSession` claims USB interfaces after the user grants USB Host permission.
-
-Device commands run off the main actor where appropriate, then publish UI state back on the main actor.
-
-## HID Endpoints
-
-Known device identifiers:
-
-- Wired keyboard: vendor `0x0c45`, product `0x800a`.
-- 2.4G receiver: vendor `0x05ac`, product `0x024f`.
-
-Known usage pages:
-
-- Wired command: `0xff13`.
-- Wired raw display: `0xff68`.
-- 2.4G command: `0xff59`.
-- 2.4G raw: `0xff60`.
-
-The app also uses report size heuristics as fallbacks where needed.
-
-## Localization
-
-Bundled localizations currently include:
-
-- English
-- Russian
-- Spanish
-- Uzbek
-- Kazakh
-- Portuguese
-- Simplified Chinese
-
-The macOS and Linux apps bundle all seven localizations. Their selected language is stored in `UserDefaults` under `app.language.code`, and the `system` option uses the default bundle resolution. Android currently bundles English and Russian and stores its language choice in Android shared preferences.
-
-## Testing
-
-`Package.swift` defines shared `AulaCoreTests` and macOS-only `AulaF75MaxDriverTests`. The macOS tests cover keyboard geometry, lighting effects, saved profiles, and screen preview decoding.
-
-Recommended validation before a release:
-
-```sh
-make clean
-make macos-app
-```
-
-Linux validation should be run on Ubuntu or Fedora after installing the documented GTK4, hidapi, and udev dependencies:
-
-```sh
-make linux-build
-make linux-run
-```
-
-The shared lighting and keyboard geometry tests run on both desktop platforms:
-
-```sh
-swift test --filter LightingPreviewTests
-```
-
-On Linux, `bash scripts/linux-ui-test.sh` exercises the actual GTK widgets with mocked HID, isolated profiles, generated image/GIF fixtures, and screenshots/animation recordings in a temporary directory. It requires `xvfb`, `xauth`, `ffmpeg`, a C compiler, and the GTK development dependencies. No commands are sent to a physical keyboard. The check covers profile CRUD, failed Apply and Revert, RGB565 preview/upload consistency, GIF timing, upload progress, reduced animation, and closing during background preparation.
-
-Linux lighting profiles are stored in `$XDG_CONFIG_HOME/aula-f75-max-driver/lighting-profiles.json` (default: `~/.config/aula-f75-max-driver/lighting-profiles.json`). Previewing effects and saving profiles work without a receiver; sending a profile requires the receiver. The Home keyboard shows the last successfully applied lighting in the current session.
-
-Validate the Android Kotlin models and debug APK with JDK 17 and an installed Android SDK:
-
-```sh
-make android-test
-make android-build
-```
-
-Manual validation:
-
-- Launch the packaged app.
-- Connect the keyboard over USB-C and verify wired endpoints appear.
-- Connect the 2.4G receiver and verify receiver endpoints appear.
-- Query battery.
-- Apply a harmless RGB profile.
-- Sync keyboard clock.
-- Upload a small test image to a non-critical display slot.
-- Switch app language and verify the UI updates correctly.
-- Toggle Launch at Login if that behavior changed.
-- On Android, connect through OTG, grant the USB permission prompt, and verify wired or receiver actions work from the Compose UI.
-
-Run the Swift test suites available on the current desktop platform with:
-
-```sh
-swift test
-```
-
-## Troubleshooting
-
-### The keyboard is connected but not detected
-
-- Check the diagnostic endpoint panel.
-- Try reconnecting the keyboard or receiver.
-- Try a direct USB port instead of a hub.
-- On macOS, grant Input Monitoring permission and restart the app.
-- On Android, confirm the phone or tablet supports USB OTG, then tap **Grant USB access** and approve the system prompt.
-- Run `make clean && make macos-app` if testing a fresh local macOS build.
-
-### Battery is unavailable
-
-Battery query requires the 2.4G receiver. Wired USB endpoints alone are not enough for the current battery implementation.
-
-### Display upload fails
-
-- Use wired USB-C mode.
-- Confirm that the wired display endpoint is visible.
-- Try a smaller still image first.
-- Confirm that the selected slot is between `1` and `255`.
-- Grant Input Monitoring permission if acknowledgements are not received.
-
-### RGB or performance commands fail
-
-- Use the 2.4G receiver.
-- Confirm that the `2.4G raw` endpoint is visible.
-- Reconnect the receiver and rescan.
-
-### Launch at Login does not change
-
-Launch at Login depends on macOS ServiceManagement behavior and app bundle identity. Test it from the packaged `.app`, not from a raw SwiftPM executable.
-
-## Limitations
-
-- The app is currently packaged from SwiftPM with a Makefile, not from a full Xcode app project.
-- There is no WidgetKit extension. The standard macOS Batteries widget cannot be extended from this package layout.
-- Linux GTK integration checks require Linux; physical HID behavior still needs hardware.
-- Hardware-dependent behavior requires a real Aula F75 Max keyboard and receiver.
-- The protocol implementation is based on observed/public packet flows and may need updates for firmware variants.
-
-## Security Notes
-
-- Do not commit generated build output.
-- Do not commit pairing data, device secrets, or private diagnostic captures.
-- This app communicates with HID devices from user space and does not install kernel extensions.
+See the [development guide](docs/DEVELOPMENT.md) for building, testing, architecture, and release instructions.
 
 ## License
 
