@@ -14,6 +14,7 @@ mkdir -p "${linux_root}/share/metainfo"
 mkdir -p "${linux_root}/share/glib-2.0/schemas"
 mkdir -p "${linux_root}/share/udev/rules.d"
 
+printf '%s\n' "${AULA_RELEASE_VERSION:-$(python3 scripts/build-version.py)}" > "${linux_root}/version.txt"
 cp ".build/release/${LINUX_PRODUCT}" "${linux_root}/"
 cp -R ".build/release/${RELEASE_BASE_NAME}_AulaLinuxApp.resources" "${linux_root}/"
 cp "packaging/linux/aula-f75-max-driver.desktop" "${linux_root}/share/applications/${LINUX_DESKTOP_ID}.desktop"

@@ -2,6 +2,8 @@
 
 import PackageDescription
 
+var dependencies: [Package.Dependency] = []
+
 var products: [Product] = [
     .library(name: "AulaCore", targets: ["AulaCore"])
 ]
@@ -12,17 +14,19 @@ var targets: [Target] = [
 ]
 
 #if os(macOS)
+dependencies.append(.package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.0"))
 products.append(
     .executable(name: "AulaF75MaxDriver", targets: ["AulaF75MaxDriver"])
 )
 targets.append(
     .executableTarget(
         name: "AulaF75MaxDriver",
-        dependencies: ["AulaCore"],
+        dependencies: ["AulaCore", .product(name: "Sparkle", package: "Sparkle")],
         resources: [
             .process("Resources")
         ],
         linkerSettings: [
+            .unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"]),
             .linkedFramework("AppKit"),
             .linkedFramework("CoreGraphics"),
             .linkedFramework("ImageIO"),
@@ -89,5 +93,6 @@ let package = Package(
         .macOS(.v14)
     ],
     products: products,
+    dependencies: dependencies,
     targets: targets
 )

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_action">更新…</string>
+    <string name="update_install">安装更新</string>
+    <string name="update_downloading">正在下载更新…</string>
+    <string name="update_cancel">取消</string>
+    <string name="update_install_failed">无法安装更新，请重试。</string>
+    <string name="update_invalid_package">此更新与应用或其签名密钥不匹配。</string>
+    <string name="update_install_permission">请在 Android 设置中允许此应用安装更新，然后重试。</string>
+    <string name="update_install_waiting">正在等待系统安装程序…</string>
+    <string name="update_restart">立即重启</string>
+    <string name="update_installed">更新已安装，请重启应用。</string>
+    <string name="update_unsupported">此版本不支持在应用内安装。</string>
+</resources>

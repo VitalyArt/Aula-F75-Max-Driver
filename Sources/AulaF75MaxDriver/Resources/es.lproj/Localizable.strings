@@ -288,3 +288,33 @@
 "Still image" = "Imagen fija";
 "Update" = "Actualizar";
 "%d entries" = "%d entradas";
+
+"Application settings" = "Ajustes de la aplicación";
+"Updates" = "Actualizaciones";
+"Current version" = "Versión actual";
+"Stable releases only." = "Solo versiones estables.";
+"Stable and preview releases, including beta and RC. May be unstable." = "Versiones estables y preliminares, incluidas beta y RC. Pueden ser inestables.";
+"Automatically check for updates" = "Buscar actualizaciones automáticamente";
+"Checking for updates…" = "Buscando actualizaciones…";
+"Could not check for updates. Try again later." = "No se pudieron buscar actualizaciones. Inténtalo más tarde.";
+"Pre-release" = "Versión preliminar";
+"Download" = "Descargar";
+"What’s new" = "Novedades";
+"You’re up to date" = "La aplicación está actualizada";
+"Last checked" = "Última comprobación";
+"Check now" = "Buscar ahora";
+"Update available" = "Actualización disponible";
+"Dismiss" = "Ocultar";
+"Update channel" = "Canal de actualizaciones";
+"Check for Updates…" = "Buscar actualizaciones…";
+
+"Update…" = "Actualizar…";
+"Install update" = "Instalar actualización";
+"Downloading update…" = "Descargando actualización…";
+"Could not install the update. Please try again." = "No se pudo instalar la actualización. Inténtalo de nuevo.";
+"The update does not match this app or its signing key." = "La actualización no coincide con esta aplicación o su clave de firma.";
+"Allow this app to install updates in Android settings, then try again." = "Permite instalar actualizaciones en los ajustes de Android e inténtalo de nuevo.";
+"Waiting for the system installer…" = "Esperando al instalador del sistema…";
+"Restart now" = "Reiniciar ahora";
+"Update installed. Restart the app." = "Actualización instalada. Reinicia la aplicación.";
+"This release does not support in-app installation." = "Esta versión no permite instalar desde la aplicación.";

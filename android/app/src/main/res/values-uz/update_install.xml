@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_action">Yangilash…</string>
+    <string name="update_install">Yangilanishni o‘rnatish</string>
+    <string name="update_downloading">Yangilanish yuklanmoqda…</string>
+    <string name="update_cancel">Bekor qilish</string>
+    <string name="update_install_failed">Yangilanishni o‘rnatib bo‘lmadi. Qayta urinib ko‘ring.</string>
+    <string name="update_invalid_package">Yangilanish ilovaga yoki uning imzo kalitiga mos kelmaydi.</string>
+    <string name="update_install_permission">Android sozlamalarida bu ilovaga yangilanishlarni o‘rnatishga ruxsat bering va qayta urining.</string>
+    <string name="update_install_waiting">Tizim o‘rnatuvchisi kutilmoqda…</string>
+    <string name="update_restart">Qayta ishga tushirish</string>
+    <string name="update_installed">Yangilanish o‘rnatildi. Ilovani qayta ishga tushiring.</string>
+    <string name="update_unsupported">Bu versiyani ilova ichidan o‘rnatib bo‘lmaydi.</string>
+</resources>

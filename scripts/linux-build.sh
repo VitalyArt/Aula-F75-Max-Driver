@@ -13,3 +13,5 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
 swift build -c "${CONFIGURATION}" --product "${LINUX_PRODUCT}"
+
+printf '%s\n' "${AULA_RELEASE_VERSION:-$(python3 scripts/build-version.py)}" > .build/release/version.txt

@@ -19,3 +19,6 @@ DerivedData/
 
 # Brainstorm mockups and plan-execution scratch
 .superpowers/
+
+# Python build/test caches
+__pycache__/

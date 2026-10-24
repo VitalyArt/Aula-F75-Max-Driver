@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_settings">Application settings</string>
+    <string name="update_title">Updates</string>
+    <string name="update_current">Current version</string>
+    <string name="update_stable">Stable releases only.</string>
+    <string name="update_alpha">Stable and preview releases, including beta and RC. May be unstable.</string>
+    <string name="update_auto">Automatically check for updates</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_error">Could not check for updates. Try again later.</string>
+    <string name="update_preview">Pre-release</string>
+    <string name="update_download">Download</string>
+    <string name="update_notes">What’s new</string>
+    <string name="update_latest">You’re up to date</string>
+    <string name="update_checked">Last checked</string>
+    <string name="update_check">Check now</string>
+    <string name="update_available">Update available</string>
+    <string name="update_dismiss">Dismiss</string>
+    <string name="update_channel">Update channel</string>
+    <string name="update_menu">Check for Updates…</string>
+</resources>

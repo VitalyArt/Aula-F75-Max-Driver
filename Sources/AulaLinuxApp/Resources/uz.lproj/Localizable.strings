@@ -261,3 +261,35 @@
 "Locks the Windows/Super key. Also sends the Typing settings above." = "Windows/Super tugmasini bloklaydi. Yuqoridagi yozish sozlamalarini ham yuboradi.";
 "Restore Windows/Super Key" = "Windows/Super tugmasini tiklash";
 "Linux udev hidraw access is required for keyboard commands." = "Linux klaviatura buyruqlari uchun udev orqali hidraw ruxsati kerak.";
+
+"Application settings" = "Ilova sozlamalari";
+"Updates" = "Yangilanishlar";
+"Current version" = "Joriy versiya";
+"Stable releases only." = "Faqat barqaror versiyalar.";
+"Stable and preview releases, including beta and RC. May be unstable." = "Barqaror va sinov versiyalari, jumladan beta va RC. Xatolar bo‘lishi mumkin.";
+"Automatically check for updates" = "Yangilanishlarni avtomatik tekshirish";
+"Checking for updates…" = "Yangilanishlar tekshirilmoqda…";
+"Could not check for updates. Try again later." = "Yangilanishlarni tekshirib bo‘lmadi. Keyinroq urinib ko‘ring.";
+"Pre-release" = "Sinov versiyasi";
+"Download" = "Yuklab olish";
+"What’s new" = "Nimalar yangi";
+"You’re up to date" = "Eng yangi versiya o‘rnatilgan";
+"Last checked" = "Oxirgi tekshiruv";
+"Check now" = "Hozir tekshirish";
+"Update available" = "Yangilanish mavjud";
+"Dismiss" = "Yashirish";
+"Update channel" = "Yangilanish kanali";
+"Check for Updates…" = "Yangilanishlarni tekshirish…";
+
+"Update…" = "Yangilash…";
+"Install update" = "Yangilanishni o‘rnatish";
+"Downloading update…" = "Yangilanish yuklanmoqda…";
+"Could not install the update. Please try again." = "Yangilanishni o‘rnatib bo‘lmadi. Qayta urinib ko‘ring.";
+"The update does not match this app or its signing key." = "Yangilanish ilovaga yoki uning imzo kalitiga mos kelmaydi.";
+"Allow this app to install updates in Android settings, then try again." = "Android sozlamalarida bu ilovaga yangilanishlarni o‘rnatishga ruxsat bering va qayta urining.";
+"Waiting for the system installer…" = "Tizim o‘rnatuvchisi kutilmoqda…";
+"Restart now" = "Qayta ishga tushirish";
+"Update installed. Restart the app." = "Yangilanish o‘rnatildi. Ilovani qayta ishga tushiring.";
+"This release does not support in-app installation." = "Bu versiyani ilova ichidan o‘rnatib bo‘lmaydi.";
+
+"System installer unavailable. Install PackageKit and try again." = "Tizim o‘rnatuvchisi mavjud emas. PackageKit o‘rnating va qayta urining.";

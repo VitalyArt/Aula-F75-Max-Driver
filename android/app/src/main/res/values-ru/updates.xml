@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_settings">Настройки приложения</string>
+    <string name="update_title">Обновления</string>
+    <string name="update_current">Текущая версия</string>
+    <string name="update_stable">Только стабильные релизы.</string>
+    <string name="update_alpha">Стабильные и предварительные релизы, включая beta и RC. Возможны ошибки.</string>
+    <string name="update_auto">Автоматически проверять обновления</string>
+    <string name="update_checking">Проверка обновлений…</string>
+    <string name="update_error">Не удалось проверить обновления. Попробуйте позже.</string>
+    <string name="update_preview">Предварительный релиз</string>
+    <string name="update_download">Скачать</string>
+    <string name="update_notes">Что нового</string>
+    <string name="update_latest">У вас последняя версия</string>
+    <string name="update_checked">Последняя проверка</string>
+    <string name="update_check">Проверить сейчас</string>
+    <string name="update_available">Доступно обновление</string>
+    <string name="update_dismiss">Скрыть</string>
+    <string name="update_channel">Канал обновлений</string>
+    <string name="update_menu">Проверить обновления…</string>
+</resources>

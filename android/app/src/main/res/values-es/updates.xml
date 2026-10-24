@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_settings">Ajustes de la aplicación</string>
+    <string name="update_title">Actualizaciones</string>
+    <string name="update_current">Versión actual</string>
+    <string name="update_stable">Solo versiones estables.</string>
+    <string name="update_alpha">Versiones estables y preliminares, incluidas beta y RC. Pueden ser inestables.</string>
+    <string name="update_auto">Buscar actualizaciones automáticamente</string>
+    <string name="update_checking">Buscando actualizaciones…</string>
+    <string name="update_error">No se pudieron buscar actualizaciones. Inténtalo más tarde.</string>
+    <string name="update_preview">Versión preliminar</string>
+    <string name="update_download">Descargar</string>
+    <string name="update_notes">Novedades</string>
+    <string name="update_latest">La aplicación está actualizada</string>
+    <string name="update_checked">Última comprobación</string>
+    <string name="update_check">Buscar ahora</string>
+    <string name="update_available">Actualización disponible</string>
+    <string name="update_dismiss">Ocultar</string>
+    <string name="update_channel">Canal de actualizaciones</string>
+    <string name="update_menu">Buscar actualizaciones…</string>
+</resources>

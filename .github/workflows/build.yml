@@ -24,14 +24,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Resolve build version
+        run: python3 scripts/build-version.py
+
+      - name: Test release feed generation
+        run: python3 -m unittest discover -s Tests/Packaging
+
+      - name: Test macOS and portable Swift code
+        run: swift test
+
       - name: Build macOS DMG
         run: make macos-dmg
+
+      - name: Sign macOS update feed
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: python3 scripts/macos-appcast.py "build/${APP_NAME}.dmg" --sign-tool .build/artifacts/sparkle/Sparkle/bin/sign_update --output build/macos.appcast.xml
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: aula-f75-max-driver-macos-dmg
-          path: "build/Aula F75 Max Driver.dmg"
+          path: |
+            build/Aula F75 Max Driver.dmg
+            build/macos.appcast.xml
           if-no-files-found: error
 
   linux-build:
@@ -47,7 +64,16 @@ jobs:
       - name: Install Linux dependencies
         run: |
           apt-get update
-          apt-get install -y make libgtk-4-dev libhidapi-dev pkg-config python3-pil
+          apt-get install -y build-essential make libgtk-4-dev libhidapi-dev pkg-config python3-pil xvfb xauth ffmpeg
+
+      - name: Resolve build version
+        run: python3 scripts/build-version.py
+
+      - name: Test portable Swift code
+        run: swift test
+
+      - name: Test Linux interface
+        run: bash scripts/linux-ui-test.sh
 
       - name: Build Linux app
         run: make linux-build
@@ -76,6 +102,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve build version
+        run: python3 scripts/build-version.py
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -150,6 +179,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Resolve build version
+        run: python3 scripts/build-version.py
+
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
@@ -179,22 +211,24 @@ jobs:
           set -euo pipefail
           safe_tag="${GITHUB_REF_NAME//\//-}"
           release_version="v${safe_tag#v}"
-          is_rc_tag=false
+          is_prerelease_tag=false
           release_flags=()
 
-          if [[ "${GITHUB_REF_NAME}" =~ (^|.*/)v?[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+$ ]]; then
-            is_rc_tag=true
+          if [[ "${GITHUB_REF_NAME}" =~ (^|.*/)v?[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.?[0-9]+$ ]]; then
+            is_prerelease_tag=true
             release_flags+=(--prerelease --latest=false)
           fi
 
+          mv release/macos.appcast.xml "release/${RELEASE_BASE_NAME}-${release_version}.appcast.xml"
           assets=(
+            "release/${RELEASE_BASE_NAME}-${release_version}.appcast.xml"
             "release/${RELEASE_BASE_NAME}-${release_version}.dmg"
             "release/${RELEASE_BASE_NAME}-${release_version}.apk"
             release/${RELEASE_BASE_NAME}-${release_version}_*.deb
           )
 
           if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
-            if $is_rc_tag; then
+            if $is_prerelease_tag; then
               release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" --jq '.id')"
               gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/${release_id}" \
                 -f prerelease=true \

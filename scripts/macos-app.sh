@@ -9,6 +9,23 @@ mkdir -p "${APP_DIR}/Contents/MacOS"
 mkdir -p "${APP_DIR}/Contents/Resources"
 cp "${EXECUTABLE}" "${APP_DIR}/Contents/MacOS/${APP_NAME}"
 cp Info.plist "${APP_DIR}/Contents/Info.plist"
+release_version="${AULA_RELEASE_VERSION:-$(python3 scripts/build-version.py)}"
+/usr/libexec/PlistBuddy -c "Add :AulaReleaseVersion string ${release_version}" "${APP_DIR}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${release_version%%[-+]*}" "${APP_DIR}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${GITHUB_RUN_NUMBER:-1}" "${APP_DIR}/Contents/Info.plist"
+sparkle_framework=".build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
+if [[ ! -d "$sparkle_framework" ]]; then
+    printf '%s\n' 'Sparkle.framework is missing; run the macOS build first.' >&2
+    exit 1
+fi
+mkdir -p "${APP_DIR}/Contents/Frameworks"
+ditto "$sparkle_framework" "${APP_DIR}/Contents/Frameworks/Sparkle.framework"
+public_key="$(tr -d '\r\n' < packaging/macos/sparkle-public-key.txt)"
+/usr/libexec/PlistBuddy -c "Add :SUPublicEDKey string ${public_key}" "${APP_DIR}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Add :SUEnableAutomaticChecks bool false" "${APP_DIR}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Add :SUAutomaticallyUpdate bool false" "${APP_DIR}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Add :SUVerifyUpdateBeforeExtraction bool true" "${APP_DIR}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Add :SURequireSignedFeed bool true" "${APP_DIR}/Contents/Info.plist"
 cp -R "Sources/AulaF75MaxDriver/Resources/." "${APP_DIR}/Contents/Resources/"
 
 # Clear any inherited quarantine metadata and re-sign the final app bundle.

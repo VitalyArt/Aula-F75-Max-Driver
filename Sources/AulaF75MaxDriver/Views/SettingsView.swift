@@ -8,7 +8,10 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             ResponsiveColumns {
-                generalCard
+                VStack(spacing: 16) {
+                    generalCard
+                    UpdatesCard()
+                }
                 dangerCard
             }
             .pageColumn()

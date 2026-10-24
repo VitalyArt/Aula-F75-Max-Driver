@@ -27,8 +27,10 @@ android {
         applicationId = "com.vitalyart.aulaf75maxdriver"
         minSdk = 28
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.takeIf { it.isNotBlank() } ?: "1").toInt()
+        versionName = System.getenv("AULA_RELEASE_VERSION")?.takeIf { it.isNotBlank() }
+            ?: System.getenv("RELEASE_TAG")?.takeIf { it.isNotBlank() }?.removePrefix("v")
+            ?: "0.1.0+dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -67,6 +69,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 

@@ -261,3 +261,35 @@
 "Locks the Windows/Super key. Also sends the Typing settings above." = "Блокирует клавишу Windows/Super. Также отправляет настройки набора текста выше.";
 "Restore Windows/Super Key" = "Восстановить клавишу Windows/Super";
 "Linux udev hidraw access is required for keyboard commands." = "Для команд клавиатуры в Linux нужен доступ к hidraw через udev.";
+
+"Application settings" = "Настройки приложения";
+"Updates" = "Обновления";
+"Current version" = "Текущая версия";
+"Stable releases only." = "Только стабильные релизы.";
+"Stable and preview releases, including beta and RC. May be unstable." = "Стабильные и предварительные релизы, включая beta и RC. Возможны ошибки.";
+"Automatically check for updates" = "Автоматически проверять обновления";
+"Checking for updates…" = "Проверка обновлений…";
+"Could not check for updates. Try again later." = "Не удалось проверить обновления. Попробуйте позже.";
+"Pre-release" = "Предварительный релиз";
+"Download" = "Скачать";
+"What’s new" = "Что нового";
+"You’re up to date" = "У вас последняя версия";
+"Last checked" = "Последняя проверка";
+"Check now" = "Проверить сейчас";
+"Update available" = "Доступно обновление";
+"Dismiss" = "Скрыть";
+"Update channel" = "Канал обновлений";
+"Check for Updates…" = "Проверить обновления…";
+
+"Update…" = "Обновить…";
+"Install update" = "Установить обновление";
+"Downloading update…" = "Скачивание обновления…";
+"Could not install the update. Please try again." = "Не удалось установить обновление. Повторите попытку.";
+"The update does not match this app or its signing key." = "Обновление не соответствует приложению или его ключу подписи.";
+"Allow this app to install updates in Android settings, then try again." = "Разрешите этому приложению устанавливать обновления в настройках Android и повторите попытку.";
+"Waiting for the system installer…" = "Ожидание системного установщика…";
+"Restart now" = "Перезапустить";
+"Update installed. Restart the app." = "Обновление установлено. Перезапустите приложение.";
+"This release does not support in-app installation." = "Этот релиз не поддерживает установку из приложения.";
+
+"System installer unavailable. Install PackageKit and try again." = "Системный установщик недоступен. Установите PackageKit и повторите попытку.";

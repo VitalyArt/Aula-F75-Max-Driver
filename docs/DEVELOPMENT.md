@@ -19,6 +19,8 @@ make macos-dmg
 
 These targets respectively build the release arm64 binary, package `build/Aula F75 Max Driver.app`, build and open the app, and create `build/Aula F75 Max Driver.dmg`. The DMG includes an Applications shortcut for drag-to-install.
 
+The build checks SwiftUI support in the selected SDK. If the default Command Line Tools SDK is incomplete (for example, missing `SwiftUIMacros`), it selects the newest compatible installed SDK. To select one explicitly, use `MACOS_SDKROOT=/absolute/path/to/MacOSX.sdk make macos-run`; an explicit selection is never overridden.
+
 Test Launch at Login from the packaged app: it uses ServiceManagement and depends on the app bundle identity. The app is packaged from SwiftPM rather than an Xcode project; it does not include a WidgetKit extension.
 
 ### Linux
@@ -142,7 +144,7 @@ Open http://localhost:8000 in a browser. The build replaces only `build/site/`, 
 
 The [Pages workflow](../.github/workflows/pages.yml) builds and publishes only `build/site/` on pushes to `main` or `master` and supports manual dispatch. Developer documentation and plans are excluded; public page and asset URLs remain unchanged.
 
-The [build workflow](../.github/workflows/build.yml) builds the macOS DMG, Linux DEB, and Android debug APK and runs Android tests on pushes and pull requests. Tagged builds also produce the signed Android release APK and create or update a GitHub release. Swift suites and Linux UI checks must be run separately; they are not part of that workflow.
+The [build workflow](../.github/workflows/build.yml) builds the macOS DMG, Linux DEB, and Android debug APK and runs Android tests on pushes and pull requests. Tagged builds also produce the signed Android release APK and create or update a GitHub release. The workflow also runs portable Swift tests and Linux UI checks.
 
 Before tagging an Android release, configure repository secrets:
 
@@ -153,4 +155,80 @@ Before tagging an Android release, configure repository secrets:
 
 Keep an offline backup of the signing key and passwords. Updates must use the same signing key as the installed app. The workflow requires all signing secrets and verifies the APK with `apksigner` before publication.
 
-`make release-package` prepares versioned assets from existing build artifacts, using `RELEASE_DIR`, `RELEASE_TAG`, `SOURCE_MACOS_DMG`, `SOURCE_ANDROID_APK`, and `SOURCE_LINUX_DEB`. See the workflow for a complete invocation. Published files use the `AulaF75MaxDriver-v<version>` base name; DEBs also include the architecture. Tags matching the workflow's `-rc<number>` pattern are marked as prereleases and are not made latest.
+`make release-package` prepares versioned assets from existing build artifacts, using `RELEASE_DIR`, `RELEASE_TAG`, `SOURCE_MACOS_DMG`, `SOURCE_ANDROID_APK`, and `SOURCE_LINUX_DEB`. See the workflow for a complete invocation. Published files use the `AulaF75MaxDriver-v<version>` base name; DEBs also include the architecture. Alpha, beta, and RC tags are marked as prereleases and are not made latest.
+
+### Update channels
+
+All three apps check this repository's public GitHub Releases API. Settings offer
+**Stable** (full releases) and **Alpha** (full releases plus alpha, beta, and RC).
+The initial channel follows the installed build; an explicit choice persists.
+Automatic checks run while the app is open, at launch/activation after 24 hours.
+Failed automatic checks wait at least an hour before retrying. Manual checks and
+channel changes check immediately, subject to GitHub's rate-limit backoff.
+The API cache stores ETags and pagination links; no GitHub token is bundled.
+
+The Update button downloads and installs through the platform installer:
+
+- macOS uses Sparkle 2.10.0, with signed appcasts and Ed25519-signed DMGs. Sparkle
+  presents download/install progress and replaces/relaunches the app. Relaunch
+  waits for any active keyboard operation to finish.
+- Android downloads into private cache, checks package ID, version code, release
+  version, SHA-256 when provided, and the installed app's signing certificate.
+  A narrowly scoped FileProvider grants the system installer access. Android
+  asks the user to allow installation from this app and confirm the update.
+  Debug APKs cannot update to the release APK because their signing keys differ.
+- Linux checks the GitHub asset SHA-256 and DEB package name, architecture and
+  version before asking PackageKit to install it. Desktop PolicyKit handles
+  authorization. `packagekit` is recommended by the DEB; a missing service or
+  rejected authorization produces an error with retry. Restart is explicit and
+  disabled while a keyboard operation is running.
+
+Checks and downloads do not send keyboard commands. Switching from Alpha to
+Stable waits for a newer full release instead of downgrading. Dismissed banners
+stay hidden for that version; Settings still offers installation. Older releases
+without a signed appcast (macOS) or a SHA-256 asset digest (Linux) cannot be
+installed in-app. The first app version containing this updater must be installed
+through the existing distribution path.
+
+Use tags `vX.Y.Z`, `vX.Y.Z-alpha.1`, `vX.Y.Z-beta.1`, `vX.Y.Z-rc.1`, or the legacy
+`vX.Y.Z-rc1`. CI marks all preview formats as prereleases and leaves Latest on
+the stable channel. The updater selects the highest supported version with a
+matching release asset: macOS arm64 DMG, Linux architecture-specific DEB, or APK.
+Publish all platform assets before announcing a release.
+
+CI resolves `AULA_RELEASE_VERSION` through `scripts/build-version.py`. macOS stores
+the full string as `AulaReleaseVersion` and numeric components in its standard
+bundle metadata. Linux stores `version.txt` alongside its executable and uses
+`~alpha.1`/`~beta.1`/`~rc.1` in Debian package versions. Android uses the release
+string as `versionName` and the Build workflow run number as `versionCode`.
+Keep this workflow's run counter increasing; any replacement workflow must seed
+a version code higher than all published APKs. Rerunning a build keeps its code.
+Local/branch builds use `0.1.0+dev.<sha>` (Android local builds: `0.1.0+dev`);
+build metadata is ignored when comparing versions.
+
+Tests use fixture responses and never publish releases. Run `swift test`,
+`make android-test`, and `bash scripts/linux-ui-test.sh` on their supported hosts.
+After publishing, manually verify a real update from the preceding release on
+all platforms, including download links, signing compatibility, and channel choice.
+
+### Sparkle release signing
+
+The public key is versioned in `packaging/macos/sparkle-public-key.txt` and copied
+into `SUPublicEDKey` during packaging. The private key is stored in the macOS login
+Keychain under account `VitalyArt.AulaF75MaxDriver` and GitHub Actions secret
+`SPARKLE_PRIVATE_KEY`. Never put the private key in the repository or artifacts.
+Use Sparkle's `generate_keys --account VitalyArt.AulaF75MaxDriver -x <secure-file>`
+to make an offline backup outside the checkout. Keep this key stable across builds.
+
+The macOS job signs the DMG and release-local appcast with `scripts/macos-appcast.py`.
+The release job publishes `AulaF75MaxDriver-v<version>.appcast.xml` alongside the
+installers. The app uses the feed asset belonging to the GitHub release selected
+by its channel, and Sparkle's own scheduling stays disabled to avoid duplicate
+checks. `SURequireSignedFeed` and `SUVerifyUpdateBeforeExtraction` are enabled.
+The embedded Sparkle framework preserves framework symlinks and receives the
+same local/code-signing identity as the app. Developer ID notarization remains a
+separate distribution configuration.
+
+Run `python3 -m unittest discover -s Tests/Packaging` for appcast tests in addition
+to the Swift, Android and GTK suites. Verify a real update across two published,
+signed releases on each platform before relying on unattended distribution.

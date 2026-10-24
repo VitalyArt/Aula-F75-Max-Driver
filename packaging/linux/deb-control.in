@@ -17,6 +17,7 @@ ProjectLicense: MIT
 Installed-Size: @INSTALLED_SIZE@
 Date: @BUILD_DATE@
 Depends: libc6, libgtk-4-1, libhidapi-hidraw0
+Recommends: packagekit
 Homepage: https://vitalyart.github.io/Aula-F75-Max-Driver/
 Description: Native Linux driver for the Aula F75 Max keyboard
  Configure the Epomaker x Aula F75 Max keyboard display, RGB lighting,
