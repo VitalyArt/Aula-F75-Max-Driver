@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_action">Обновить…</string>
+    <string name="update_install">Установить обновление</string>
+    <string name="update_downloading">Скачивание обновления…</string>
+    <string name="update_cancel">Отмена</string>
+    <string name="update_install_failed">Не удалось установить обновление. Повторите попытку.</string>
+    <string name="update_invalid_package">Обновление не соответствует приложению или его ключу подписи.</string>
+    <string name="update_install_permission">Разрешите этому приложению устанавливать обновления в настройках Android и повторите попытку.</string>
+    <string name="update_install_waiting">Ожидание системного установщика…</string>
+    <string name="update_restart">Перезапустить</string>
+    <string name="update_installed">Обновление установлено. Перезапустите приложение.</string>
+    <string name="update_unsupported">Этот релиз не поддерживает установку из приложения.</string>
+</resources>

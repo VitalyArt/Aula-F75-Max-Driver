@@ -24,6 +24,7 @@ if [ -z "$release_tag" ] && [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
 fi
 version="${release_tag:-1.0.0}"
 version="${version#v}"
+version="${version/-/\~}"
 version="$(printf '%s' "$version" | tr '/' '-')"
 
 deb_path="${LINUX_DEB:-}"
@@ -48,6 +49,7 @@ mkdir -p \
     "${root}/usr/share/glib-2.0/schemas" \
     "${root}/etc/udev/rules.d"
 
+printf '%s\n' "${AULA_RELEASE_VERSION:-$(python3 scripts/build-version.py)}" > "${install_dir}/version.txt"
 install -m 0755 "$binary" "${install_dir}/${LINUX_PRODUCT}"
 cp -R ".build/release/${RELEASE_BASE_NAME}_AulaLinuxApp.resources" "${install_dir}/"
 

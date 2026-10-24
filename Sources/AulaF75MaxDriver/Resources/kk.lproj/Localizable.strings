@@ -288,3 +288,33 @@
 "Still image" = "Қозғалмайтын сурет";
 "Update" = "Жаңарту";
 "%d entries" = "%d жазба";
+
+"Application settings" = "Қолданба баптаулары";
+"Updates" = "Жаңартулар";
+"Current version" = "Ағымдағы нұсқа";
+"Stable releases only." = "Тек тұрақты шығарылымдар.";
+"Stable and preview releases, including beta and RC. May be unstable." = "Тұрақты және сынақ шығарылымдары, соның ішінде beta және RC. Қателер болуы мүмкін.";
+"Automatically check for updates" = "Жаңартуларды автоматты тексеру";
+"Checking for updates…" = "Жаңартулар тексерілуде…";
+"Could not check for updates. Try again later." = "Жаңартуларды тексеру мүмкін болмады. Кейінірек қайталаңыз.";
+"Pre-release" = "Сынақ шығарылымы";
+"Download" = "Жүктеп алу";
+"What’s new" = "Не жаңалық";
+"You’re up to date" = "Соңғы нұсқа орнатылған";
+"Last checked" = "Соңғы тексеру";
+"Check now" = "Қазір тексеру";
+"Update available" = "Жаңарту қолжетімді";
+"Dismiss" = "Жасыру";
+"Update channel" = "Жаңарту арнасы";
+"Check for Updates…" = "Жаңартуларды тексеру…";
+
+"Update…" = "Жаңарту…";
+"Install update" = "Жаңартуды орнату";
+"Downloading update…" = "Жаңарту жүктелуде…";
+"Could not install the update. Please try again." = "Жаңартуды орнату мүмкін болмады. Қайталаңыз.";
+"The update does not match this app or its signing key." = "Жаңарту қолданбаға немесе оның қолтаңба кілтіне сәйкес келмейді.";
+"Allow this app to install updates in Android settings, then try again." = "Android баптауларында бұл қолданбаға жаңартулар орнатуға рұқсат беріп, қайталаңыз.";
+"Waiting for the system installer…" = "Жүйелік орнатушы күтілуде…";
+"Restart now" = "Қайта іске қосу";
+"Update installed. Restart the app." = "Жаңарту орнатылды. Қолданбаны қайта іске қосыңыз.";
+"This release does not support in-app installation." = "Бұл нұсқаны қолданба ішінен орнату қолдау таппайды.";

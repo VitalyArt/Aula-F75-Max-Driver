@@ -867,6 +867,7 @@ static void install_css(void) {
         ".page { padding: 16px 28px 24px; }"
         ".hero-title { font-size: 26px; font-weight: bold; padding: 20px 28px 6px; }"
         ".subtitle, .muted { opacity: 0.65; font-size: 12px; }"
+        ".update-banner { background: alpha(@theme_selected_bg_color, .10); border: 1px solid alpha(@theme_selected_bg_color, .20); border-radius: 12px; padding: 10px 12px; }"
         ".ready-pill { color: #38a86b; padding: 12px 6px; }"
         ".status-card, .panel { background: alpha(@theme_base_color, 0.65); border: 1px solid alpha(@theme_fg_color, 0.10); border-radius: 12px; padding: 18px; }"
         ".panel-title { font-size: 16px; font-weight: bold; }"
@@ -953,6 +954,8 @@ static GtkWidget *requirement_note(const char *text) {
     GtkWidget *note=label_new(text,"warning-box");
     return note;
 }
+
+#include "LinuxUpdates.inc"
 
 static void activate(GtkApplication *app, gpointer user_data) {
     (void)user_data;
@@ -1189,6 +1192,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     ui->restore_command_button=make_button("Restore Windows/Super Key","edit-undo-symbolic"); g_signal_connect(ui->restore_command_button,"clicked",G_CALLBACK(on_restore_command_clicked),ui);
     gtk_box_append(GTK_BOX(game),ui->game_mode_button); gtk_box_append(GTK_BOX(game),ui->restore_command_button);
 
+    create_updates(pages[4],detail,ui);
     GtkWidget *general=NULL; GtkWidget *general_panel=make_panel("General","Language","emblem-system-symbolic",&general); gtk_box_append(GTK_BOX(pages[4]),general_panel);
     ui->language_combo=gtk_combo_box_text_new(); append_language_items(GTK_COMBO_BOX_TEXT(ui->language_combo));
     char language[32]={0}; aula_linux_current_language_code(language,sizeof(language)); ui->selected_language_index=language_index_for_code(language);

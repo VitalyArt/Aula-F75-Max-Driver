@@ -3,6 +3,29 @@
 #include "../../Sources/CAulaLinuxGTK/AulaLinuxGTK.c"
 #include <assert.h>
 
+static int mock_install_result=-2;
+void aula_updates_install_finished(int success) { mock_install_result=success; }
+void aula_updates_command(int action) { (void)action; }
+static int mock_update_mode;
+void aula_updates_read(int field,char *b,int n) {
+    const char *value="";
+    switch(field) {
+        case 0: value="0.1.0+test"; break;
+        case 1: value=mock_update_mode ? "alpha" : "stable"; break;
+        case 2: value="0"; break;
+        case 3: value=mock_update_mode==1 ? "Update available: v0.2.0-rc1 · Pre-release" : mock_update_mode==2 ? "Downloading update… 50%" : mock_update_mode==3 ? "Update installed. Restart the app." : "You’re up to date"; break;
+        case 4: if(mock_update_mode) value="https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/download/v0.2.0-rc1/app.deb"; break;
+        case 5: if(mock_update_mode) value="https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/tag/v0.2.0-rc1"; break;
+        case 6: value="Last checked: Today, 12:00"; break;
+        case 7: value=mock_update_mode ? "1" : "0"; break;
+        case 8: case 13: value=mock_update_mode==2 ? "1" : "0"; break;
+        case 9: value=mock_update_mode ? "Stable and preview releases, including beta and RC. May be unstable." : "Stable releases only."; break;
+        case 11: value=mock_update_mode==3 ? "1" : "0"; break;
+        case 14: value=mock_update_mode==2 ? "0.5" : "-1"; break;
+    }
+    g_strlcpy(b,value,n);
+}
+
 static int mock_wired, mock_dongle, sent_rgb;
 static gboolean fail_rgb;
 static const unsigned char *expected_upload;
@@ -70,6 +93,15 @@ static void screenshot(AulaLinuxUI *ui,const char *name) {
     g_free(path);g_object_unref(texture);gsk_render_node_unref(node);g_object_unref(paintable);
 }
 int main(int argc,char **argv) {
+    // PackageKit completion must distinguish success, failure and an earlier ErrorCode.
+    AulaPackageInstall *install=g_new0(AulaPackageInstall,1); install->refs=1;
+    GVariant *finished=g_variant_ref_sink(g_variant_new("(uu)",1,0));
+    package_signal(NULL,NULL,NULL,NULL,"Finished",finished,install);
+    assert(mock_install_result==1 && install->finished); package_unref(install);
+    install=g_new0(AulaPackageInstall,1); install->refs=1; install->failed=TRUE;
+    package_signal(NULL,NULL,NULL,NULL,"Finished",finished,install);
+    assert(mock_install_result==0 && install->finished); package_unref(install); g_variant_unref(finished);
+
     assert(argc==3); gtk_init();
     GtkApplication *app=gtk_application_new("test.aula.preview",G_APPLICATION_NON_UNIQUE);
     GError *error=NULL; assert(g_application_register(G_APPLICATION(app),NULL,&error));
@@ -118,6 +150,10 @@ int main(int argc,char **argv) {
         choose_page(ui,i);
         char name[64]; snprintf(name,sizeof(name),"%s.png",pages[i]); screenshot(ui,name);
     }
+    choose_page(ui,4);
+    const char *update_shots[]={"updates-available.png","updates-downloading.png","updates-installed.png"};
+    for(mock_update_mode=1;mock_update_mode<=3;mock_update_mode++) { pump(1100); screenshot(ui,update_shots[mock_update_mode-1]); }
+    mock_update_mode=0; pump(1100);
     choose_page(ui,1); record_animation(ui,"lighting.mp4");
     GtkScrolledWindow *lighting_scroll=GTK_SCROLLED_WINDOW(gtk_stack_get_visible_child(ui->stack));
     GtkAdjustment *adjustment=gtk_scrolled_window_get_vadjustment(lighting_scroll);

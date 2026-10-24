@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_settings">Ilova sozlamalari</string>
+    <string name="update_title">Yangilanishlar</string>
+    <string name="update_current">Joriy versiya</string>
+    <string name="update_stable">Faqat barqaror versiyalar.</string>
+    <string name="update_alpha">Barqaror va sinov versiyalari, jumladan beta va RC. Xatolar bo‘lishi mumkin.</string>
+    <string name="update_auto">Yangilanishlarni avtomatik tekshirish</string>
+    <string name="update_checking">Yangilanishlar tekshirilmoqda…</string>
+    <string name="update_error">Yangilanishlarni tekshirib bo‘lmadi. Keyinroq urinib ko‘ring.</string>
+    <string name="update_preview">Sinov versiyasi</string>
+    <string name="update_download">Yuklab olish</string>
+    <string name="update_notes">Nimalar yangi</string>
+    <string name="update_latest">Eng yangi versiya o‘rnatilgan</string>
+    <string name="update_checked">Oxirgi tekshiruv</string>
+    <string name="update_check">Hozir tekshirish</string>
+    <string name="update_available">Yangilanish mavjud</string>
+    <string name="update_dismiss">Yashirish</string>
+    <string name="update_channel">Yangilanish kanali</string>
+    <string name="update_menu">Yangilanishlarni tekshirish…</string>
+</resources>

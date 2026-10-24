@@ -301,3 +301,33 @@
 "Still image" = "Still image";
 "Update" = "Update";
 "%d entries" = "%d entries";
+
+"Application settings" = "Application settings";
+"Updates" = "Updates";
+"Current version" = "Current version";
+"Stable releases only." = "Stable releases only.";
+"Stable and preview releases, including beta and RC. May be unstable." = "Stable and preview releases, including beta and RC. May be unstable.";
+"Automatically check for updates" = "Automatically check for updates";
+"Checking for updates…" = "Checking for updates…";
+"Could not check for updates. Try again later." = "Could not check for updates. Try again later.";
+"Pre-release" = "Pre-release";
+"Download" = "Download";
+"What’s new" = "What’s new";
+"You’re up to date" = "You’re up to date";
+"Last checked" = "Last checked";
+"Check now" = "Check now";
+"Update available" = "Update available";
+"Dismiss" = "Dismiss";
+"Update channel" = "Update channel";
+"Check for Updates…" = "Check for Updates…";
+
+"Update…" = "Update…";
+"Install update" = "Install update";
+"Downloading update…" = "Downloading update…";
+"Could not install the update. Please try again." = "Could not install the update. Please try again.";
+"The update does not match this app or its signing key." = "The update does not match this app or its signing key.";
+"Allow this app to install updates in Android settings, then try again." = "Allow this app to install updates in Android settings, then try again.";
+"Waiting for the system installer…" = "Waiting for the system installer…";
+"Restart now" = "Restart now";
+"Update installed. Restart the app." = "Update installed. Restart the app.";
+"This release does not support in-app installation." = "This release does not support in-app installation.";

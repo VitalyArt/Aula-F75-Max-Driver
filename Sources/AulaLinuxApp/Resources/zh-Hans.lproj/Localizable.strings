@@ -261,3 +261,35 @@
 "Locks the Windows/Super key. Also sends the Typing settings above." = "锁定 Windows/Super 键。同时发送上面的输入设置。";
 "Restore Windows/Super Key" = "恢复 Windows/Super 键";
 "Linux udev hidraw access is required for keyboard commands." = "Linux 键盘命令需要通过 udev 获得 hidraw 访问权限。";
+
+"Application settings" = "应用设置";
+"Updates" = "更新";
+"Current version" = "当前版本";
+"Stable releases only." = "仅限稳定版本。";
+"Stable and preview releases, including beta and RC. May be unstable." = "稳定版和预览版，包括 beta 和 RC。可能不稳定。";
+"Automatically check for updates" = "自动检查更新";
+"Checking for updates…" = "正在检查更新…";
+"Could not check for updates. Try again later." = "无法检查更新，请稍后重试。";
+"Pre-release" = "预发布版本";
+"Download" = "下载";
+"What’s new" = "更新内容";
+"You’re up to date" = "已是最新版本";
+"Last checked" = "上次检查";
+"Check now" = "立即检查";
+"Update available" = "有可用更新";
+"Dismiss" = "关闭";
+"Update channel" = "更新渠道";
+"Check for Updates…" = "检查更新…";
+
+"Update…" = "更新…";
+"Install update" = "安装更新";
+"Downloading update…" = "正在下载更新…";
+"Could not install the update. Please try again." = "无法安装更新，请重试。";
+"The update does not match this app or its signing key." = "此更新与应用或其签名密钥不匹配。";
+"Allow this app to install updates in Android settings, then try again." = "请在 Android 设置中允许此应用安装更新，然后重试。";
+"Waiting for the system installer…" = "正在等待系统安装程序…";
+"Restart now" = "立即重启";
+"Update installed. Restart the app." = "更新已安装，请重启应用。";
+"This release does not support in-app installation." = "此版本不支持在应用内安装。";
+
+"System installer unavailable. Install PackageKit and try again." = "系统安装程序不可用，请安装 PackageKit 后重试。";

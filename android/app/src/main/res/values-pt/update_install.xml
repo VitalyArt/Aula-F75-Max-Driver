@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_action">Atualizar…</string>
+    <string name="update_install">Instalar atualização</string>
+    <string name="update_downloading">Baixando atualização…</string>
+    <string name="update_cancel">Cancelar</string>
+    <string name="update_install_failed">Não foi possível instalar a atualização. Tente novamente.</string>
+    <string name="update_invalid_package">A atualização não corresponde ao aplicativo ou à sua chave de assinatura.</string>
+    <string name="update_install_permission">Permita instalar atualizações nas configurações do Android e tente novamente.</string>
+    <string name="update_install_waiting">Aguardando o instalador do sistema…</string>
+    <string name="update_restart">Reiniciar agora</string>
+    <string name="update_installed">Atualização instalada. Reinicie o aplicativo.</string>
+    <string name="update_unsupported">Esta versão não permite instalar pelo aplicativo.</string>
+</resources>

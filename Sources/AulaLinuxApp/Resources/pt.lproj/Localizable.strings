@@ -261,3 +261,35 @@
 "Locks the Windows/Super key. Also sends the Typing settings above." = "Bloqueia a tecla Windows/Super. Também envia as configurações de digitação acima.";
 "Restore Windows/Super Key" = "Restaurar tecla Windows/Super";
 "Linux udev hidraw access is required for keyboard commands." = "Os comandos do teclado no Linux exigem acesso a hidraw via udev.";
+
+"Application settings" = "Configurações do aplicativo";
+"Updates" = "Atualizações";
+"Current version" = "Versão atual";
+"Stable releases only." = "Apenas versões estáveis.";
+"Stable and preview releases, including beta and RC. May be unstable." = "Versões estáveis e de prévia, incluindo beta e RC. Podem ser instáveis.";
+"Automatically check for updates" = "Verificar atualizações automaticamente";
+"Checking for updates…" = "Verificando atualizações…";
+"Could not check for updates. Try again later." = "Não foi possível verificar atualizações. Tente mais tarde.";
+"Pre-release" = "Pré-lançamento";
+"Download" = "Baixar";
+"What’s new" = "Novidades";
+"You’re up to date" = "O aplicativo está atualizado";
+"Last checked" = "Última verificação";
+"Check now" = "Verificar agora";
+"Update available" = "Atualização disponível";
+"Dismiss" = "Dispensar";
+"Update channel" = "Canal de atualizações";
+"Check for Updates…" = "Verificar atualizações…";
+
+"Update…" = "Atualizar…";
+"Install update" = "Instalar atualização";
+"Downloading update…" = "Baixando atualização…";
+"Could not install the update. Please try again." = "Não foi possível instalar a atualização. Tente novamente.";
+"The update does not match this app or its signing key." = "A atualização não corresponde ao aplicativo ou à sua chave de assinatura.";
+"Allow this app to install updates in Android settings, then try again." = "Permita instalar atualizações nas configurações do Android e tente novamente.";
+"Waiting for the system installer…" = "Aguardando o instalador do sistema…";
+"Restart now" = "Reiniciar agora";
+"Update installed. Restart the app." = "Atualização instalada. Reinicie o aplicativo.";
+"This release does not support in-app installation." = "Esta versão não permite instalar pelo aplicativo.";
+
+"System installer unavailable. Install PackageKit and try again." = "O instalador do sistema não está disponível. Instale o PackageKit e tente novamente.";

@@ -86,9 +86,12 @@ private enum class AulaDestination(@StringRes val label: Int, val icon: ImageVec
 
 @Composable
 fun AulaApp(viewModel: AulaViewModel = viewModel()) {
+    val updates: UpdatesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    UpdateInstallCoordinator(updates, !state.isWorking)
     androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
         viewModel.refresh()
+        updates.checkIfDue()
     }
     val availableLanguages = viewModel.availableLanguages
     var destination by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(AulaDestination.HOME) }
@@ -113,13 +116,16 @@ fun AulaApp(viewModel: AulaViewModel = viewModel()) {
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
             topBar = {
-                AppHeader(
-                    state = state,
-                    availableLanguages = availableLanguages,
-                    onRefresh = viewModel::refresh,
-                    onLanguageSelected = viewModel::setLanguage,
-                    onRequestPermission = viewModel::requestUsbPermission
-                )
+                Column {
+                    UpdateBanner(updates)
+                    AppHeader(
+                        state = state,
+                        availableLanguages = availableLanguages,
+                        onRefresh = viewModel::refresh,
+                        onLanguageSelected = viewModel::setLanguage,
+                        onRequestPermission = viewModel::requestUsbPermission
+                    )
+                }
             },
             bottomBar = {
                 if (!wide) NavigationBar(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)) {
@@ -148,7 +154,7 @@ fun AulaApp(viewModel: AulaViewModel = viewModel()) {
                         AulaDestination.LIGHTING -> ControlScreen(state, viewModel)
                         AulaDestination.DISPLAY -> DisplayScreen(state, viewModel::setSlot, viewModel::setFitMode,
                             { filePicker.launch("image/*") }, viewModel::uploadSelectedImage, viewModel::requestUsbPermission)
-                        AulaDestination.DEVICE -> DeviceScreen(state, viewModel, viewModel::queryBattery,
+                        AulaDestination.DEVICE -> DeviceScreen(state, viewModel, updates, viewModel::queryBattery,
                             viewModel::syncTime, { showResetDialog = true })
                     }
                 }
@@ -592,8 +598,9 @@ private fun DisplayScreen(state: AulaUiState, onSlotChanged: (Int) -> Unit, onFi
 }
 
 @Composable
-private fun DeviceScreen(state: AulaUiState, viewModel: AulaViewModel, onQueryBattery: () -> Unit, onSyncTime: () -> Unit, onReset: () -> Unit) {
+private fun DeviceScreen(state: AulaUiState, viewModel: AulaViewModel, updates: UpdatesViewModel, onQueryBattery: () -> Unit, onSyncTime: () -> Unit, onReset: () -> Unit) {
     ScreenColumn {
+        UpdatesCard(updates)
         PerformanceCard(state, viewModel)
         PremiumCard {
             CardTitle(R.string.device_diagnostics, R.string.endpoint_description, Icons.Outlined.Usb)

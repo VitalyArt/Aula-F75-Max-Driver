@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_action">Жаңарту…</string>
+    <string name="update_install">Жаңартуды орнату</string>
+    <string name="update_downloading">Жаңарту жүктелуде…</string>
+    <string name="update_cancel">Болдырмау</string>
+    <string name="update_install_failed">Жаңартуды орнату мүмкін болмады. Қайталаңыз.</string>
+    <string name="update_invalid_package">Жаңарту қолданбаға немесе оның қолтаңба кілтіне сәйкес келмейді.</string>
+    <string name="update_install_permission">Android баптауларында бұл қолданбаға жаңартулар орнатуға рұқсат беріп, қайталаңыз.</string>
+    <string name="update_install_waiting">Жүйелік орнатушы күтілуде…</string>
+    <string name="update_restart">Қайта іске қосу</string>
+    <string name="update_installed">Жаңарту орнатылды. Қолданбаны қайта іске қосыңыз.</string>
+    <string name="update_unsupported">Бұл нұсқаны қолданба ішінен орнату қолдау таппайды.</string>
+</resources>

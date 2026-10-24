@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_settings">Қолданба баптаулары</string>
+    <string name="update_title">Жаңартулар</string>
+    <string name="update_current">Ағымдағы нұсқа</string>
+    <string name="update_stable">Тек тұрақты шығарылымдар.</string>
+    <string name="update_alpha">Тұрақты және сынақ шығарылымдары, соның ішінде beta және RC. Қателер болуы мүмкін.</string>
+    <string name="update_auto">Жаңартуларды автоматты тексеру</string>
+    <string name="update_checking">Жаңартулар тексерілуде…</string>
+    <string name="update_error">Жаңартуларды тексеру мүмкін болмады. Кейінірек қайталаңыз.</string>
+    <string name="update_preview">Сынақ шығарылымы</string>
+    <string name="update_download">Жүктеп алу</string>
+    <string name="update_notes">Не жаңалық</string>
+    <string name="update_latest">Соңғы нұсқа орнатылған</string>
+    <string name="update_checked">Соңғы тексеру</string>
+    <string name="update_check">Қазір тексеру</string>
+    <string name="update_available">Жаңарту қолжетімді</string>
+    <string name="update_dismiss">Жасыру</string>
+    <string name="update_channel">Жаңарту арнасы</string>
+    <string name="update_menu">Жаңартуларды тексеру…</string>
+</resources>

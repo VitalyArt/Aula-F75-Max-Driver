@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_action">Update…</string>
+    <string name="update_install">Install update</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_cancel">Cancel</string>
+    <string name="update_install_failed">Could not install the update. Please try again.</string>
+    <string name="update_invalid_package">The update does not match this app or its signing key.</string>
+    <string name="update_install_permission">Allow this app to install updates in Android settings, then try again.</string>
+    <string name="update_install_waiting">Waiting for the system installer…</string>
+    <string name="update_restart">Restart now</string>
+    <string name="update_installed">Update installed. Restart the app.</string>
+    <string name="update_unsupported">This release does not support in-app installation.</string>
+</resources>

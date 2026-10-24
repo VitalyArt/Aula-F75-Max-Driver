@@ -22,6 +22,8 @@ python3 - "$test_dir/animated.gif" <<'PY'
 import struct, sys
 # Two 1x1 GIF frames, red then blue, with delays of 100 and 200ms.
 data = b'GIF89a' + struct.pack('<HH', 1, 1) + b'\x80\x00\x00' + b'\xff\x00\x00\x00\x00\xff'
+# Explicit looping keeps GdkPixbuf's last-frame delay finite on all versions.
+data += b'\x21\xff\x0bNETSCAPE2.0\x03\x01\x00\x00\x00'
 for color, delay in [(0, 10), (1, 20)]:
     data += b'\x21\xf9\x04\x00' + struct.pack('<H', delay) + b'\x00\x00'
     data += b'\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00'
