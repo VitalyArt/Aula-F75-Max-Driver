@@ -1,0 +1,144 @@
+# Development guide
+
+For installation and everyday use, see the [README](../README.md).
+
+## Build and run
+
+Run commands from the repository root. `make help` lists the available targets. Generated output belongs in `.build/`, `build/`, and `android/app/build/` and should not be committed.
+
+### macOS
+
+Requires macOS 14+, an Apple Silicon Mac, and Xcode Command Line Tools or Xcode with a Swift 6 toolchain.
+
+```sh
+make macos-build
+make macos-app
+make macos-run
+make macos-dmg
+```
+
+These targets respectively build the release arm64 binary, package `build/Aula F75 Max Driver.app`, build and open the app, and create `build/Aula F75 Max Driver.dmg`. The DMG includes an Applications shortcut for drag-to-install.
+
+Test Launch at Login from the packaged app: it uses ServiceManagement and depends on the app bundle identity. The app is packaged from SwiftPM rather than an Xcode project; it does not include a WidgetKit extension.
+
+### Linux
+
+Build on Linux with Swift 6, GTK4, hidapi, and pkg-config. Ubuntu dependencies:
+
+```sh
+sudo apt install libgtk-4-dev libhidapi-dev pkg-config
+```
+
+Fedora dependencies for source builds:
+
+```sh
+sudo dnf install gtk4-devel hidapi-devel pkgconf-pkg-config
+```
+
+```sh
+make linux-build
+make linux-install-udev
+make linux-run
+```
+
+The udev installation requires administrator access. Replug the keyboard and receiver afterward. The rule is maintained in [packaging/linux](../packaging/linux/60-aula-f75-max.rules).
+
+`make linux-deb` builds a Debian/Ubuntu installer in `build/`. It installs the launcher, desktop entry, icon, required Swift runtime libraries, and udev rule. See [the packaging script](../scripts/linux-deb.sh) for packaging dependencies and architecture handling. `make linux-package` produces the legacy developer archive `build/AulaF75MaxDriverLinux.tar.gz`.
+
+### Android
+
+Requires JDK 17 and the Android SDK. CI installs platform-tools, Android platform 34, and build-tools 34.0.0. The minimum device version is Android 9 (API 28). Android Studio is optional.
+
+```sh
+make android-build
+make android-test
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+The project uses its checked-in Gradle wrapper; downloaded Gradle state is kept under `android/.gradle/`. Hardware checks require USB OTG and USB Host permission.
+
+`make clean` removes `.build/` and `build/`; it does not clean Android output.
+
+## Project structure and data flow
+
+- `Sources/AulaCore/` contains portable Swift packet builders, keyboard geometry, lighting settings, and preview rendering shared by macOS and Linux.
+- `Sources/AulaF75MaxDriver/` contains the SwiftUI app, AppKit integrations, IOKit HID transport, display encoder, notifications, and login helper.
+- `Sources/AulaLinuxApp/`, `Sources/AulaLinuxHID/`, and `Sources/CAulaLinuxGTK/` provide the GTK4 UI, hidapi/hidraw transport, and C bridge.
+- `android/` is a separate Kotlin/Compose Gradle project using the Android USB Host API.
+- `Package.swift` defines the Swift targets; `Info.plist` configures the macOS app bundle. `Makefile`, `make/`, and `scripts/` provide build and packaging commands.
+
+On macOS, `AulaF75MaxDriverApp` creates `AppViewModel`; views invoke its actions and render published state. The view model coordinates HID monitoring, device operations, battery polling, and logs. `AulaDevice` handles wired commands, `WirelessAulaDevice` handles the receiver, and `DisplayEncoder` prepares display payloads. Device work runs off the main actor where appropriate.
+
+On Android, `AulaViewModel` coordinates the UI, `AndroidAulaBackend` performs commands, and `UsbHidSession` claims USB interfaces after permission is granted.
+
+### Profiles, previews, and localization
+
+macOS lighting profiles use UserDefaults key `lighting.profiles.v1`. Linux uses `$XDG_CONFIG_HOME/aula-f75-max-driver/lighting-profiles.json`, defaulting to `~/.config/aula-f75-max-driver/lighting-profiles.json`. Android stores profile JSON in private SharedPreferences under `lighting.profiles.v1`. Profiles are local to each installation and independent of firmware.
+
+Lighting edits change the preview until Apply. Selecting a saved profile can also apply it when the receiver is connected, permitted, and idle. Android does not defer automatic application until a receiver connects. Desktop Revert restores the last applied settings. Home displays the last successfully applied lighting in the current session.
+
+Desktop screen previews show encoded RGB565 frames, GIF timing, thumbnails, and upload progress. Android shows the first GIF frame in its preview. Android lighting animation pauses off screen and in the background and respects the system animator-duration setting.
+
+macOS and Linux bundle English, Russian, Spanish, Uzbek, Kazakh, Portuguese, and Simplified Chinese. Their language selection uses UserDefaults key `app.language.code`. Android bundles English and Russian, stores its choice in SharedPreferences, and falls back to English for unsupported system locales.
+
+## Device protocol
+
+| Endpoint | Vendor / product | Usage page |
+| --- | --- | --- |
+| Wired command | `0x0c45` / `0x800a` | `0xff13` |
+| Wired raw display | `0x0c45` / `0x800a` | `0xff68` |
+| Receiver command | `0x05ac` / `0x024f` | `0xff59` |
+| Receiver raw | `0x05ac` / `0x024f` | `0xff60` |
+
+Endpoint selection also uses report-size heuristics where needed. Wired USB handles display uploads, clock sync, and reset; the receiver handles battery, lighting, response level, sleep, Game Mode, and Command key restore.
+
+Display uploads render supported image files to 128 × 128 pixels, encode RGB565 frames, and send chunks in 4096-byte HID output reports. Display slots range from 1 through 255. Fit preserves aspect ratio with letterboxing, Fill crops while preserving aspect ratio, and Stretch fills the display without preserving proportions. Animated GIF uploads retain frame delays.
+
+The protocol follows observed/public packet flows and may need changes for firmware variants. Actual transport behavior requires hardware verification. The apps communicate from user space and do not install kernel extensions. Do not commit pairing data, device secrets, signing credentials, or private diagnostic captures.
+
+## Testing
+
+The current Swift manifest defines shared `AulaCoreTests` and macOS-only `AulaF75MaxDriverTests` under `Tests/`.
+
+```sh
+swift test
+swift test --filter LightingPreviewTests
+make android-test
+```
+
+The Swift suites cover shared behavior and, on macOS, keyboard geometry, lighting, profiles, and screen preview decoding. Android JVM tests live under `android/app/src/test/`.
+
+On Linux, run:
+
+```sh
+bash scripts/linux-ui-test.sh
+```
+
+This exercises GTK widgets using mocked HID, isolated profiles, image/GIF fixtures, and temporary screenshots and recordings. It requires `xvfb`, `xauth`, `ffmpeg`, a C compiler, and GTK development dependencies. It covers profile CRUD, failed Apply and Revert, preview/upload consistency, GIF timing, progress, reduced animation, and closing during background preparation. It sends no commands to physical hardware.
+
+For release validation, build the appropriate platform artifacts with `make macos-app`, `make linux-deb`, or `make android-build` and manually check:
+
+- Device detection over wired USB and the receiver, including reconnection.
+- Battery readings and a harmless lighting change through the receiver.
+- Clock sync and a small image/GIF upload to a non-critical slot over USB.
+- Language changes and any changed platform integration, such as Launch at Login.
+- Android OTG permission and the corresponding wired/receiver actions.
+
+macOS may require Input Monitoring permission. Linux needs hidraw access through udev; Android needs USB Host permission.
+
+## Website and releases
+
+The static user site starts at [index.html](index.html), with platform guides, assets, screenshots, and seven site languages. English is the default. The [Pages workflow](../.github/workflows/pages.yml) publishes `docs/` on pushes to `main` or `master` and supports manual dispatch.
+
+The [build workflow](../.github/workflows/build.yml) builds the macOS DMG, Linux DEB, and Android debug APK and runs Android tests on pushes and pull requests. Tagged builds also produce the signed Android release APK and create or update a GitHub release. Swift suites and Linux UI checks must be run separately; they are not part of that workflow.
+
+Before tagging an Android release, configure repository secrets:
+
+- `ANDROID_RELEASE_KEYSTORE_BASE64`
+- `ANDROID_RELEASE_KEYSTORE_PASSWORD`
+- `ANDROID_RELEASE_KEY_ALIAS`
+- `ANDROID_RELEASE_KEY_PASSWORD`
+
+Keep an offline backup of the signing key and passwords. Updates must use the same signing key as the installed app. The workflow requires all signing secrets and verifies the APK with `apksigner` before publication.
+
+`make release-package` prepares versioned assets from existing build artifacts, using `RELEASE_DIR`, `RELEASE_TAG`, `SOURCE_MACOS_DMG`, `SOURCE_ANDROID_APK`, and `SOURCE_LINUX_DEB`. See the workflow for a complete invocation. Published files use the `AulaF75MaxDriver-v<version>` base name; DEBs also include the architecture. Tags matching the workflow's `-rc<number>` pattern are marked as prereleases and are not made latest.
