@@ -1,7 +1,7 @@
 # Aula F75 Max Driver
 
 <p align="center">
-  <img src="docs/assets/app-icon.png" width="128" alt="Aula F75 Max Driver app icon">
+  <img src="assets/app-icon.png" width="128" alt="Aula F75 Max Driver app icon">
 </p>
 
 Configure your Epomaker x Aula F75 Max keyboard on macOS, Linux, and Android.
@@ -68,15 +68,15 @@ On Android, connect either accessory through OTG and grant USB access. Open **Ho
 
 ### macOS
 
-![macOS lighting effects and keyboard preview](docs/screenshots/redesign-lighting.png)
+![macOS lighting effects and keyboard preview](site/screenshots/redesign-lighting.png)
 
 ### Linux
 
-![Linux screen image and GIF preview](docs/screenshots/linux-screen.png)
+![Linux screen image and GIF preview](site/screenshots/linux-screen.png)
 
 ### Android
 
-<img src="docs/screenshots/android-home.png" width="320" alt="Android home and keyboard status">
+<img src="site/screenshots/android-home.png" width="320" alt="Android home and keyboard status">
 
 ## If something is not working
 

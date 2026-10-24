@@ -6,7 +6,7 @@ Device: Samsung SM-S936B, 1080 × 2340, density 450. Tested through wireless ADB
 
 Verified Home keyboard geometry and two-tone keycaps; animated RGB preview; wrapping effect tiles and selected styling; profile creation, persistence across force-stop/relaunch, selection, deletion confirmation and deletion; landscape navigation rail; and the Display page at 150% font scale. Fixed dark-text contrast on Home and unselected effect tiles during device testing.
 
-Screenshots: [Home](screenshots/android-home.png), [Lighting](screenshots/android-lighting.png).
+Screenshots: [Home](../site/screenshots/android-home.png), [Lighting](../site/screenshots/android-lighting.png).
 
 Profile rename/update, unsaved-edit confirmation, reduced-motion behavior, GIF uploads, and physical-tablet layout still require device-level verification. JVM tests cover preview/model behavior, profile persistence and HID descriptor parsing.
 

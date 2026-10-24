@@ -66,8 +66,8 @@ printf '%s\n' \
 chmod 0755 "${root}/usr/bin/${LINUX_PRODUCT}"
 
 install -m 0644 "packaging/linux/aula-f75-max-driver.desktop" "${root}/usr/share/applications/${LINUX_DESKTOP_ID}.desktop"
-install -m 0644 "docs/assets/app-icon.png" "${root}/usr/share/icons/hicolor/256x256/apps/${LINUX_DESKTOP_ID}.png"
-install -m 0644 "docs/assets/app-icon.png" "${root}/usr/share/pixmaps/${LINUX_DESKTOP_ID}.png"
+install -m 0644 "assets/app-icon.png" "${root}/usr/share/icons/hicolor/256x256/apps/${LINUX_DESKTOP_ID}.png"
+install -m 0644 "assets/app-icon.png" "${root}/usr/share/pixmaps/${LINUX_DESKTOP_ID}.png"
 appstream_metainfo="${root}/usr/share/metainfo/${LINUX_APPSTREAM_ID}.metainfo.xml"
 install -m 0644 "packaging/linux/aula-f75-max-driver.metainfo.xml" "$appstream_metainfo"
 install -m 0644 "packaging/linux/60-aula-f75-max.rules" "${root}/etc/udev/rules.d/"
@@ -88,7 +88,7 @@ python3 scripts/render-metainfo.py \
     "$appstream_metainfo" \
     "$version" \
     "$build_date"
-scripts/embed-deb-icon.py "${root}/DEBIAN/control" "docs/assets/app-icon.png"
+scripts/embed-deb-icon.py "${root}/DEBIAN/control" "assets/app-icon.png"
 
 install -m 0755 "packaging/linux/deb-postinst" "${root}/DEBIAN/postinst"
 install -m 0755 "packaging/linux/deb-postrm" "${root}/DEBIAN/postrm"

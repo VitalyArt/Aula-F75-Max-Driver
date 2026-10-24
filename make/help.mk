@@ -13,4 +13,5 @@ help:
 		'  android-build Build the Android app debug APK' \
 		'  android-test  Run Android unit tests' \
 		'  release-package Rename release artifacts for a tag (DMG/DEB/APK)' \
+		'  site-build    Build the static website into build/site/' \
 		'  clean         Remove generated build output'
