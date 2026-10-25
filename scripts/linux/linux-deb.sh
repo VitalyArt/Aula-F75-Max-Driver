@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$repo_root"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 if ! command -v dpkg-deb >/dev/null 2>&1; then
     printf '%s\n' 'Missing Linux packaging dependency: dpkg-deb'
@@ -18,14 +17,7 @@ if ! python3 -c 'from PIL import Image' >/dev/null 2>&1; then
 fi
 
 arch="$(dpkg --print-architecture)"
-release_tag="${RELEASE_TAG:-${GITHUB_REF_NAME:-}}"
-if [ -z "$release_tag" ] && [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
-    release_tag="${GITHUB_REF_NAME:-}"
-fi
-version="${release_tag:-1.0.0}"
-version="${version#v}"
-version="${version/-/\~}"
-version="$(printf '%s' "$version" | tr '/' '-')"
+version="$(python3 scripts/release/identity.py --field debian_version)"
 
 deb_path="${LINUX_DEB:-}"
 if [ -z "$deb_path" ]; then
@@ -34,7 +26,7 @@ fi
 
 root="${BUILD_DIR}/deb-root"
 install_dir="${root}${LINUX_INSTALL_PREFIX}"
-binary=".build/release/${LINUX_PRODUCT}"
+binary=".build/${CONFIGURATION}/${LINUX_PRODUCT}"
 
 rm -rf "$root"
 mkdir -p \
@@ -49,9 +41,9 @@ mkdir -p \
     "${root}/usr/share/glib-2.0/schemas" \
     "${root}/etc/udev/rules.d"
 
-printf '%s\n' "${AULA_RELEASE_VERSION:-$(python3 scripts/build-version.py)}" > "${install_dir}/version.txt"
+printf '%s\n' "${AULA_RELEASE_VERSION:-$(python3 scripts/release/build-version.py)}" > "${install_dir}/version.txt"
 install -m 0755 "$binary" "${install_dir}/${LINUX_PRODUCT}"
-cp -R ".build/release/${RELEASE_BASE_NAME}_AulaLinuxApp.resources" "${install_dir}/"
+cp -R ".build/${CONFIGURATION}/${RELEASE_BASE_NAME}_AulaLinuxApp.resources" "${install_dir}/"
 
 # Bundle the Swift runtime that the Linux executable loads at startup.
 # The binary depends on more than libswift* (for example libBlocksRuntime
@@ -85,12 +77,12 @@ sed \
     -e "s/@INSTALLED_SIZE@/${installed_size}/g" \
     -e "s/@BUILD_DATE@/${build_date}/g" \
     "packaging/linux/deb-control.in" > "${root}/DEBIAN/control"
-python3 scripts/render-metainfo.py \
+python3 scripts/linux/render-metainfo.py \
     "packaging/linux/aula-f75-max-driver.metainfo.xml" \
     "$appstream_metainfo" \
     "$version" \
     "$build_date"
-scripts/embed-deb-icon.py "${root}/DEBIAN/control" "assets/app-icon.png"
+scripts/linux/embed-deb-icon.py "${root}/DEBIAN/control" "assets/app-icon.png"
 
 install -m 0755 "packaging/linux/deb-postinst" "${root}/DEBIAN/postinst"
 install -m 0755 "packaging/linux/deb-postrm" "${root}/DEBIAN/postrm"

@@ -4,7 +4,7 @@ from pathlib import Path
 import unittest
 import xml.etree.ElementTree as ET
 
-spec = importlib.util.spec_from_file_location('appcast', Path(__file__).resolve().parents[2] / 'scripts/macos-appcast.py')
+spec = importlib.util.spec_from_file_location('appcast', Path(__file__).resolve().parents[2] / 'scripts/macos/macos-appcast.py')
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 

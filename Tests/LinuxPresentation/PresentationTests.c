@@ -1,5 +1,5 @@
 /* Integration test against real GTK widgets and Swift previews; HID is mocked.
- * Run with scripts/linux-ui-test.sh. No keyboard commands reach hardware. */
+ * Run with scripts/linux/linux-ui-test.sh. No keyboard commands reach hardware. */
 #include "../../Sources/CAulaLinuxGTK/AulaLinuxGTK.c"
 #include <assert.h>
 

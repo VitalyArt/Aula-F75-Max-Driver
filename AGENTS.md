@@ -17,7 +17,7 @@ This repository ships native macOS, Linux, and Android apps. Shared portable Swi
 - `make android-test`: runs the Android JVM unit tests.
 - `make clean`: removes `.build/` and `build/`.
 
-There is no Swift test target in the current manifest. Android JVM tests live under `android/app/src/test/`.
+Swift tests live under `Tests/AulaCoreTests/` and `Tests/AulaF75MaxDriverTests/` (macOS only). Packaging tests live under `Tests/Packaging/`. Android JVM tests live under `android/app/src/test/`.
 
 ## Coding Style & Naming Conventions
 
@@ -25,7 +25,7 @@ Use standard Swift and Kotlin style: 4-space indentation, `PascalCase` for types
 
 ## Testing Guidelines
 
-No automated Swift tests are currently defined. If you add them, place them under `Tests/` with names like `AulaF75MaxDriverTests.swift`, and use `swift test` once a test target exists. Keep Android JVM tests under `android/app/src/test/` and run them with `make android-test`. Android hardware behavior still requires an Android 9+ device with USB OTG and a connected keyboard or receiver.
+Run `make macos-test` or `make linux-test` on the corresponding host, and `make packaging-test` for release tooling. Keep Swift tests under `Tests/` in the existing test targets. Keep Android JVM tests under `android/app/src/test/` and run them with `make android-test`. Android hardware behavior still requires an Android 9+ device with USB OTG and a connected keyboard or receiver.
 
 ## Commit & Pull Request Guidelines
 

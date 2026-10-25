@@ -1,17 +1,19 @@
+.PHONY: linux-check-deps linux-build linux-install-udev linux-deb linux-run linux-test
 linux-check-deps:
-	@scripts/linux-check-deps.sh
+	@scripts/linux/linux-check-deps.sh
 
 linux-build: linux-check-deps
-	@scripts/linux-build.sh
+	@scripts/linux/linux-build.sh
 
 linux-install-udev:
-	@scripts/linux-install-udev.sh
-
-linux-package: linux-build
-	@scripts/linux-package.sh
+	@scripts/linux/linux-install-udev.sh
 
 linux-deb: linux-build
-	@scripts/linux-deb.sh
+	@scripts/linux/linux-deb.sh
 
 linux-run: linux-check-deps
-	@scripts/linux-run.sh
+	@scripts/linux/linux-run.sh
+
+linux-test: linux-check-deps
+	@swift test
+	@bash scripts/linux/linux-ui-test.sh

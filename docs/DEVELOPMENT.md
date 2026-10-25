@@ -45,11 +45,11 @@ make linux-run
 
 The udev installation requires administrator access. Replug the keyboard and receiver afterward. The rule is maintained in [packaging/linux](../packaging/linux/60-aula-f75-max.rules).
 
-`make linux-deb` builds a Debian/Ubuntu installer in `build/`. It installs the launcher, desktop entry, icon, required Swift runtime libraries, and udev rule. See [the packaging script](../scripts/linux-deb.sh) for packaging dependencies and architecture handling. `make linux-package` produces the legacy developer archive `build/AulaF75MaxDriverLinux.tar.gz`.
+`make linux-deb` builds a Debian/Ubuntu installer in `build/`. It installs the launcher, desktop entry, icon, required Swift runtime libraries, and udev rule. See [the packaging script](../scripts/linux/linux-deb.sh) for packaging dependencies and architecture handling.
 
 ### Android
 
-Requires JDK 17 and the Android SDK. CI installs platform-tools, Android platform 34, and build-tools 34.0.0. The minimum device version is Android 9 (API 28). Android Studio is optional.
+Requires JDK 17, Python 3.9+ for shared build identity, and the Android SDK. CI installs platform-tools, Android platform 34, and build-tools 34.0.0. The minimum device version is Android 9 (API 28). Android Studio is optional.
 
 ```sh
 make android-build
@@ -114,7 +114,7 @@ The Swift suites cover shared behavior and, on macOS, keyboard geometry, lightin
 On Linux, run:
 
 ```sh
-bash scripts/linux-ui-test.sh
+bash scripts/linux/linux-ui-test.sh
 ```
 
 This exercises GTK widgets using mocked HID, isolated profiles, image/GIF fixtures, and temporary screenshots and recordings. It requires `xvfb`, `xauth`, `ffmpeg`, a C compiler, and GTK development dependencies. It covers profile CRUD, failed Apply and Revert, preview/upload consistency, GIF timing, progress, reduced animation, and closing during background preparation. It sends no commands to physical hardware.
@@ -155,7 +155,7 @@ Before tagging an Android release, configure repository secrets:
 
 Keep an offline backup of the signing key and passwords. Updates must use the same signing key as the installed app. The workflow requires all signing secrets and verifies the APK with `apksigner` before publication.
 
-`make release-package` prepares versioned assets from existing build artifacts, using `RELEASE_DIR`, `RELEASE_TAG`, `SOURCE_MACOS_DMG`, `SOURCE_ANDROID_APK`, and `SOURCE_LINUX_DEB`. See the workflow for a complete invocation. Published files use the `AulaF75MaxDriver-v<version>` base name; DEBs also include the architecture. Alpha, beta, and RC tags are marked as prereleases and are not made latest.
+`make release-package` validates and copies the complete DMG/APK/DEB set from existing build artifacts, using `RELEASE_DIR`, `RELEASE_TAG`, `SOURCE_MACOS_DMG`, `SOURCE_ANDROID_APK`, and `SOURCE_LINUX_DEB`. See the workflow for a complete invocation. Published files use the `AulaF75MaxDriver-v<version>` base name; DEBs also include the architecture. Alpha, beta, and RC tags are marked as prereleases and are not made latest.
 
 ### Update channels
 
@@ -196,18 +196,18 @@ the stable channel. The updater selects the highest supported version with a
 matching release asset: macOS arm64 DMG, Linux architecture-specific DEB, or APK.
 Publish all platform assets before announcing a release.
 
-CI resolves `AULA_RELEASE_VERSION` through `scripts/build-version.py`. macOS stores
+CI resolves `AULA_RELEASE_VERSION` through `scripts/release/build-version.py`. macOS stores
 the full string as `AulaReleaseVersion` and numeric components in its standard
 bundle metadata. Linux stores `version.txt` alongside its executable and uses
 `~alpha.1`/`~beta.1`/`~rc.1` in Debian package versions. Android uses the release
 string as `versionName` and the Build workflow run number as `versionCode`.
 Keep this workflow's run counter increasing; any replacement workflow must seed
 a version code higher than all published APKs. Rerunning a build keeps its code.
-Local/branch builds use `0.1.0+dev.<sha>` (Android local builds: `0.1.0+dev`);
+Local/branch builds through Make use `0.1.0+dev.<sha>` on all platforms;
 build metadata is ignored when comparing versions.
 
 Tests use fixture responses and never publish releases. Run `swift test`,
-`make android-test`, and `bash scripts/linux-ui-test.sh` on their supported hosts.
+`make android-test`, and `bash scripts/linux/linux-ui-test.sh` on their supported hosts.
 After publishing, manually verify a real update from the preceding release on
 all platforms, including download links, signing compatibility, and channel choice.
 
@@ -220,15 +220,15 @@ Keychain under account `VitalyArt.AulaF75MaxDriver` and GitHub Actions secret
 Use Sparkle's `generate_keys --account VitalyArt.AulaF75MaxDriver -x <secure-file>`
 to make an offline backup outside the checkout. Keep this key stable across builds.
 
-The macOS job signs the DMG and per-release appcast with `scripts/macos-appcast.py`.
-The release job stores the signed XML in the `sparkle-feeds` data branch using
-`scripts/publish-update-feed.sh`. Only DMG, APK and DEB installers are attached to
+The macOS job signs the DMG and per-release appcast with `scripts/macos/macos-appcast.py`.
+After publishing installers, the release job stores the signed XML in the `sparkle-feeds` data branch using
+`scripts/release/publish-update-feed.sh`. Only DMG, APK and DEB installers are attached to
 new GitHub Releases. A dependent job calls the Pages workflow to publish the XML at
 `https://vitalyart.github.io/Aula-F75-Max-Driver/updates/macos/<tag>.xml`.
 Merge the workflow and app changes into the default branch before tagging a release.
 
 Every Pages deployment builds the website from the default branch and overlays the
-complete feed history from `sparkle-feeds` with `scripts/copy-update-feeds.sh`.
+complete feed history from `sparkle-feeds` with `scripts/release/copy-update-feeds.sh`.
 This prevents site updates or older release tags from removing feeds or rolling
 back the website. Concurrent feed writes retry against the latest data branch;
 Pages deployments share one concurrency group. Do not delete the data branch or
@@ -253,3 +253,30 @@ separate distribution configuration.
 Run `python3 -m unittest discover -s Tests/Packaging` for appcast tests in addition
 to the Swift, Android and GTK suites. Verify a real update across two published,
 signed releases on each platform before relying on unattended distribution.
+
+### Build tooling layout
+
+Make is the supported entry point for local builds and CI. Platform targets live
+in `make/`; scripts are grouped under `scripts/macos`, `scripts/linux`,
+`scripts/android`, `scripts/release`, and `scripts/checks`. Shell operations load
+shared defaults from `scripts/lib/common.sh`. Python release tooling shares
+`identity.py` for tag validation, versions, channels, build numbers and asset names.
+
+Use `make macos-test`, `make linux-test`, and `make packaging-test` for platform
+and packaging checks. `make android-release` accepts an existing
+`ANDROID_KEYSTORE_PATH` or `ANDROID_KEYSTORE_BASE64`, plus the signing passwords
+and alias described above. Base64 keystores are decoded into a temporary directory
+and removed on success or failure. The APK signature is verified before success.
+
+`make release-publish RELEASE_TAG=vX.Y.Z` validates and copies installers,
+publishes the GitHub Release using `gh`, then stores the signed appcast. Defaults
+are `RELEASE_DIR=release`, `SOURCE_MACOS_DMG="Aula F75 Max Driver.dmg"`,
+`SOURCE_ANDROID_APK=app-release.apk`, and `SOURCE_LINUX_DEB=app.deb`.
+The directory must also contain `macos.appcast.xml`. Repeating the command
+updates the same release and completes feed publication after an interrupted run.
+CI deploys Pages only after this command succeeds. No tar.gz packaging is retained.
+
+The existing `build.yml` workflow and its run counter are retained for Android
+update compatibility. Pushes run tests and produce installers; fork pull requests
+run the same checks, while internal pull requests use their existing push run.
+Superseded branch builds are cancelled; tag builds continue to completion.

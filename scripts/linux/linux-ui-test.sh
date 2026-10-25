@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$repo_root"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 if ! command -v swiftc >/dev/null 2>&1; then
     source "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh"
 fi

@@ -36,7 +36,7 @@ jobs:
         run: make site-build
 
       - name: Include signed update feeds
-        run: bash scripts/copy-update-feeds.sh build/site
+        run: bash scripts/release/copy-update-feeds.sh build/site
 
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
