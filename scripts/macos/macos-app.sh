@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$repo_root"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 rm -rf "${APP_DIR}"
 mkdir -p "${APP_DIR}/Contents/MacOS"
 mkdir -p "${APP_DIR}/Contents/Resources"
 cp "${EXECUTABLE}" "${APP_DIR}/Contents/MacOS/${APP_NAME}"
 cp Info.plist "${APP_DIR}/Contents/Info.plist"
-release_version="${AULA_RELEASE_VERSION:-$(python3 scripts/build-version.py)}"
+release_version="${AULA_RELEASE_VERSION:-$(python3 scripts/release/build-version.py)}"
 /usr/libexec/PlistBuddy -c "Add :AulaReleaseVersion string ${release_version}" "${APP_DIR}/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${release_version%%[-+]*}" "${APP_DIR}/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${GITHUB_RUN_NUMBER:-1}" "${APP_DIR}/Contents/Info.plist"
@@ -36,7 +35,7 @@ fi
 
 if command -v codesign >/dev/null 2>&1; then
     # Prefer a stable local signing identity if one is installed (see
-    # scripts/macos-setup-local-signing.sh), so macOS privacy grants such as
+    # a locally installed signing certificate), so macOS privacy grants such as
     # Input Monitoring survive rebuilds instead of resetting every time, as
     # they do with the content-hashed ad-hoc identity ("-"). Falls back to
     # ad-hoc signing when no such identity exists, e.g. in CI.

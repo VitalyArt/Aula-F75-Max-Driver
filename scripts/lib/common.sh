@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Shared defaults for standalone scripts and Make entry points (Bash 3 compatible).
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$repo_root"
+: "${APP_NAME:=Aula F75 Max Driver}"
+: "${RELEASE_BASE_NAME:=AulaF75MaxDriver}"
+: "${EXECUTABLE_NAME:=AulaF75MaxDriver}"
+: "${CONFIGURATION:=release}"
+: "${BUILD_DIR:=build}"
+: "${LINUX_PRODUCT:=AulaF75MaxDriverLinux}"
+: "${LINUX_DESKTOP_ID:=vitalyart.aula-f75-max-driver}"
+: "${LINUX_APPSTREAM_ID:=vitalyart.aula-f75-max-driver}"
+: "${LINUX_PACKAGE_NAME:=aula-f75-max-driver}"
+: "${LINUX_INSTALL_PREFIX:=/opt/$LINUX_PACKAGE_NAME}"
+: "${APP_DIR:=$BUILD_DIR/$APP_NAME.app}"
+: "${DMG_DIR:=$BUILD_DIR/dmg}"
+: "${DMG_PATH:=$BUILD_DIR/$APP_NAME.dmg}"
+: "${DMG_RW_PATH:=$BUILD_DIR/$APP_NAME-rw.dmg}"
+: "${DMG_STYLE_SCRIPT:=scripts/macos/style-dmg.applescript}"
+: "${EXECUTABLE:=.build/$CONFIGURATION/$EXECUTABLE_NAME}"
+AULA_RELEASE_VERSION="$(python3 scripts/release/identity.py --field version)"
+export AULA_RELEASE_VERSION

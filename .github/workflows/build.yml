@@ -12,12 +12,13 @@ on:
 permissions:
   contents: read
 
-env:
-  APP_NAME: "Aula F75 Max Driver"
-  RELEASE_BASE_NAME: "AulaF75MaxDriver"
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   macos-dmg:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     name: macOS DMG
     runs-on: macos-15
 
@@ -26,13 +27,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Resolve build version
-        run: python3 scripts/build-version.py
+        run: python3 scripts/release/build-version.py
 
       - name: Test release feed generation
-        run: python3 -m unittest discover -s Tests/Packaging
+        run: make packaging-test
 
       - name: Test macOS and portable Swift code
-        run: swift test
+        run: make macos-test
 
       - name: Build macOS DMG
         run: make macos-dmg
@@ -41,7 +42,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
-        run: python3 scripts/macos-appcast.py "build/${APP_NAME}.dmg" --sign-tool .build/artifacts/sparkle/Sparkle/bin/sign_update --output build/macos.appcast.xml
+        run: make macos-appcast
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -53,6 +54,7 @@ jobs:
           if-no-files-found: error
 
   linux-build:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     name: Linux GTK
     runs-on: ubuntu-latest
     container:
@@ -68,35 +70,23 @@ jobs:
           apt-get install -y build-essential make libgtk-4-dev libhidapi-dev pkg-config python3-pil xvfb xauth ffmpeg
 
       - name: Resolve build version
-        run: python3 scripts/build-version.py
+        run: python3 scripts/release/build-version.py
 
-      - name: Test portable Swift code
-        run: swift test
-
-      - name: Test Linux interface
-        run: bash scripts/linux-ui-test.sh
-
-      - name: Build Linux app
-        run: make linux-build
+      - name: Test Linux code and interface
+        run: make linux-test
 
       - name: Build Linux DEB installer
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            make linux-deb RELEASE_TAG="${GITHUB_REF_NAME}" LINUX_DEB="build/aula-f75-max-driver-${GITHUB_SHA}.deb"
-          else
-            make linux-deb RELEASE_TAG="0.0.0+${GITHUB_SHA}" LINUX_DEB="build/aula-f75-max-driver-${GITHUB_SHA}.deb"
-          fi
+        run: make linux-deb LINUX_DEB="build/app.deb"
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: aula-f75-max-driver-linux
-          path: "build/aula-f75-max-driver-${{ github.sha }}.deb"
+          path: build/app.deb
           if-no-files-found: error
 
   android-build:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     name: Android APK
     runs-on: ubuntu-latest
 
@@ -105,7 +95,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Resolve build version
-        run: python3 scripts/build-version.py
+        run: python3 scripts/release/build-version.py
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -122,6 +112,7 @@ jobs:
         run: make android-test
 
       - name: Build Android debug APK
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: make android-build
 
       - name: Upload Android debug artifact
@@ -139,24 +130,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          : "${ANDROID_KEYSTORE_BASE64:?ANDROID_RELEASE_KEYSTORE_BASE64 secret is required}"
-          : "${ANDROID_KEYSTORE_PASSWORD:?ANDROID_RELEASE_KEYSTORE_PASSWORD secret is required}"
-          : "${ANDROID_KEY_ALIAS:?ANDROID_RELEASE_KEY_ALIAS secret is required}"
-          : "${ANDROID_KEY_PASSWORD:?ANDROID_RELEASE_KEY_PASSWORD secret is required}"
-
-          export ANDROID_KEYSTORE_PATH="${RUNNER_TEMP}/aula-f75-max-release.jks"
-          printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "${ANDROID_KEYSTORE_PATH}"
-          bash android/gradlew assembleRelease
-
-          apk_path="android/app/build/outputs/apk/release/app-release.apk"
-          "${ANDROID_HOME}/build-tools/34.0.0/apksigner" verify \
-            --verbose \
-            --print-certs \
-            "${apk_path}"
+        run: make android-release
 
       - name: Upload Android release artifact
         if: startsWith(github.ref, 'refs/tags/')
@@ -181,7 +155,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Resolve build version
-        run: python3 scripts/build-version.py
+        run: python3 scripts/release/build-version.py
 
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
@@ -201,47 +175,10 @@ jobs:
           name: aula-f75-max-driver-android-apk
           path: release
 
-      - name: Prepare release assets
-        run: make release-package RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME" SOURCE_MACOS_DMG="${APP_NAME}.dmg" SOURCE_ANDROID_APK="app-release.apk" SOURCE_LINUX_DEB="aula-f75-max-driver-${GITHUB_SHA}.deb"
-
-      - name: Store signed appcast for GitHub Pages
-        run: bash scripts/publish-update-feed.sh release/macos.appcast.xml "$GITHUB_REF_NAME"
-
-      - name: Create or update GitHub release
+      - name: Publish release installers and signed feed
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          safe_tag="${GITHUB_REF_NAME//\//-}"
-          release_version="v${safe_tag#v}"
-          is_prerelease_tag=false
-          release_flags=()
-
-          if [[ "${GITHUB_REF_NAME}" =~ (^|.*/)v?[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.?[0-9]+$ ]]; then
-            is_prerelease_tag=true
-            release_flags+=(--prerelease --latest=false)
-          fi
-
-          assets=(
-            "release/${RELEASE_BASE_NAME}-${release_version}.dmg"
-            "release/${RELEASE_BASE_NAME}-${release_version}.apk"
-            release/${RELEASE_BASE_NAME}-${release_version}_*.deb
-          )
-
-          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
-            if $is_prerelease_tag; then
-              release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" --jq '.id')"
-              gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/${release_id}" \
-                -f prerelease=true \
-                -f make_latest=false >/dev/null
-            fi
-            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
-          else
-            gh release create "${GITHUB_REF_NAME}" "${assets[@]}" "${release_flags[@]}" \
-              --title "${GITHUB_REF_NAME}" \
-              --generate-notes
-          fi
+        run: make release-publish RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME"
 
   publish-update-pages:
     if: startsWith(github.ref, 'refs/tags/')

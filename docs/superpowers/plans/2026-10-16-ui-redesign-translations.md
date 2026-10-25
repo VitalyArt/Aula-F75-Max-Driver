@@ -1,6 +1,6 @@
 # Sidebar redesign: translation review
 
-Drafted by Claude for owner review. Only rows added by the redesign are listed. pt is Brazilian Portuguese (matches the existing pt.lproj). Edit the values in `Sources/AulaF75MaxDriver/Resources/<lang>.lproj/Localizable.strings`, then run `python3 scripts/check_localization.py`.
+Drafted by Claude for owner review. Only rows added by the redesign are listed. pt is Brazilian Portuguese (matches the existing pt.lproj). Edit the values in `Sources/AulaF75MaxDriver/Resources/<lang>.lproj/Localizable.strings`, then run `python3 scripts/checks/check_localization.py`.
 
 Least confident: **kk** and **uz** (checked against nothing). Medium: **zh-Hans**. Most confident: es, pt, ru.
 

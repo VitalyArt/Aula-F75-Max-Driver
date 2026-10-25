@@ -37,7 +37,7 @@
 
 | File | Responsibility |
 |------|----------------|
-| `scripts/check_localization.py` (new) | Fails if any `L10n` key used by the new UI is missing from any lproj file. |
+| `scripts/checks/check_localization.py` (new) | Fails if any `L10n` key used by the new UI is missing from any lproj file. |
 | `Sources/AulaF75MaxDriver/ContentView.swift` (rewrite) | `NavigationSplitView` shell, sidebar list, page switch, status bar placement. |
 | `Sources/AulaF75MaxDriver/Views/SidebarPage.swift` (new) | `SidebarPage` enum: title, SF Symbol, Main or Advanced group. |
 | `Sources/AulaF75MaxDriver/Views/Components.swift` (new) | Shared pieces: `DeviceRequirementNote`, `StatusBar`, `LogTextView`, `EndpointGroup`, `EndpointRow`. |
@@ -49,14 +49,14 @@
 
 Porting source: the old views are deleted in Task 1. Later tasks copy behaviour from `git show HEAD:Sources/AulaF75MaxDriver/ContentView.swift` (the version before this plan), with line ranges given per task.
 
-**Note on tests:** the package has no Swift test target, and the spec does not ask for one. Each task's automated check is `make macos-build` plus `python3 scripts/check_localization.py`. Behaviour is checked by running the app (`make macos-app`, then `open "build/Aula F75 Max Driver.app"`) with the steps listed in each task.
+**Note on tests:** the package has no Swift test target, and the spec does not ask for one. Each task's automated check is `make macos-build` plus `python3 scripts/checks/check_localization.py`. Behaviour is checked by running the app (`make macos-app`, then `open "build/Aula F75 Max Driver.app"`) with the steps listed in each task.
 
 ---
 
 ### Task 1: Shell, sidebar, status bar, shared components
 
 **Files:**
-- Create: `scripts/check_localization.py`
+- Create: `scripts/checks/check_localization.py`
 - Create: `Sources/AulaF75MaxDriver/Views/SidebarPage.swift`
 - Create: `Sources/AulaF75MaxDriver/Views/Components.swift`
 - Create: the 7 page files, each a placeholder for now: `HomeView.swift`, `LightingView.swift`, `ScreenView.swift`, `PerformanceView.swift`, `SettingsView.swift`, `DiagnosticsView.swift`, `ActivityLogView.swift`
@@ -78,14 +78,14 @@ Porting source: the old views are deleted in Task 1. Later tasks copy behaviour 
 
 - [ ] **Step 1: Write the localisation check**
 
-`scripts/check_localization.py`, run with `python3 scripts/check_localization.py` from the repo root, no arguments.
+`scripts/checks/check_localization.py`, run with `python3 scripts/checks/check_localization.py` from the repo root, no arguments.
 - Scans `Sources/AulaF75MaxDriver/ContentView.swift` and `Sources/AulaF75MaxDriver/Views/*.swift`, plus `title` strings in `SidebarPage.swift`, for keys matching `L10n\.(?:text|format)\("((?:[^"\\]|\\.)*)"`.
 - For each `Sources/AulaF75MaxDriver/Resources/*.lproj/Localizable.strings`, reads keys matching `^"((?:[^"\\]|\\.)*)"\s*=` per line.
 - Prints `<lang>: missing "<key>"` for every gap, then `OK: <n> keys in 7 languages` or exits with status 1.
 
 - [ ] **Step 2: Run it against the old UI to see it work**
 
-Run: `python3 scripts/check_localization.py`
+Run: `python3 scripts/checks/check_localization.py`
 Expected: it runs and reports either OK or a list of existing gaps. (en has 201 lines and the others 180, so some gaps are likely. Note them; Step 8 fixes any that the new UI still uses.)
 
 - [ ] **Step 3: Add `SidebarPage`, `Components.swift`, and the 7 placeholder pages**
@@ -130,7 +130,7 @@ Expected: build succeeds, no errors. Warnings about unused localisation keys are
 
 New keys in this task: the 7 page titles, "Advanced", "Ready", "Working…", "No activity yet", the two `DeviceRequirementNote` sentences. Add each to `en.lproj` (value = key) and a drafted translation to es, kk, pt, ru, uz, zh-Hans. Also fill any gaps from Step 2 for keys the new UI uses.
 
-Run: `python3 scripts/check_localization.py`
+Run: `python3 scripts/checks/check_localization.py`
 Expected: `OK: <n> keys in 7 languages`
 
 - [ ] **Step 9: Run the app and check the shell**
@@ -179,7 +179,7 @@ Three equal tiles in an `HStack`:
 - [ ] **Step 3: Keys, check, build**
 
 Add every new key to all 7 lproj files (drafted translations).
-Run: `python3 scripts/check_localization.py && make macos-build`
+Run: `python3 scripts/checks/check_localization.py && make macos-build`
 Expected: `OK: …` then a successful build.
 
 - [ ] **Step 4: Run and check**
@@ -385,7 +385,7 @@ The disabled rules are the old ones.
 
 - [ ] **Step 1: Generate the review sheet**
 
-List every key added by Tasks 1-7 in one table: key | en | es | kk | pt | ru | uz | zh-Hans. Take the values from the lproj files rather than retyping them. Hand the sheet to the owner, apply their corrections to the lproj files, then run `python3 scripts/check_localization.py` again.
+List every key added by Tasks 1-7 in one table: key | en | es | kk | pt | ru | uz | zh-Hans. Take the values from the lproj files rather than retyping them. Hand the sheet to the owner, apply their corrections to the lproj files, then run `python3 scripts/checks/check_localization.py` again.
 
 - [ ] **Step 2: Confirm no old styling survived**
 

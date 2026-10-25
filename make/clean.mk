@@ -1,2 +1,3 @@
+.PHONY: clean
 clean:
-	@scripts/clean.sh
+	@rm -rf .build "$(or $(BUILD_DIR),build)"

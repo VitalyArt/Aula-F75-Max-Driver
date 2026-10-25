@@ -28,9 +28,10 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.takeIf { it.isNotBlank() } ?: "1").toInt()
-        versionName = System.getenv("AULA_RELEASE_VERSION")?.takeIf { it.isNotBlank() }
-            ?: System.getenv("RELEASE_TAG")?.takeIf { it.isNotBlank() }?.removePrefix("v")
-            ?: "0.1.0+dev"
+        versionName = providers.exec {
+            workingDir(rootProject.projectDir.parentFile)
+            commandLine("python3", "scripts/release/identity.py", "--field", "version")
+        }.standardOutput.asText.get().trim()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

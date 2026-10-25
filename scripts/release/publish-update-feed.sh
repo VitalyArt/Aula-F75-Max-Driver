@@ -3,10 +3,12 @@
 set -euo pipefail
 feed="${1:?Signed appcast path is required}"
 tag="${2:?Release tag is required}"
-if [[ ! "$tag" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.?[0-9]+$ && ! "$tag" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    printf '%s\n' 'Unsupported release tag' >&2
-    exit 1
-fi
+python3 - "$tag" "$(dirname "${BASH_SOURCE[0]}")" <<'CHECK'
+import sys
+sys.path.insert(0, sys.argv[2])
+from identity import release_version
+release_version(sys.argv[1])
+CHECK
 feed_blob="$(git hash-object -w "$feed")"
 index_dir="$(mktemp -d)"
 trap 'rm -rf "$index_dir"' EXIT

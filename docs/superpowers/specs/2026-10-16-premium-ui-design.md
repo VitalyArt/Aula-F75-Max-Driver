@@ -205,7 +205,7 @@ Manual checks on hardware stay as in the previous spec.
 ## Localisation
 
 Same rule as before: every new string via `L10n`, in all 7 languages, drafted
-translations reviewed by the owner; `scripts/check_localization.py` must pass.
+translations reviewed by the owner; `scripts/checks/check_localization.py` must pass.
 Effect names already have keys.
 
 ## Budget constraint (owner)

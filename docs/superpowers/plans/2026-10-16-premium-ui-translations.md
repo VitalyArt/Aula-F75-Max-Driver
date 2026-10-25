@@ -1,6 +1,6 @@
 # Premium UI: translation review
 
-Drafted by Claude for owner review (31 keys). pt is Brazilian Portuguese. Least confident: kk, uz. Edit `Sources/AulaF75MaxDriver/Resources/<lang>.lproj/Localizable.strings`, then run `python3 scripts/check_localization.py`.
+Drafted by Claude for owner review (31 keys). pt is Brazilian Portuguese. Least confident: kk, uz. Edit `Sources/AulaF75MaxDriver/Resources/<lang>.lproj/Localizable.strings`, then run `python3 scripts/checks/check_localization.py`.
 
 | # | English (key) | es | pt | ru | uz | kk | zh-Hans |
 |---|---|---|---|---|---|---|---|

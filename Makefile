@@ -1,54 +1,11 @@
 SHELL := /bin/bash
-
-APP_NAME := Aula F75 Max Driver
-RELEASE_BASE_NAME := AulaF75MaxDriver
-EXECUTABLE_NAME := AulaF75MaxDriver
-CONFIGURATION := release
-BUILD_DIR := build
-
-LINUX_PRODUCT := AulaF75MaxDriverLinux
-LINUX_ARTIFACT := $(BUILD_DIR)/AulaF75MaxDriverLinux.tar.gz
-LINUX_DESKTOP_ID := vitalyart.aula-f75-max-driver
-LINUX_APPSTREAM_ID := vitalyart.aula-f75-max-driver
-LINUX_PACKAGE_NAME := aula-f75-max-driver
-LINUX_INSTALL_PREFIX := /opt/$(LINUX_PACKAGE_NAME)
-LINUX_DEB ?=
-
-RELEASE_DIR ?= release
-RELEASE_TAG ?=
-SOURCE_MACOS_DMG ?= $(APP_NAME).dmg
-SOURCE_ANDROID_APK ?=
-SOURCE_LINUX_ARTIFACT ?= AulaF75MaxDriverLinux.tar.gz
-SOURCE_LINUX_DEB ?=
-
-APP_DIR := $(BUILD_DIR)/$(APP_NAME).app
-DMG_DIR := $(BUILD_DIR)/dmg
-DMG_PATH := $(BUILD_DIR)/$(APP_NAME).dmg
-DMG_RW_PATH := $(BUILD_DIR)/$(APP_NAME)-rw.dmg
-DMG_STYLE_SCRIPT := scripts/style-dmg.applescript
-EXECUTABLE := .build/$(CONFIGURATION)/$(EXECUTABLE_NAME)
-
-export APP_NAME RELEASE_BASE_NAME EXECUTABLE_NAME CONFIGURATION BUILD_DIR
-export LINUX_PRODUCT LINUX_ARTIFACT LINUX_DESKTOP_ID LINUX_APPSTREAM_ID
-export LINUX_PACKAGE_NAME LINUX_INSTALL_PREFIX LINUX_DEB
-export RELEASE_DIR RELEASE_TAG SOURCE_MACOS_DMG SOURCE_ANDROID_APK SOURCE_LINUX_ARTIFACT SOURCE_LINUX_DEB
-export APP_DIR DMG_DIR DMG_PATH DMG_RW_PATH DMG_STYLE_SCRIPT EXECUTABLE
-
-.PHONY: help
-.PHONY: android-build android-test
-.PHONY: macos-build macos-app macos-dmg macos-run
-.PHONY: linux-check-deps linux-install-udev linux-build linux-package linux-deb linux-run
-.PHONY: release-package clean
-
+.DEFAULT_GOAL := help
+# Command-line Make variables are also available to standalone build scripts.
+.EXPORT_ALL_VARIABLES:
 include make/help.mk
-include make/site.mk
 include make/macos.mk
 include make/linux.mk
+include make/android.mk
 include make/release.mk
+include make/site.mk
 include make/clean.mk
-
-android-build:
-	@bash android/gradlew assembleDebug
-
-android-test:
-	@bash android/gradlew test

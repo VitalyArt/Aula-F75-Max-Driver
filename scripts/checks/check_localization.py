@@ -3,7 +3,7 @@
 
 Run from the repository root:
 
-    python3 scripts/check_localization.py
+    python3 scripts/checks/check_localization.py
 
 It scans ContentView.swift and the Views, Keyboard, Screen and Lighting
 folders for L10n.text("...") and

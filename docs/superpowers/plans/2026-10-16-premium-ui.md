@@ -17,7 +17,7 @@
 - No third-party dependencies.
 - Do not ship the owner's reference photo. The keyboard is drawn in code.
 - The Apple-structured pages (Performance, Settings, Diagnostics, Activity Log) get no neon glow and no uppercase headings.
-- Every user-facing string goes through `L10n.text` / `L10n.format` and exists in all 7 lproj files. `python3 scripts/check_localization.py` must print `OK`.
+- Every user-facing string goes through `L10n.text` / `L10n.format` and exists in all 7 lproj files. `python3 scripts/checks/check_localization.py` must print `OK`.
 - The RGB preview shows the caption "Preview is an approximation of the keyboard's effect". The screen preview is decoded from the same bytes that get uploaded.
 - Animation pauses when its view is off-screen, and shows a static frame when `accessibilityReduceMotion` is on.
 - **Git (owner's rule):** no `git commit` or `git push` by anyone without the owner's explicit OK. No AI co-author lines. Codex never commits.
@@ -207,7 +207,7 @@ func testCorruptDataLoadsEmptyWithoutReseeding() // defaults.set(Data("x".utf8),
   - Selecting a profile:
     - If `model.lightingSettings` differs from both `lastAppliedLighting` and the selected profile's settings, first confirm "Discard your unsaved lighting changes?".
     - Then `loadLighting(profile.settings)`, set `store.selectedID`, and call `model.applyRGB()` only if `model.isDonglePresent && !model.isWorking`.
-- [ ] **Step 3: Verify.** Run `swift test && python3 scripts/check_localization.py && make macos-build`. Then run the app with the receiver connected:
+- [ ] **Step 3: Verify.** Run `swift test && python3 scripts/checks/check_localization.py && make macos-build`. Then run the app with the receiver connected:
   - Click an effect tile: the stage changes and the badge appears.
   - Apply: the keyboard changes and the badge clears.
   - ⌘S, save "Test": it appears in the list.
@@ -236,7 +236,7 @@ func testCorruptDataLoadsEmptyWithoutReseeding() // defaults.set(Data("x".utf8),
   - The page accepts dropped files with `.dropDestination(for: URL.self)`.
   - Cards: Fit (live re-preview), Slot, Clock (Sync), and Upload with progress, keeping the existing disabled rules.
   - The empty state reads "Drop a GIF or image here".
-- [ ] **Step 2: Verify.** Run `swift test && python3 scripts/check_localization.py && make macos-build`. Then run the app:
+- [ ] **Step 2: Verify.** Run `swift test && python3 scripts/checks/check_localization.py && make macos-build`. Then run the app:
   - Drop a GIF: it plays. Switching Fit/Fill/Stretch updates within about 1 second.
   - Upload: the keyboard screen matches the preview.
   - Review Focus 2: drop a GIF with 200+ frames, and the window keeps responding while the preview loads.
@@ -251,7 +251,7 @@ func testCorruptDataLoadsEmptyWithoutReseeding() // defaults.set(Data("x".utf8),
 - [ ] **Step 4: Home additions.** A profile switcher row (chips that call the same select logic as Task 5) is added to Home.
 - [ ] **Step 5: Style the requirement note for the stage.** `DeviceRequirementNote` reads well on the dark stage, using a material background.
 - [ ] **Step 6: Translations.** Add every new key to all 7 languages (drafts), then generate `docs/superpowers/plans/2026-10-16-premium-ui-translations.md` with the same table format as before.
-- [ ] **Step 7: Verify.** Run `swift test && python3 scripts/check_localization.py && make macos-build && make macos-app`. Expected: all pass. `strings -a "build/Aula F75 Max Driver.app/Contents/MacOS/Aula F75 Max Driver" | grep -c KeyboardStageView` is at least 1.
+- [ ] **Step 7: Verify.** Run `swift test && python3 scripts/checks/check_localization.py && make macos-build && make macos-app`. Expected: all pass. `strings -a "build/Aula F75 Max Driver.app/Contents/MacOS/Aula F75 Max Driver" | grep -c KeyboardStageView` is at least 1.
 
 ### Task 8: Final review (orchestrator)
 

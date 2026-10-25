@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$repo_root"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 rm -rf "${DMG_DIR}" "${DMG_PATH}" "${DMG_RW_PATH}"
 mkdir -p "${DMG_DIR}"
