@@ -1,6 +1,20 @@
 #!/bin/sh
 set -e
 
+if [ "${1:-}" = configure ]; then
+    fnmode=/sys/module/hid_apple/parameters/fnmode
+    if [ -e "$fnmode" ]; then
+        if ! (printf '%s\n' 2 > "$fnmode"); then
+            printf '%s\n' 'Warning: could not set hid_apple fnmode=2 for this session. Reboot to apply the installed configuration.' >&2
+        fi
+    fi
+    if command -v update-initramfs >/dev/null 2>&1; then
+        if ! update-initramfs -u; then
+            printf '%s\n' 'Warning: could not update initramfs. Run sudo update-initramfs -u to persist the F1–F12 fix in the boot image.' >&2
+        fi
+    fi
+fi
+
 if command -v udevadm >/dev/null 2>&1; then
     udevadm control --reload-rules || true
     udevadm trigger || true

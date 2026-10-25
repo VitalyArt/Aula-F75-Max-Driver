@@ -43,6 +43,10 @@ sudo apt install ./AulaF75MaxDriver-v*_*.deb
 
 Unplug and reconnect the keyboard and receiver after installation, then open **Aula F75 Max Driver** from your applications menu. Run the app normally, without `sudo`.
 
+The DEB also fixes F1–F12 being treated as media keys by setting `hid_apple fnmode=2` immediately when the module is loaded and saving it in `/etc/modprobe.d/aula-f75-max.conf` for future boots. Installation and upgrades refresh initramfs when `update-initramfs` is available. This system-wide setting affects all keyboards handled by `hid_apple`.
+
+To disable the persistent fix, comment out `options hid_apple fnmode=2` in that file, run `sudo update-initramfs -u`, and reboot. DEB upgrades preserve your configuration edits, but apply `fnmode=2` to the current session again; reboot to restore your chosen boot setting. Purging the package removes its configuration and refreshes initramfs; it does not change the current session's `fnmode`.
+
 ### Android
 
 1. Open the downloaded APK. If prompted, allow your browser or file manager to install apps, then complete installation.
