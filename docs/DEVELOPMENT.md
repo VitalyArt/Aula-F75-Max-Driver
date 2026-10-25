@@ -223,7 +223,7 @@ to make an offline backup outside the checkout. Keep this key stable across buil
 The macOS job signs the DMG and per-release appcast with `scripts/macos/macos-appcast.py`.
 After publishing installers, the release job stores the signed XML in the `sparkle-feeds` data branch using
 `scripts/release/publish-update-feed.sh`. Only DMG, APK and DEB installers are attached to
-new GitHub Releases. A dependent job calls the Pages workflow to publish the XML at
+new GitHub Releases. A dependent job dispatches the Pages workflow on the default branch to publish the XML at
 `https://vitalyart.github.io/Aula-F75-Max-Driver/updates/macos/<tag>.xml`.
 Merge the workflow and app changes into the default branch before tagging a release.
 
@@ -231,7 +231,11 @@ Every Pages deployment builds the website from the default branch and overlays t
 complete feed history from `sparkle-feeds` with `scripts/release/copy-update-feeds.sh`.
 This prevents site updates or older release tags from removing feeds or rolling
 back the website. Concurrent feed writes retry against the latest data branch;
-Pages deployments share one concurrency group. Do not delete the data branch or
+Pages deployments share one concurrency group. Release jobs dispatch Pages on the
+default branch rather than invoking it from the tag: Pages can report success yet
+serve the previous artifact when the tag and the main deployment share a commit.
+The Pages workflow verifies the public appcast bytes after deployment and fails on
+404 responses or stale contents. The dispatched release tag is checked explicitly. Do not delete the data branch or
 its historical XML files. Only signed public metadata belongs in this branch.
 GitHub Actions needs Contents write access to this branch and Pages/ID-token write
 permissions for deployment. The `github-pages` environment allows release tags matching
@@ -240,10 +244,9 @@ Branch rules must allow Actions to update the data branch.
 
 The app selects a release through the GitHub API, then probes its fixed Pages URL.
 A 404 offers manual download for older releases; network errors remain errors.
-It retains support for legacy appcast assets, including `v1.7.0-rc1`: keep that
-release's XML asset. That shipped app only discovers feed assets, so its first
-update to a Pages-based release requires manual download. Subsequent updates use
-Pages. Do not remove old XML assets during migration.
+It retains support for legacy appcast assets. Builds made before Pages support
+require a manual download when moving to a release without an XML attachment.
+Keep legacy XML assets for any releases that still depend on them.
 
 Sparkle's own scheduling stays disabled to avoid duplicate checks. `SURequireSignedFeed` and `SUVerifyUpdateBeforeExtraction` are enabled.
 The embedded Sparkle framework preserves framework symlinks and receives the

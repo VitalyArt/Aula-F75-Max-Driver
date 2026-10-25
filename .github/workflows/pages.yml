@@ -6,7 +6,11 @@ on:
       - main
       - master
   workflow_dispatch:
-  workflow_call:
+    inputs:
+      release_tag:
+        description: Release tag whose signed appcast must be publicly available
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -46,3 +50,9 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify published appcasts
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: python3 scripts/release/verify-pages.py build/site "$PAGES_URL" --tag "$RELEASE_TAG"
