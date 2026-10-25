@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+if [ "${1:-}" = purge ] && command -v update-initramfs >/dev/null 2>&1; then
+    if ! update-initramfs -u; then
+        printf '%s\n' 'Warning: could not update initramfs after removing the F1–F12 configuration. Run sudo update-initramfs -u.' >&2
+    fi
+fi
+
 if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database /usr/share/applications || true
 fi

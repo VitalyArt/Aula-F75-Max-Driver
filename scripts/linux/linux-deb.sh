@@ -39,6 +39,7 @@ mkdir -p \
     "${root}/usr/share/pixmaps" \
     "${root}/usr/share/metainfo" \
     "${root}/usr/share/glib-2.0/schemas" \
+    "${root}/etc/modprobe.d" \
     "${root}/etc/udev/rules.d"
 
 printf '%s\n' "${AULA_RELEASE_VERSION:-$(python3 scripts/release/build-version.py)}" > "${install_dir}/version.txt"
@@ -83,6 +84,9 @@ python3 scripts/linux/render-metainfo.py \
     "$version" \
     "$build_date"
 scripts/linux/embed-deb-icon.py "${root}/DEBIAN/control" "assets/app-icon.png"
+
+install -m 0644 "packaging/linux/aula-f75-max.conf" "${root}/etc/modprobe.d/"
+install -m 0644 "packaging/linux/deb-conffiles" "${root}/DEBIAN/conffiles"
 
 install -m 0755 "packaging/linux/deb-postinst" "${root}/DEBIAN/postinst"
 install -m 0755 "packaging/linux/deb-postrm" "${root}/DEBIAN/postrm"
