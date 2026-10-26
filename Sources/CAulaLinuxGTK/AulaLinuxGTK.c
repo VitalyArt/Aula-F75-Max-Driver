@@ -934,10 +934,11 @@ static void open_shortcut(GtkButton *button, gpointer data) {
 }
 
 static void open_activity_log(GtkListBox *navigation) {
-    gtk_list_box_select_row(navigation, gtk_list_box_get_row_at_index(navigation, 7));
+    gtk_list_box_select_row(navigation, gtk_list_box_get_row_at_index(navigation, 8));
 }
 
 #include "LinuxPresentation.inc"
+#include "KeyboardGuide.inc"
 
 static GtkWidget *wrapping_flow(int max, int spacing) {
     GtkWidget *flow=gtk_flow_box_new();
@@ -991,15 +992,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_stack_set_transition_duration(ui->stack,150);
     gtk_stack_set_hhomogeneous(ui->stack,FALSE); gtk_stack_set_vhomogeneous(ui->stack,FALSE);
     gtk_widget_set_vexpand(GTK_WIDGET(ui->stack),TRUE); gtk_box_append(GTK_BOX(detail),GTK_WIDGET(ui->stack));
-    const char *names[]={"home","lighting","screen","performance","settings","diagnostics","log"};
-    const char *titles[]={"Home","Lighting","Screen","Performance","Settings","Diagnostics","Activity Log"};
-    const char *icons[]={"go-home-symbolic","weather-clear-symbolic","video-display-symbolic","preferences-system-symbolic","emblem-system-symbolic","network-transmit-receive-symbolic","view-list-symbolic"};
-    GtkWidget *pages[7]; GtkWidget *navigation=gtk_list_box_new();
+    const char *names[]={"home","lighting","screen","performance","settings","guide","diagnostics","log"};
+    const char *titles[]={"Home","Lighting","Screen","Performance","Settings","guide.title","Diagnostics","Activity Log"};
+    const char *icons[]={"go-home-symbolic","weather-clear-symbolic","video-display-symbolic","preferences-system-symbolic","emblem-system-symbolic","help-browser-symbolic","network-transmit-receive-symbolic","view-list-symbolic"};
+    GtkWidget *pages[8]; GtkWidget *navigation=gtk_list_box_new();
     ui->navigation=GTK_LIST_BOX(navigation);
     gtk_list_box_set_selection_mode(GTK_LIST_BOX(navigation),GTK_SELECTION_SINGLE);
     gtk_box_append(GTK_BOX(sidebar),navigation);
-    for(int i=0;i<7;i++) {
-        if(i==5) {
+    for(int i=0;i<8;i++) {
+        if(i==6) {
             GtkWidget *section=gtk_list_box_row_new();
             gtk_list_box_row_set_selectable(GTK_LIST_BOX_ROW(section),FALSE);
             gtk_list_box_row_set_activatable(GTK_LIST_BOX_ROW(section),FALSE);
@@ -1029,6 +1030,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_button_set_child(GTK_BUTTON(status_button),ui->status_message);
     g_signal_connect_swapped(status_button,"clicked",G_CALLBACK(open_activity_log),navigation);
     gtk_box_append(GTK_BOX(detail),status_button);
+
+    create_keyboard_guide(pages[5]);
 
     // Home: one stage with the connection summary underneath.
     GtkWidget *summary=vbox_new(16); add_class(summary,"stage-backdrop");
@@ -1208,15 +1211,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *endpoint_view=gtk_text_view_new(); gtk_text_view_set_editable(GTK_TEXT_VIEW(endpoint_view),FALSE); gtk_text_view_set_monospace(GTK_TEXT_VIEW(endpoint_view),TRUE);
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(endpoint_view),GTK_WRAP_WORD_CHAR); ui->endpoint_buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(endpoint_view));
     GtkWidget *endpoint_scroll=gtk_scrolled_window_new(); gtk_widget_set_size_request(endpoint_scroll,-1,260);
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(endpoint_scroll),endpoint_view); gtk_box_append(GTK_BOX(endpoints),endpoint_scroll); gtk_box_append(GTK_BOX(pages[5]),endpoint_panel);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(endpoint_scroll),endpoint_view); gtk_box_append(GTK_BOX(endpoints),endpoint_scroll); gtk_box_append(GTK_BOX(pages[6]),endpoint_panel);
 
     GtkWidget *log_header=hbox_new(12); ui->log_count=label_new("0 entries","muted"); gtk_box_append(GTK_BOX(log_header),ui->log_count);
     GtkWidget *copy=make_button("Copy Log","edit-copy-symbolic"); g_signal_connect(copy,"clicked",G_CALLBACK(copy_log),ui); gtk_box_append(GTK_BOX(log_header),copy);
-    gtk_box_append(GTK_BOX(pages[6]),log_header);
+    gtk_box_append(GTK_BOX(pages[7]),log_header);
     GtkWidget *log_scroll=gtk_scrolled_window_new(); gtk_widget_set_vexpand(log_scroll,TRUE); gtk_widget_set_size_request(log_scroll,-1,320);
     ui->log_view=GTK_TEXT_VIEW(gtk_text_view_new()); gtk_text_view_set_editable(ui->log_view,FALSE); gtk_text_view_set_monospace(ui->log_view,TRUE);
     gtk_text_view_set_wrap_mode(ui->log_view,GTK_WRAP_WORD_CHAR); ui->log_buffer=gtk_text_view_get_buffer(ui->log_view);
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(log_scroll),GTK_WIDGET(ui->log_view)); gtk_box_append(GTK_BOX(pages[6]),log_scroll);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(log_scroll),GTK_WIDGET(ui->log_view)); gtk_box_append(GTK_BOX(pages[7]),log_scroll);
     g_object_set_data(G_OBJECT(ui->wired_detail),"requirement-note",usb_note);
     g_object_set_data(G_OBJECT(ui->dongle_detail),"requirement-note",receiver_note);
     g_object_set_data(G_OBJECT(ui->dongle_detail),"performance-note",performance_note);

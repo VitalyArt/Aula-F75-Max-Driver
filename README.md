@@ -15,6 +15,7 @@ Configure your Epomaker x Aula F75 Max keyboard on macOS, Linux, and Android.
 - Sync the keyboard clock with your device's local time.
 - Check battery level and adjust performance, sleep, and Game Mode settings.
 - Get low-battery notifications on macOS and Linux.
+- Open **Keyboard guide** for offline Fn shortcuts, pairing, and Windows/Mac function-key reference.
 
 ## Download and install
 
