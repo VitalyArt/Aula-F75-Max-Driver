@@ -27,6 +27,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Remove
@@ -81,7 +82,8 @@ private enum class AulaDestination(@StringRes val label: Int, val icon: ImageVec
     HOME(R.string.tab_home, Icons.Outlined.Keyboard),
     LIGHTING(R.string.lighting, Icons.Outlined.Bolt),
     DISPLAY(R.string.tab_display, Icons.Outlined.Image),
-    DEVICE(R.string.tab_device, Icons.Outlined.Settings)
+    DEVICE(R.string.tab_device, Icons.Outlined.Settings),
+    GUIDE(R.string.guide_title, Icons.Outlined.MenuBook)
 }
 
 @Composable
@@ -150,6 +152,7 @@ fun AulaApp(viewModel: AulaViewModel = viewModel()) {
                 }
                 Box(Modifier.weight(1f)) {
                     when (destination) {
+                        AulaDestination.GUIDE -> KeyboardGuideScreen()
                         AulaDestination.HOME -> HomeScreen(state, viewModel, { destination = AulaDestination.LIGHTING }, { destination = AulaDestination.DISPLAY })
                         AulaDestination.LIGHTING -> ControlScreen(state, viewModel)
                         AulaDestination.DISPLAY -> DisplayScreen(state, viewModel::setSlot, viewModel::setFitMode,

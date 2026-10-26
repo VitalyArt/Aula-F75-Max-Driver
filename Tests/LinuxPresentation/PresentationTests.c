@@ -66,7 +66,13 @@ static void wait_preview(AulaLinuxUI *ui) {
     assert(ui->display_bytes && ui->display_frames->len);
 }
 static void choose_page(AulaLinuxUI *ui,int index) {
-    gtk_list_box_select_row(ui->navigation,gtk_list_box_get_row_at_index(ui->navigation,index>=5 ? index+1 : index));
+    const char *names[] = {"home", "lighting", "screen", "performance", "settings", "diagnostics", "log", "guide"};
+    for (int i=0;;i++) {
+        GtkListBoxRow *row=gtk_list_box_get_row_at_index(ui->navigation,i);
+        assert(row);
+        const char *name=g_object_get_data(G_OBJECT(row),"page-name");
+        if (name && strcmp(name,names[index])==0) { gtk_list_box_select_row(ui->navigation,row); return; }
+    }
 }
 static void record_animation(AulaLinuxUI *ui,const char *name) {
     (void)ui;
@@ -145,11 +151,27 @@ int main(int argc,char **argv) {
     g_object_set(gtk_settings_get_default(),"gtk-enable-animations",TRUE,NULL);
     mock_wired=1; refresh_status(ui); gsize length; expected_upload=g_bytes_get_data(ui->display_bytes,&length); expected_length=(int)length;
     start_command(ui,1); wait_command(ui); assert(gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(ui->upload_progress))==1);
-    const char *pages[]={"home","lighting","screen","performance","settings","diagnostics","log"};
-    for(int i=0;i<7;i++) {
+    const char *pages[]={"home","lighting","screen","performance","settings","diagnostics","log","guide"};
+    for(int i=0;i<8;i++) {
         choose_page(ui,i);
         char name[64]; snprintf(name,sizeof(name),"%s.png",pages[i]); screenshot(ui,name);
     }
+    // Adding the guide must preserve existing numeric navigation.
+    page_shortcuts(NULL,GDK_KEY_6,0,GDK_CONTROL_MASK,ui->navigation);
+    assert(!strcmp(gtk_stack_get_visible_child_name(ui->stack),"diagnostics"));
+    page_shortcuts(NULL,GDK_KEY_7,0,GDK_CONTROL_MASK,ui->navigation);
+    assert(!strcmp(gtk_stack_get_visible_child_name(ui->stack),"log"));
+    page_shortcuts(NULL,GDK_KEY_8,0,GDK_CONTROL_MASK,ui->navigation);
+    assert(!strcmp(gtk_stack_get_visible_child_name(ui->stack),"guide"));
+    GtkWidget *guide_page=gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(gtk_stack_get_visible_child(ui->stack)));
+    GtkWidget *mode_panel=gtk_widget_get_next_sibling(gtk_widget_get_first_child(guide_page));
+    GtkDropDown *guide_mode=GTK_DROP_DOWN(gtk_widget_get_first_child(gtk_widget_get_last_child(mode_panel)));
+    gtk_drop_down_set_selected(guide_mode,1);
+    screenshot(ui,"guide-mac.png");
+    gtk_window_set_default_size(window,820,560);
+    screenshot(ui,"guide-narrow.png");
+    gtk_window_set_default_size(window,1100,840);
+    gtk_drop_down_set_selected(guide_mode,0);
     choose_page(ui,4);
     const char *update_shots[]={"updates-available.png","updates-downloading.png","updates-installed.png"};
     for(mock_update_mode=1;mock_update_mode<=3;mock_update_mode++) { pump(1100); screenshot(ui,update_shots[mock_update_mode-1]); }

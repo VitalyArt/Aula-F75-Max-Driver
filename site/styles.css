@@ -412,6 +412,11 @@ footer {
     color:var(--muted);
     font-size:.8rem
 }
+.footer-links {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 24px
+}
 footer a {
     display:inline-flex;
     min-height:44px;

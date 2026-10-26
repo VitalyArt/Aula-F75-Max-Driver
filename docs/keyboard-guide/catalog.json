@@ -1,0 +1,889 @@
+{
+  "source": "https://powerspikepc.com/wp-content/uploads/EPOMAKER_AULA_F75_MAX_manual.pdf",
+  "sourcePage": 2,
+  "excluded": "Both speed directions are printed as Fn + right arrow on page 2; omitted until confirmed.",
+  "strings": {
+    "title": {
+      "en": "Keyboard guide",
+      "ru": "Инструкция",
+      "es": "Guía del teclado",
+      "uz": "Klaviatura qo‘llanmasi",
+      "kk": "Пернетақта нұсқаулығы",
+      "pt": "Guia do teclado",
+      "zh-Hans": "键盘指南"
+    },
+    "intro": {
+      "en": "Hold Fn and press the indicated key.",
+      "ru": "Удерживайте Fn и нажмите указанную клавишу.",
+      "es": "Mantén Fn y pulsa la tecla indicada.",
+      "uz": "Fn tugmasini ushlab, ko‘rsatilgan tugmani bosing.",
+      "kk": "Fn пернесін ұстап, көрсетілген пернені басыңыз.",
+      "pt": "Segure Fn e pressione a tecla indicada.",
+      "zh-Hans": "按住 Fn 并按下指定按键。"
+    },
+    "mode": {
+      "en": "Keyboard mode",
+      "ru": "Режим клавиатуры",
+      "es": "Modo del teclado",
+      "uz": "Klaviatura rejimi",
+      "kk": "Пернетақта режимі",
+      "pt": "Modo do teclado",
+      "zh-Hans": "键盘模式"
+    },
+    "mode_note": {
+      "en": "Choose the mode set on your keyboard. This only changes the guide. System shortcuts depend on your operating system.",
+      "ru": "Выберите режим, установленный на клавиатуре. Меняется только справка. Системные команды зависят от вашей ОС.",
+      "es": "Elige el modo configurado en el teclado. Solo cambia la guía. Los atajos del sistema dependen de tu sistema operativo.",
+      "uz": "Klaviaturada o‘rnatilgan rejimni tanlang. Faqat qo‘llanma o‘zgaradi. Tizim buyruqlari operatsion tizimingizga bog‘liq.",
+      "kk": "Пернетақтада орнатылған режимді таңдаңыз. Тек анықтама өзгереді. Жүйелік пәрмендер операциялық жүйеңізге байланысты.",
+      "pt": "Escolha o modo definido no teclado. Apenas o guia muda. Os atalhos do sistema dependem do sistema operacional.",
+      "zh-Hans": "请选择键盘当前设置的模式。此选项仅切换指南内容。系统快捷键的效果取决于操作系统。"
+    },
+    "hold": {
+      "en": "Hold for 3 seconds",
+      "ru": "Удерживать 3 секунды",
+      "es": "Mantener 3 segundos",
+      "uz": "3 soniya ushlab turing",
+      "kk": "3 секунд ұстап тұрыңыз",
+      "pt": "Segure por 3 segundos",
+      "zh-Hans": "按住 3 秒"
+    },
+    "connections": {
+      "en": "Connection & pairing",
+      "ru": "Подключение и сопряжение",
+      "es": "Conexión y emparejamiento",
+      "uz": "Ulanish va juftlash",
+      "kk": "Қосылу және жұптастыру",
+      "pt": "Conexão e pareamento",
+      "zh-Hans": "连接与配对"
+    },
+    "connections_note": {
+      "en": "Set the physical switch to Bluetooth or 2.4G before pairing.",
+      "ru": "Перед сопряжением переведите переключатель клавиатуры в Bluetooth или 2.4G.",
+      "es": "Antes de emparejar, pon el interruptor del teclado en Bluetooth o 2.4G.",
+      "uz": "Juftlashdan oldin klaviatura kalitini Bluetooth yoki 2.4G holatiga o‘tkazing.",
+      "kk": "Жұптастыру алдында пернетақта қосқышын Bluetooth немесе 2.4G күйіне қойыңыз.",
+      "pt": "Antes de parear, coloque o seletor do teclado em Bluetooth ou 2.4G.",
+      "zh-Hans": "配对前，请将键盘实体开关切换至蓝牙或 2.4G。"
+    },
+    "bt1": {
+      "en": "Pair Bluetooth device 1",
+      "ru": "Сопряжение с Bluetooth-устройством 1",
+      "es": "Emparejar dispositivo Bluetooth 1",
+      "uz": "Bluetooth qurilmasi 1 bilan juftlash",
+      "kk": "Bluetooth құрылғысы 1-мен жұптастыру",
+      "pt": "Parear dispositivo Bluetooth 1",
+      "zh-Hans": "配对蓝牙设备 1"
+    },
+    "bt2": {
+      "en": "Pair Bluetooth device 2",
+      "ru": "Сопряжение с Bluetooth-устройством 2",
+      "es": "Emparejar dispositivo Bluetooth 2",
+      "uz": "Bluetooth qurilmasi 2 bilan juftlash",
+      "kk": "Bluetooth құрылғысы 2-мен жұптастыру",
+      "pt": "Parear dispositivo Bluetooth 2",
+      "zh-Hans": "配对蓝牙设备 2"
+    },
+    "bt3": {
+      "en": "Pair Bluetooth device 3",
+      "ru": "Сопряжение с Bluetooth-устройством 3",
+      "es": "Emparejar dispositivo Bluetooth 3",
+      "uz": "Bluetooth qurilmasi 3 bilan juftlash",
+      "kk": "Bluetooth құрылғысы 3-мен жұптастыру",
+      "pt": "Parear dispositivo Bluetooth 3",
+      "zh-Hans": "配对蓝牙设备 3"
+    },
+    "receiver": {
+      "en": "Pair the 2.4G receiver",
+      "ru": "Сопряжение с приёмником 2.4G",
+      "es": "Emparejar receptor 2.4G",
+      "uz": "2.4G qabul qilgich bilan juftlash",
+      "kk": "2.4G қабылдағышымен жұптастыру",
+      "pt": "Parear receptor 2.4G",
+      "zh-Hans": "配对 2.4G 接收器"
+    },
+    "lighting": {
+      "en": "Backlight",
+      "ru": "Подсветка",
+      "es": "Iluminación",
+      "uz": "Yoritish",
+      "kk": "Жарықтандыру",
+      "pt": "Iluminação",
+      "zh-Hans": "背光"
+    },
+    "lighting_note": {
+      "en": "Change the lighting directly on the keyboard.",
+      "ru": "Меняйте подсветку прямо на клавиатуре.",
+      "es": "Cambia la iluminación directamente en el teclado.",
+      "uz": "Yoritishni bevosita klaviaturada o‘zgartiring.",
+      "kk": "Жарықтандыруды тікелей пернетақтада өзгертіңіз.",
+      "pt": "Altere a iluminação diretamente no teclado.",
+      "zh-Hans": "直接在键盘上调整背光。"
+    },
+    "brighter": {
+      "en": "Increase backlight brightness",
+      "ru": "Увеличить яркость подсветки",
+      "es": "Aumentar brillo del teclado",
+      "uz": "Yoritish yorqinligini oshirish",
+      "kk": "Жарық жарықтығын арттыру",
+      "pt": "Aumentar brilho do teclado",
+      "zh-Hans": "提高背光亮度"
+    },
+    "dimmer": {
+      "en": "Decrease backlight brightness",
+      "ru": "Уменьшить яркость подсветки",
+      "es": "Reducir brillo del teclado",
+      "uz": "Yoritish yorqinligini kamaytirish",
+      "kk": "Жарық жарықтығын азайту",
+      "pt": "Diminuir brilho do teclado",
+      "zh-Hans": "降低背光亮度"
+    },
+    "effect": {
+      "en": "Next backlight effect",
+      "ru": "Следующий эффект подсветки",
+      "es": "Siguiente efecto de iluminación",
+      "uz": "Keyingi yoritish effekti",
+      "kk": "Келесі жарық әсері",
+      "pt": "Próximo efeito de iluminação",
+      "zh-Hans": "切换背光效果"
+    },
+    "colour": {
+      "en": "Next backlight colour",
+      "ru": "Следующий цвет подсветки",
+      "es": "Siguiente color de iluminación",
+      "uz": "Keyingi yoritish rangi",
+      "kk": "Келесі жарық түсі",
+      "pt": "Próxima cor de iluminação",
+      "zh-Hans": "切换背光颜色"
+    },
+    "media": {
+      "en": "Music, volume & function keys",
+      "ru": "Музыка, громкость и F-клавиши",
+      "es": "Música, volumen y teclas F",
+      "uz": "Musiqa, ovoz va F tugmalari",
+      "kk": "Музыка, дыбыс және F пернелері",
+      "pt": "Música, volume e teclas F",
+      "zh-Hans": "音乐、音量与功能键"
+    },
+    "media_note": {
+      "en": "In Windows mode, use Fn for media controls. In Mac mode, F1–F12 act directly; hold Fn for standard F keys.",
+      "ru": "В режиме Windows для мультимедиа удерживайте Fn. В режиме Mac F1–F12 работают напрямую; для обычных F-клавиш удерживайте Fn.",
+      "es": "En modo Windows, usa Fn para multimedia. En modo Mac, F1–F12 actúan directamente; mantén Fn para las teclas F estándar.",
+      "uz": "Windows rejimida media uchun Fn tugmasini ushlang. Mac rejimida F1–F12 bevosita ishlaydi; odatiy F tugmalari uchun Fn ni ushlang.",
+      "kk": "Windows режимінде медиа үшін Fn пернесін ұстаңыз. Mac режимінде F1–F12 тікелей жұмыс істейді; қалыпты F пернелері үшін Fn ұстаңыз.",
+      "pt": "No modo Windows, use Fn para multimídia. No modo Mac, F1–F12 atuam diretamente; segure Fn para as teclas F padrão.",
+      "zh-Hans": "Windows 模式下，按住 Fn 使用媒体功能。Mac 模式下，F1–F12 直接执行功能；按住 Fn 可使用标准 F 键。"
+    },
+    "browser": {
+      "en": "Open browser",
+      "ru": "Открыть браузер",
+      "es": "Abrir navegador",
+      "uz": "Brauzerni ochish",
+      "kk": "Браузерді ашу",
+      "pt": "Abrir navegador",
+      "zh-Hans": "打开浏览器"
+    },
+    "mail": {
+      "en": "Open mail",
+      "ru": "Открыть почту",
+      "es": "Abrir correo",
+      "uz": "Pochtani ochish",
+      "kk": "Поштаны ашу",
+      "pt": "Abrir e-mail",
+      "zh-Hans": "打开邮件"
+    },
+    "tasks": {
+      "en": "Switch between tasks",
+      "ru": "Переключение между задачами",
+      "es": "Cambiar entre tareas",
+      "uz": "Vazifalar orasida almashish",
+      "kk": "Тапсырмалар арасында ауысу",
+      "pt": "Alternar entre tarefas",
+      "zh-Hans": "切换任务"
+    },
+    "files": {
+      "en": "Open file explorer",
+      "ru": "Открыть проводник",
+      "es": "Abrir explorador de archivos",
+      "uz": "Fayl boshqaruvchisini ochish",
+      "kk": "Файл шолғышын ашу",
+      "pt": "Abrir explorador de arquivos",
+      "zh-Hans": "打开文件管理器"
+    },
+    "previous": {
+      "en": "Previous track",
+      "ru": "Предыдущий трек",
+      "es": "Pista anterior",
+      "uz": "Oldingi trek",
+      "kk": "Алдыңғы трек",
+      "pt": "Faixa anterior",
+      "zh-Hans": "上一曲"
+    },
+    "play": {
+      "en": "Play / pause",
+      "ru": "Воспроизведение / пауза",
+      "es": "Reproducir / pausar",
+      "uz": "Ijro / pauza",
+      "kk": "Ойнату / кідірту",
+      "pt": "Reproduzir / pausar",
+      "zh-Hans": "播放 / 暂停"
+    },
+    "next": {
+      "en": "Next track",
+      "ru": "Следующий трек",
+      "es": "Pista siguiente",
+      "uz": "Keyingi trek",
+      "kk": "Келесі трек",
+      "pt": "Próxima faixa",
+      "zh-Hans": "下一曲"
+    },
+    "mute": {
+      "en": "Mute sound",
+      "ru": "Выключить звук",
+      "es": "Silenciar sonido",
+      "uz": "Ovozni o‘chirish",
+      "kk": "Дыбысты өшіру",
+      "pt": "Silenciar som",
+      "zh-Hans": "静音"
+    },
+    "volume_down": {
+      "en": "Decrease volume",
+      "ru": "Уменьшить громкость",
+      "es": "Bajar volumen",
+      "uz": "Ovozni pasaytirish",
+      "kk": "Дыбысты азайту",
+      "pt": "Diminuir volume",
+      "zh-Hans": "降低音量"
+    },
+    "volume_up": {
+      "en": "Increase volume",
+      "ru": "Увеличить громкость",
+      "es": "Subir volumen",
+      "uz": "Ovozni oshirish",
+      "kk": "Дыбысты арттыру",
+      "pt": "Aumentar volume",
+      "zh-Hans": "提高音量"
+    },
+    "screen_down": {
+      "en": "Decrease screen brightness",
+      "ru": "Уменьшить яркость монитора",
+      "es": "Reducir brillo de pantalla",
+      "uz": "Monitor yorqinligini kamaytirish",
+      "kk": "Монитор жарықтығын азайту",
+      "pt": "Diminuir brilho da tela",
+      "zh-Hans": "降低显示器亮度"
+    },
+    "screen_up": {
+      "en": "Increase screen brightness",
+      "ru": "Увеличить яркость монитора",
+      "es": "Aumentar brillo de pantalla",
+      "uz": "Monitor yorqinligini oshirish",
+      "kk": "Монитор жарықтығын арттыру",
+      "pt": "Aumentar brilho da tela",
+      "zh-Hans": "提高显示器亮度"
+    },
+    "desktop": {
+      "en": "Show desktop",
+      "ru": "Показать рабочий стол",
+      "es": "Mostrar escritorio",
+      "uz": "Ish stolini ko‘rsatish",
+      "kk": "Жұмыс үстелін көрсету",
+      "pt": "Mostrar área de trabalho",
+      "zh-Hans": "显示桌面"
+    },
+    "extra": {
+      "en": "Additional keys",
+      "ru": "Дополнительные клавиши",
+      "es": "Teclas adicionales",
+      "uz": "Qo‘shimcha tugmalar",
+      "kk": "Қосымша пернелер",
+      "pt": "Teclas adicionais",
+      "zh-Hans": "附加按键"
+    },
+    "extra_note": {
+      "en": "Access keys that have no dedicated button on this layout.",
+      "ru": "Клавиши, для которых нет отдельной кнопки в этой раскладке.",
+      "es": "Accede a las teclas sin botón dedicado en esta distribución.",
+      "uz": "Bu joylashuvda alohida tugmasi bo‘lmagan funksiyalar.",
+      "kk": "Бұл орналасуда жеке батырмасы жоқ пернелер.",
+      "pt": "Acesse teclas sem botão dedicado neste layout.",
+      "zh-Hans": "使用此布局中没有独立按键的功能。"
+    },
+    "lock": {
+      "en": "Lock Windows key",
+      "ru": "Заблокировать клавишу Windows",
+      "es": "Bloquear tecla Windows",
+      "uz": "Windows tugmasini bloklash",
+      "kk": "Windows пернесін бұғаттау",
+      "pt": "Bloquear tecla Windows",
+      "zh-Hans": "锁定 Windows 键"
+    },
+    "knob_section": {
+      "en": "Screen & knob",
+      "ru": "Экран и регулятор",
+      "es": "Pantalla y mando",
+      "uz": "Ekran va regulyator",
+      "kk": "Экран және реттегіш",
+      "pt": "Tela e controle giratório",
+      "zh-Hans": "屏幕与旋钮"
+    },
+    "knob_note": {
+      "en": "Use the knob to control the keyboard screen or volume.",
+      "ru": "Используйте регулятор для управления экраном клавиатуры или громкостью.",
+      "es": "Usa el mando para controlar la pantalla del teclado o el volumen.",
+      "uz": "Klaviatura ekrani yoki ovozni regulyator bilan boshqaring.",
+      "kk": "Реттегішпен пернетақта экранын немесе дыбысты басқарыңыз.",
+      "pt": "Use o controle giratório para controlar a tela do teclado ou o volume.",
+      "zh-Hans": "使用旋钮控制键盘屏幕或音量。"
+    },
+    "knob": {
+      "en": "Knob",
+      "ru": "Регулятор",
+      "es": "Mando",
+      "uz": "Regulyator",
+      "kk": "Реттегіш",
+      "pt": "Controle giratório",
+      "zh-Hans": "旋钮"
+    },
+    "knob_action": {
+      "en": "Switch knob control between screen and volume",
+      "ru": "Переключить регулятор между экраном и громкостью",
+      "es": "Cambiar el mando entre pantalla y volumen",
+      "uz": "Regulyatorni ekran va ovoz o‘rtasida almashtirish",
+      "kk": "Реттегішті экран мен дыбыс арасында ауыстыру",
+      "pt": "Alternar controle entre tela e volume",
+      "zh-Hans": "切换旋钮的屏幕与音量控制模式"
+    },
+    "reset_section": {
+      "en": "Factory reset",
+      "ru": "Сброс настроек",
+      "es": "Restablecimiento de fábrica",
+      "uz": "Zavod sozlamalariga qaytarish",
+      "kk": "Зауыттық баптауларға қайтару",
+      "pt": "Restaurar configurações",
+      "zh-Hans": "恢复出厂设置"
+    },
+    "reset_note": {
+      "en": "Resets keyboard settings to factory defaults. Your custom settings will be lost.",
+      "ru": "Возвращает настройки клавиатуры к заводским. Пользовательские настройки будут потеряны.",
+      "es": "Restaura los ajustes de fábrica del teclado. Se perderán tus ajustes personalizados.",
+      "uz": "Klaviatura zavod sozlamalariga qaytadi. Shaxsiy sozlamalaringiz yo‘qoladi.",
+      "kk": "Пернетақтаны зауыттық баптауларға қайтарады. Жеке баптаулар жоғалады.",
+      "pt": "Restaura os padrões de fábrica do teclado. Suas configurações personalizadas serão perdidas.",
+      "zh-Hans": "将键盘恢复为出厂设置。自定义设置将丢失。"
+    },
+    "reset": {
+      "en": "Reset keyboard settings",
+      "ru": "Сбросить настройки клавиатуры",
+      "es": "Restablecer ajustes del teclado",
+      "uz": "Klaviatura sozlamalarini tiklash",
+      "kk": "Пернетақта баптауларын қалпына келтіру",
+      "pt": "Restaurar configurações do teclado",
+      "zh-Hans": "重置键盘设置"
+    },
+    "manual": {
+      "en": "Open the F75 Max manual",
+      "ru": "Открыть руководство F75 Max",
+      "es": "Abrir manual de F75 Max",
+      "uz": "F75 Max qo‘llanmasini ochish",
+      "kk": "F75 Max нұсқаулығын ашу",
+      "pt": "Abrir manual do F75 Max",
+      "zh-Hans": "打开 F75 Max 说明书"
+    }
+  },
+  "groups": [
+    {
+      "id": "connections",
+      "note": "connections_note",
+      "rows": [
+        {
+          "keys": [
+            "Fn",
+            "1"
+          ],
+          "action": "bt1",
+          "mode": "all",
+          "hold": true
+        },
+        {
+          "keys": [
+            "Fn",
+            "2"
+          ],
+          "action": "bt2",
+          "mode": "all",
+          "hold": true
+        },
+        {
+          "keys": [
+            "Fn",
+            "3"
+          ],
+          "action": "bt3",
+          "mode": "all",
+          "hold": true
+        },
+        {
+          "keys": [
+            "Fn",
+            "`"
+          ],
+          "action": "receiver",
+          "mode": "all",
+          "hold": true
+        }
+      ]
+    },
+    {
+      "id": "lighting",
+      "note": "lighting_note",
+      "rows": [
+        {
+          "keys": [
+            "Fn",
+            "↑"
+          ],
+          "action": "brighter",
+          "mode": "all",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "↓"
+          ],
+          "action": "dimmer",
+          "mode": "all",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "\\"
+          ],
+          "action": "effect",
+          "mode": "all",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "Tab"
+          ],
+          "action": "colour",
+          "mode": "all",
+          "hold": false
+        }
+      ]
+    },
+    {
+      "id": "media",
+      "note": "media_note",
+      "rows": [
+        {
+          "keys": [
+            "Fn",
+            "F1"
+          ],
+          "action": "browser",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F2"
+          ],
+          "action": "mail",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F3"
+          ],
+          "action": "tasks",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F4"
+          ],
+          "action": "files",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F5"
+          ],
+          "action": "dimmer",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F6"
+          ],
+          "action": "brighter",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F7"
+          ],
+          "action": "previous",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F8"
+          ],
+          "action": "play",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F9"
+          ],
+          "action": "next",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F10"
+          ],
+          "action": "mute",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F11"
+          ],
+          "action": "volume_down",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F12"
+          ],
+          "action": "volume_up",
+          "mode": "windows",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F1"
+          ],
+          "action": "screen_down",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F2"
+          ],
+          "action": "screen_up",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F3"
+          ],
+          "action": "tasks",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F4"
+          ],
+          "action": "desktop",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F5"
+          ],
+          "action": "dimmer",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F6"
+          ],
+          "action": "brighter",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F7"
+          ],
+          "action": "previous",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F8"
+          ],
+          "action": "play",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F9"
+          ],
+          "action": "next",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F10"
+          ],
+          "action": "mute",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F11"
+          ],
+          "action": "volume_down",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "F12"
+          ],
+          "action": "volume_up",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F1"
+          ],
+          "action": "F1",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F2"
+          ],
+          "action": "F2",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F3"
+          ],
+          "action": "F3",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F4"
+          ],
+          "action": "F4",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F5"
+          ],
+          "action": "F5",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F6"
+          ],
+          "action": "F6",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F7"
+          ],
+          "action": "F7",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F8"
+          ],
+          "action": "F8",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F9"
+          ],
+          "action": "F9",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F10"
+          ],
+          "action": "F10",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F11"
+          ],
+          "action": "F11",
+          "mode": "mac",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "F12"
+          ],
+          "action": "F12",
+          "mode": "mac",
+          "hold": false
+        }
+      ]
+    },
+    {
+      "id": "extra",
+      "note": "extra_note",
+      "rows": [
+        {
+          "keys": [
+            "Fn",
+            "Del"
+          ],
+          "action": "Insert",
+          "mode": "all",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "End"
+          ],
+          "action": "Home",
+          "mode": "all",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "U"
+          ],
+          "action": "Print Screen",
+          "mode": "all",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "I"
+          ],
+          "action": "Scroll Lock",
+          "mode": "all",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "O"
+          ],
+          "action": "Pause",
+          "mode": "all",
+          "hold": false
+        },
+        {
+          "keys": [
+            "Fn",
+            "Win"
+          ],
+          "action": "lock",
+          "mode": "all",
+          "hold": false
+        }
+      ]
+    },
+    {
+      "id": "knob_section",
+      "note": "knob_note",
+      "rows": [
+        {
+          "keys": [
+            "Fn",
+            "Knob"
+          ],
+          "action": "knob_action",
+          "mode": "all",
+          "hold": false
+        }
+      ]
+    },
+    {
+      "id": "reset_section",
+      "note": "reset_note",
+      "rows": [
+        {
+          "keys": [
+            "Fn",
+            "Esc"
+          ],
+          "action": "reset",
+          "mode": "all",
+          "hold": true
+        }
+      ]
+    }
+  ],
+  "manualURL": "https://vitalyart.github.io/Aula-F75-Max-Driver/aula-f75-max-manual.pdf"
+}

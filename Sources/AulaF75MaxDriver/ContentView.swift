@@ -107,7 +107,7 @@ struct ContentView: View {
         .padding(.vertical, 12)
     }
 
-    /// Invisible buttons that give ⌘1…⌘7 to the sidebar pages in order.
+    /// Invisible buttons that give ⌘1…⌘8 to the sidebar pages in order.
     private var pageShortcuts: some View {
         ZStack {
             ForEach(Array(SidebarPage.allCases.enumerated()), id: \.element) { index, page in
@@ -162,6 +162,7 @@ struct ContentView: View {
         case .settings: SettingsView()
         case .diagnostics: DiagnosticsView()
         case .activityLog: ActivityLogView()
+        case .guide: KeyboardGuideView()
         }
     }
 }

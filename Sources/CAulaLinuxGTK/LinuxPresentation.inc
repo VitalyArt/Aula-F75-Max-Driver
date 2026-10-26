@@ -60,6 +60,14 @@ static void gradient_fill(cairo_t *cr, double y, double height, double top, doub
     cairo_pattern_destroy(pattern);
 }
 
+/* Shared sculpted cap geometry for Home and the offline guide. */
+static void paint_keycap(cairo_t *cr, double x, double y, double w, double h, double unit, gboolean light, double lift) {
+    rounded(cr, x, y, w, h, unit*.13);
+    gradient_fill(cr, y, h, light ? .66 : .13+lift, light ? .5 : .07+lift);
+    rounded(cr, x+unit*.09, y+unit*.05, w-unit*.18, h-unit*.2, unit*.1);
+    gradient_fill(cr, y+unit*.05, h-unit*.2, light ? .86 : .24+lift, light ? .74 : .17+lift);
+}
+
 static void stage_transform(cairo_t *cr, int width, int height) {
     double unit = fmin((width-32.)/17.1, (height-24.)/7.4);
     cairo_translate(cr, (width-unit*17.1)/2, (height-unit*7.4)/2);
@@ -86,10 +94,7 @@ static void paint_caps(cairo_t *cr, gboolean legends) {
         PreviewKey k=preview_keys[i];
         double x=k.x+.55+.075, y=k.y+.5+.075, w=k.w-.15, h=k.h-.15;
         double lift=k.row==3 ? .08 : 0;
-        rounded(cr,x,y,w,h,.13);
-        gradient_fill(cr,y,h,k.light ? .66 : .13+lift,k.light ? .5 : .07+lift);
-        rounded(cr,x+.09,y+.05,w-.18,h-.2,.1);
-        gradient_fill(cr,y+.05,h-.2,k.light ? .86 : .24+lift,k.light ? .74 : .17+lift);
+        paint_keycap(cr, x, y, w, h, 1, k.light, lift);
         if (legends && k.label[0]) {
             cairo_set_source_rgb(cr,k.light ? .25 : .62,k.light ? .25 : .62,k.light ? .25 : .62);
             // Lay out legends in device pixels: subpixel key units otherwise
@@ -712,9 +717,15 @@ static gboolean page_shortcuts(GtkEventControllerKey *controller, guint key, gui
     (void)controller; (void)code;
     if(!(modifiers&GDK_CONTROL_MASK)) return FALSE;
     GtkListBox *navigation=data;
-    if(key>=GDK_KEY_1 && key<=GDK_KEY_7) {
-        int index=key-GDK_KEY_1; if(index>=5) index++;
-        gtk_list_box_select_row(navigation,gtk_list_box_get_row_at_index(navigation,index)); return TRUE;
+    if(key>=GDK_KEY_1 && key<=GDK_KEY_8) {
+        const char *names[] = {"home", "lighting", "screen", "performance", "settings", "diagnostics", "log", "guide"};
+        const char *target = names[key-GDK_KEY_1];
+        for (int i=0;;i++) {
+            GtkListBoxRow *row = gtk_list_box_get_row_at_index(navigation,i);
+            if (!row) break;
+            const char *name = g_object_get_data(G_OBJECT(row), "page-name");
+            if (name && strcmp(name,target)==0) { gtk_list_box_select_row(navigation,row); return TRUE; }
+        }
     }
     return FALSE;
 }

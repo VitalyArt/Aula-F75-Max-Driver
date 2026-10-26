@@ -11,6 +11,7 @@ enum SidebarPage: String, CaseIterable, Identifiable, Hashable {
     case settings
     case diagnostics
     case activityLog
+    case guide
 
     var id: String { rawValue }
 
@@ -23,6 +24,7 @@ enum SidebarPage: String, CaseIterable, Identifiable, Hashable {
         case .settings: return L10n.text("Settings")
         case .diagnostics: return L10n.text("Diagnostics")
         case .activityLog: return L10n.text("Activity Log")
+        case .guide: return L10n.text("guide.title")
         }
     }
 
@@ -35,6 +37,7 @@ enum SidebarPage: String, CaseIterable, Identifiable, Hashable {
         case .settings: return "gearshape"
         case .diagnostics: return "stethoscope"
         case .activityLog: return "list.bullet.rectangle"
+        case .guide: return "book.closed"
         }
     }
 
@@ -45,7 +48,7 @@ enum SidebarPage: String, CaseIterable, Identifiable, Hashable {
     }
 
     static var mainPages: [SidebarPage] {
-        allCases.filter { !$0.isAdvanced }
+        [.home, .lighting, .screen, .performance, .settings, .guide]
     }
 
     static var advancedPages: [SidebarPage] {

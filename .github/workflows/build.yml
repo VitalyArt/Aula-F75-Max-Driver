@@ -26,6 +26,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check keyboard guide catalogs and translations
+        run: python3 scripts/checks/generate_keyboard_guide.py --check
+
       - name: Resolve build version
         run: python3 scripts/release/build-version.py
 

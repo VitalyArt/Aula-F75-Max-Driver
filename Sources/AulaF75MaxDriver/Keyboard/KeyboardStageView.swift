@@ -204,8 +204,8 @@ struct KeyboardStageView: View {
     private func capPalette(for key: KeyboardKey) -> CapPalette {
         if key.tone == .light {
             return CapPalette(
-                faceTop: Color(white: 0.86), faceBottom: Color(white: 0.74),
-                skirtTop: Color(white: 0.66), skirtBottom: Color(white: 0.5)
+                faceTop: KeyboardKeycapPalette.faceTop, faceBottom: KeyboardKeycapPalette.faceBottom,
+                skirtTop: KeyboardKeycapPalette.skirtTop, skirtBottom: KeyboardKeycapPalette.skirtBottom
             )
         }
         // Dark caps get a little lighter on row 3 so the fade looks gradual.

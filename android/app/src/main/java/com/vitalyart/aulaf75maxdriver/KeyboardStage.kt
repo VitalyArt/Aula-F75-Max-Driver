@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.nativeCanvas
@@ -53,13 +54,13 @@ private class KeyboardArtwork(val width: Int, val height: Int) {
         KeyboardLayout.keys.forEach { key ->
             val r=rect(key.x,key.y,key.width,1f).apply { inset(unit*0.075f,unit*0.075f) }
             val lift=if(key.row==3)0.08f else 0f
-            fun fill(top: Float,bottom: Float,box: RectF,radius: Float) {
-                paint.shader=LinearGradient(0f,box.top,0f,box.bottom,grey(top),grey(bottom),Shader.TileMode.CLAMP)
+            fun fill(top: Int,bottom: Int,box: RectF,radius: Float) {
+                paint.shader=LinearGradient(0f,box.top,0f,box.bottom,top,bottom,Shader.TileMode.CLAMP)
                 c.drawRoundRect(box,radius,radius,paint);paint.shader=null
             }
-            fill(if(key.light)0.66f else 0.13f+lift,if(key.light)0.5f else 0.07f+lift,r,unit*0.13f)
+            fill(if(key.light)KeycapPalette.skirtTop.toArgb() else grey(0.13f+lift),if(key.light)KeycapPalette.skirtBottom.toArgb() else grey(0.07f+lift),r,unit*0.13f)
             val face=RectF(r.left+unit*0.09f,r.top+unit*0.05f,r.right-unit*0.09f,r.bottom-unit*0.15f)
-            fill(if(key.light)0.86f else 0.24f+lift,if(key.light)0.74f else 0.17f+lift,face,unit*0.1f)
+            fill(if(key.light)KeycapPalette.faceTop.toArgb() else grey(0.24f+lift),if(key.light)KeycapPalette.faceBottom.toArgb() else grey(0.17f+lift),face,unit*0.1f)
             if(unit>=14f) {paint.color=grey(if(key.light)0.25f else 0.68f);paint.textSize=unit*0.2f
                 c.drawText(key.label,face.left+unit*0.08f,face.bottom-unit*0.06f,paint)}
         }
