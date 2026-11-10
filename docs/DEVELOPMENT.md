@@ -45,7 +45,7 @@ make linux-run
 
 The udev installation requires administrator access. Replug the keyboard and receiver afterward. The rule is maintained in [packaging/linux](../packaging/linux/60-aula-f75-max.rules).
 
-`make linux-deb` builds a Debian/Ubuntu installer in `build/`. It installs the launcher, desktop entry, icon, required Swift runtime libraries, and udev rule. See [the packaging script](../scripts/linux/linux-deb.sh) for packaging dependencies and architecture handling.
+`make linux-deb` builds a Debian/Ubuntu installer in `build/` for the host architecture (amd64 or arm64). ARM64 packages must be built on an ARM64 Linux host with the ARM64 Swift toolchain. CI runs native builds and tests on both Ubuntu 24.04 architectures. It installs the launcher, desktop entry, icon, required Swift runtime libraries, and udev rule. See [the packaging script](../scripts/linux/linux-deb.sh) for packaging dependencies and architecture handling.
 
 ### Android
 
@@ -155,7 +155,7 @@ Before tagging an Android release, configure repository secrets:
 
 Keep an offline backup of the signing key and passwords. Updates must use the same signing key as the installed app. The workflow requires all signing secrets and verifies the APK with `apksigner` before publication.
 
-`make release-package` validates and copies the complete DMG/APK/DEB set from existing build artifacts, using `RELEASE_DIR`, `RELEASE_TAG`, `SOURCE_MACOS_DMG`, `SOURCE_ANDROID_APK`, and `SOURCE_LINUX_DEB`. See the workflow for a complete invocation. Published files use the `AulaF75MaxDriver-v<version>` base name; DEBs also include the architecture. Alpha, beta, and RC tags are marked as prereleases and are not made latest.
+`make release-package` validates and copies the complete DMG/APK/DEB set from existing build artifacts, using `RELEASE_DIR`, `RELEASE_TAG`, `SOURCE_MACOS_DMG`, `SOURCE_ANDROID_APK`, and `SOURCE_LINUX_DEB`. Set `SOURCE_LINUX_ARM64_DEB` to include a second DEB; this requires the primary DEB to be amd64 and the second to be arm64. The release workflow requires and publishes both packages. See the workflow for a complete invocation. Published files use the `AulaF75MaxDriver-v<version>` base name; DEBs also include the architecture. Alpha, beta, and RC tags are marked as prereleases and are not made latest.
 
 ### Update channels
 
