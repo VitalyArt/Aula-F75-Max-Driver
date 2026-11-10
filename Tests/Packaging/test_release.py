@@ -55,6 +55,27 @@ class PackagingTests(unittest.TestCase):
                     self.assertTrue(all(target.read_text() == 'installer' for target in targets))
             self.assertTrue((directory / 'app.deb').exists())
 
+    def test_two_linux_architectures(self):
+        with tempfile.TemporaryDirectory() as temp, patch.dict(os.environ, {
+            'RELEASE_DIR': temp, 'RELEASE_TAG': 'v1.2.3',
+            'SOURCE_LINUX_ARM64_DEB': 'app-arm64.deb',
+        }, clear=True):
+            directory = Path(temp)
+            for name in ['Aula F75 Max Driver.dmg', 'app-release.apk', 'app.deb']:
+                (directory / name).write_text(name)
+            with self.assertRaises(ValueError):
+                package.prepare()
+            (directory / 'app-arm64.deb').write_text('ARM installer')
+            with patch.object(package.subprocess, 'check_output', side_effect=['amd64\n', 'arm64\n']):
+                _, targets = package.prepare()
+            self.assertEqual(len(targets), 4)
+            self.assertEqual(targets[2].name, 'AulaF75MaxDriver-v1.2.3_amd64.deb')
+            self.assertEqual(targets[3].name, 'AulaF75MaxDriver-v1.2.3_arm64.deb')
+            self.assertEqual(targets[3].read_text(), 'ARM installer')
+            with patch.object(package.subprocess, 'check_output', side_effect=['amd64\n', 'amd64\n']):
+                with self.assertRaises(ValueError):
+                    package.prepare()
+
     def test_publication_order_and_retry_with_fake_gh(self):
         with tempfile.TemporaryDirectory() as temp:
             directory = Path(temp)

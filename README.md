@@ -24,7 +24,7 @@ Open the [download page](https://github.com/VitalyArt/Aula-F75-Max-Driver/releas
 | Platform | Requirements | Download |
 | --- | --- | --- |
 | macOS | macOS 14 or newer, Apple Silicon Mac | `.dmg` |
-| Linux | Debian / Ubuntu, package matching your computer's architecture | `.deb` |
+| Linux | Debian / Ubuntu, amd64 (Intel / AMD) or arm64 (ARM64) | `.deb` |
 | Android | Android 9 or newer, USB OTG support | `.apk` |
 
 ### macOS

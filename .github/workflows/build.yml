@@ -58,8 +58,16 @@ jobs:
 
   linux-build:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Linux GTK
-    runs-on: ubuntu-latest
+    name: Linux GTK (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     container:
       image: swift:6.0-noble
 
@@ -79,13 +87,13 @@ jobs:
         run: make linux-test
 
       - name: Build Linux DEB installer
-        run: make linux-deb LINUX_DEB="build/app.deb"
+        run: make linux-deb LINUX_DEB="build/app-${{ matrix.arch }}.deb"
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aula-f75-max-driver-linux
-          path: build/app.deb
+          name: aula-f75-max-driver-linux-${{ matrix.arch }}
+          path: build/app-${{ matrix.arch }}.deb
           if-no-files-found: error
 
   android-build:
@@ -166,10 +174,11 @@ jobs:
           name: aula-f75-max-driver-macos-dmg
           path: release
 
-      - name: Download Linux artifact
+      - name: Download Linux artifacts
         uses: actions/download-artifact@v4
         with:
-          name: aula-f75-max-driver-linux
+          pattern: aula-f75-max-driver-linux-*
+          merge-multiple: true
           path: release
 
       - name: Download Android artifact
@@ -181,6 +190,8 @@ jobs:
       - name: Publish release installers and signed feed
         env:
           GH_TOKEN: ${{ github.token }}
+          SOURCE_LINUX_DEB: app-amd64.deb
+          SOURCE_LINUX_ARM64_DEB: app-arm64.deb
         run: make release-publish RELEASE_DIR=release RELEASE_TAG="$GITHUB_REF_NAME"
 
   publish-update-pages:
