@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+  <channel>
+    <title>Aula F75 Max Driver</title>
+    <item>
+      <title>1.8.0</title>
+      <link>https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/tag/v1.8.0</link>
+      <pubDate>Sun, 15 Nov 2026 16:17:14 +0000</pubDate>
+      <sparkle:version>155</sparkle:version>
+      <sparkle:shortVersionString>1.8.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0.0</sparkle:minimumSystemVersion>
+      <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+      <enclosure url="https://github.com/VitalyArt/Aula-F75-Max-Driver/releases/download/v1.8.0/AulaF75MaxDriver-v1.8.0.dmg" sparkle:edSignature="X94dCmNgQ3ez/zGZmstSXAxzvNlG/77mYBo/sq2MAbAYQ+fsc76DZ6TgInV0z/d4fByMJ44lLrO5o1v6/rePBQ==" length="5830749" type="application/octet-stream"></enclosure>
+    </item>
+  </channel>
+</rss><!-- sparkle-signatures:
+edSignature: mcteJK/dAx0VprsjY1F9/G6jHDqZOrQRmCdpXNTYz0Nq8j8plt+8OjhlqrR66PayBjJtNpGeofN+6HTdXQMVAQ==
+length: 1203
+-->
