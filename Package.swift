@@ -76,6 +76,10 @@ targets.append(contentsOf: [
         name: "AulaLinuxHID",
         dependencies: ["AulaCore", "CHIDAPI"]
     ),
+    .testTarget(
+        name: "AulaLinuxHIDTests",
+        dependencies: ["AulaLinuxHID", "AulaCore"]
+    ),
     .executableTarget(
         name: "AulaLinuxApp",
         dependencies: ["AulaCore", "AulaLinuxHID", "CAulaLinuxGTK"],
