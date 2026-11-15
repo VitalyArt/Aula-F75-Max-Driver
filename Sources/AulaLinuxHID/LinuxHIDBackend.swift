@@ -340,13 +340,20 @@ public final class LinuxHIDBackend {
     }
 
     private func sendDisplayChunk(_ device: OpaquePointer, _ bytes: [UInt8], index: Int, total: Int) throws {
-        let written = writeOutput(device, bytes)
+        let report = Self.displayOutputReport(bytes)
+        let written = writeOutput(device, report)
         guard written >= 0 else {
             throw AulaError.hidFailed("display chunk \(index)/\(total)", Int32(written))
         }
-        guard written == Int32(bytes.count) else {
-            throw AulaError.hidFailed("display chunk \(index)/\(total) short write \(written)/\(bytes.count)", Int32(written))
+        guard written == Int32(report.count) else {
+            throw AulaError.hidFailed("display chunk \(index)/\(total) short write \(written)/\(report.count)", Int32(written))
         }
+    }
+
+    static func displayOutputReport(_ payload: [UInt8]) -> [UInt8] {
+        // HIDAPI requires a Report ID byte even for unnumbered reports.
+        // It is transport framing, separate from the 4096-byte display payload.
+        [0] + payload
     }
 
     private func waitForRawAck(_ device: OpaquePointer, timeoutMilliseconds: Int32) -> Bool {
